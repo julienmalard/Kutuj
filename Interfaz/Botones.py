@@ -82,48 +82,12 @@ class BotónTexto(Botón):
                          ubicación=ubicación, tipo_ubic=tipo_ubic)
 
 
-class BotónImagen(object):
+class BotónImagen(Botón):
     def __init__(símismo, pariente, comanda, formato, img_norm, img_sel, img_bloq=None,
                  ubicación=None, tipo_ubic=None):
-        símismo.img_norm = img_norm
-        if img_bloq is None:
-            img_bloq = img_norm
-        símismo.img_bloq = img_bloq
-        símismo.img_sel = img_sel
-        símismo.estado = 'Normal'
-
-        símismo.bt = tk.Button(pariente.cj, relief=tk.FLAT, command=comanda, image=símismo.img_norm,
-                               **formato)
-        símismo.bt.bind('<Enter>', lambda event, b=símismo: b.resaltar())
-        símismo.bt.bind('<Leave>', lambda event, b=símismo: b.desresaltar())
-        if tipo_ubic == 'pack':
-            símismo.bt.pack(**ubicación)
-        elif tipo_ubic == 'place':
-            símismo.bt.place(**ubicación)
-
-    def bloquear(símismo):
-        símismo.estado = 'Bloqueado'
-        símismo.bt.configure(image=símismo.img_bloq, state=tk.DISABLED)
-
-    def desbloquear(símismo):
-        símismo.estado = 'Normal'
-        símismo.bt.configure(image=símismo.img_norm, state=tk.ACTIVE)
-
-    def seleccionar(símismo):
-        símismo.estado = 'Seleccionado'
-        símismo.bt.configure(image=símismo.img_sel)
-
-    def deseleccionar(símismo):
-        símismo.estado = 'Normal'
-        símismo.bt.configure(image=símismo.img_norm)
-
-    def resaltar(símismo):
-        if símismo.estado == 'Normal':
-            símismo.bt.configure(image=símismo.img_sel)
-
-    def desresaltar(símismo):
-        if símismo.estado == 'Normal':
-            símismo.bt.configure(image=símismo.img_norm)
+        super().__init__(pariente, comanda, formato=formato, img_norm=img_norm,
+                         img_sel=img_sel, img_bloq=img_bloq,
+                         ubicación=ubicación, tipo_ubic=tipo_ubic)
 
 
 class BotónNavIzq(BotónImagen):
