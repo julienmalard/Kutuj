@@ -1,98 +1,90 @@
 import tkinter as tk
 
 from Interfaz import Formatos as Fm
+from Interfaz import Botones as Bt
+from Interfaz import Gráficos as Gr
 from Interfaz import Animaciones as Anim
+from Interfaz import CajasGenéricas as CjG
 
 
 class CajaInic(object):
     def __init__(símismo, pariente):
-        cj = tk.Frame(pariente, **Fm.formato_CjInic)
-        cj.place(**Fm.ubic_CjInic)
+        símismo.cj = tk.Frame(pariente, **Fm.formato_CjInic)
+        símismo.logo = Gr.imagen('LogoInic')
+        logo = tk.Label(símismo.cj, image=símismo.logo, **Fm.formato_LogoInic)
+        logo.pack(Fm.ubic_LogoInic)
+
+        bt_empezar = Bt.BotónTexto(símismo.cj, comanda=símismo.acción_bt_empezar, texto='Empezar',
+                                   formato_norm=Fm.formato_BtsInic_norm,
+                                   formato_bloq=Fm.formato_BtsInic_bloq,
+                                   formato_sel=Fm.formato_BtsInic_sel,
+                                   ubicación=Fm.ubic_BtsInic, tipo_ubic='pack')
+        bt_empezar.bt.pack()
+        símismo.cj.place(**Fm.ubic_CjInic)
+
+    def acción_bt_empezar(símismo):
+        Anim.quitar(símismo.cj, 'arriba')
+        símismo.cj.destroy()
 
 
 class CajaLeng(object):
     def __init__(símismo, pariente):
-        cj = tk.Frame(pariente, **Fm.formato_CjLeng)
-        cj.place(**Fm.ubic_CjLeng)
+        símismo.cj = tk.Frame(pariente, **Fm.formato_CjLeng)
+        símismo.apli = pariente
+        símismo.BtRegreso = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_regreso,
+                                           img_norm=Gr.imagen('BtRegrCent_norm'),
+                                           img_sel=Gr.imagen('BtRegrCent_sel'),
+                                           formato=Fm.formato_BtRegrCent,
+                                           ubicación=Fm.ubic_Bt_Regr_Cent, tipo_ubic='place')
+        símismo.cj.place(**Fm.ubic_CjLeng)
+
+    def acción_bt_regreso(símismo):
+        Anim.quitar(símismo.cj, 'derecha')
+
+
+class CajaCentral(object):
+    def __init__(símismo, pariente):
+        símismo.cj = tk.Frame(pariente, **Fm.formato_CjCent)
+
+        símismo.CjCabeza = CajaCabeza(símismo, apli=pariente)
+
+        símismo.ContCjEtapas = CjG.ContCajaEtps(símismo, núm_cajas=5)
+        símismo.CajasEtapas = símismo.ContCjEtapas.Cajas
+        símismo.CjIzq = CajaIzq(símismo, cajas_etapas=símismo.CajasEtapas)
+
+        símismo.cj.place(**Fm.ubic_CjCent)
 
 
 class CajaCabeza(object):
-    pass
+    def __init__(símismo, pariente, apli):
+        símismo.apli = apli
+        símismo.cj = tk.Frame(pariente)
+        símismo.logo_cabeza = tk.Label(símismo.cj, **Fm.formato_LogoCabz)
+        símismo.logo_cabeza.place(**Fm.ubic_LogoCabz)
+        símismo.bt_leng = Bt.BotónImagen(símismo.cj, comanda=símismo.acción_bt_leng,
+                                         img_norm=Gr.imagen('BtLeng_norm'),
+                                         img_bloq=Gr.imagen('BtLeng_bloq'),
+                                         img_sel=Gr.imagen('BtLeng_sel'),
+                                         formato=Fm.formato_BtLeng,
+                                         ubicación=Fm.ubic_BtLeng, tipo_ubic='place')
+
+    def acción_bt_leng(símismo):
+        Anim.sobreponer(símismo.apli.CajaCentral.cj, símismo.apli.CajaLenguas.cj, 'izquierda')
 
 
-class ContCajaEtps(object):
+class CajaIzq(object):
+    def __init__(símismo, pariente, cajas_etapas):
+        símismo.cj = tk.Frame(pariente)
+
+        símismo.bts = []
+        for cj in cajas_etapas:
+            símismo.bts.append(Bt.BotónNavIzq(símismo, caja=cj))
+
+        símismo.cj.place(**Fm.ubic_CjIzq)
+
+
+class Caja1_1(CjG.CajaSubEtapa):
     def __init__(símismo, pariente):
-        símismo.cj = tk.Frame(pariente)
-        símismo.Cajas = []
-        símismo.CajaActual = None
-
-    def añadir_caja(símismo, nueva_caja):
-        símismo.Cajas.append(nueva_caja)
-
-    def ir_a(símismo, núm_cj_nueva):
-        if símismo.CajaActual is None:
-            símismo.Cajas[núm_cj_nueva - 1].lift()
-            símismo.CajaActual = símismo.Cajas[núm_cj_nueva - 1]
-        else:
-            if núm_cj_nueva < símismo.CajaActual.núm:
-                dirección = 'abajo'
-            elif núm_cj_nueva > símismo.CajaActual.núm:
-                dirección = 'arriba'
-            else:
-                return
-            Anim.intercambiar(símismo.CajaActual, símismo.Cajas[núm_cj_nueva-1], dirección=dirección)
-            símismo.CajaActual = símismo.CajaActual[núm_cj_nueva-1]
+        super().__init__(pariente, núm=1, total=3)
 
 
-class CajaEtapa(object):
-    def __init__(símismo, pariente, núm, núm_sub_cajas=1):
-        símismo.núm = núm
-        símismo.pariente = pariente
-        símismo.cj = tk.Frame(pariente)
-        símismo.cj.place(Fm.ubic_CjEtp)
-        símismo.SubCajas = []
-        símismo.SubCajaActual = None
-        for i in range(núm_sub_cajas):
-            símismo.SubCajas.append(CajaSubEtapa(símismo, i+1))
-        símismo.ir_a_sub(1)
-
-    def ir_a_sub(símismo, núm_sub_nueva):
-        if símismo.SubCajaActual is None:
-            símismo.SubCajaActual = símismo.SubCajas[núm_sub_nueva-1]
-            símismo.SubCajaActual.lift()
-        else:
-            if núm_sub_nueva < símismo.SubCajaActual.núm:
-                dirección = 'derecha'
-            elif núm_sub_nueva > símismo.SubCajaActual.núm:
-                dirección = 'izquierda'
-            else:
-                return
-            Anim.intercambiar(símismo.SubCajaActual, símismo.SubCajas[núm_sub_nueva-1], dirección=dirección)
-            símismo.SubCajaActual = símismo.SubCajas[núm_sub_nueva-1]
-
-    def traer_me(símismo):
-        símismo.pariente.ir_a(símismo.núm)
-
-    def ir_etp_siguiente(símismo):
-        símismo.pariente.ir_a(símismo.núm + 1)
-
-    def ir_etp_anterior(símismo):
-        símismo.pariente.ir_a(símismo.núm - 1)
-
-
-class CajaSubEtapa(object):
-    def __init__(símismo, pariente, núm):
-        símismo.pariente = pariente
-        símismo.núm = núm
-
-    def ir_sub_siguiente(símismo):
-        símismo.pariente.ir_a_sub(símismo.núm + 1)
-
-    def ir_sub_anterior(símismo):
-        símismo.pariente.ir_a_sub(símismo.núm - 1)
-
-    def ir_etp_siguiente(símismo):
-        símismo.pariente.ir_etp_siguiente()
-
-    def ir_etp_anterior(símismo):
-        símismo.pariente.ir_etp_anterior()

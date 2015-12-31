@@ -77,7 +77,7 @@ def quitar(actual, dirección):
     deslizar([actual], pos_inic, dirección, distancia, paso=0.025, tiempo=0.5)
 
 
-def deslizar(objetos, pos_inic, dirección, distancia, paso, método='logístico', tiempo=0.5):
+def deslizar(objetos, pos_inic, dirección, distancia, paso=0.025, método='logístico', tiempo=0.5):
     for t in range(paso, tiempo+paso, paso):
         if método == 'logístico':
             nueva_pos = round(distancia/(1+mat.exp(-8/tiempo * (t-tiempo/2))))
