@@ -35,7 +35,7 @@ class CajaLeng(object):
                                            img_norm=Gr.imagen('BtRegrCent_norm'),
                                            img_sel=Gr.imagen('BtRegrCent_sel'),
                                            formato=Fm.formato_BtRegrCent,
-                                           ubicación=Fm.ubic_Bt_Regr_Cent, tipo_ubic='place')
+                                           ubicación=Fm.ubic_BtRegrCent, tipo_ubic='place')
         símismo.cj.place(**Fm.ubic_CjLeng)
 
     def acción_bt_regreso(símismo):
