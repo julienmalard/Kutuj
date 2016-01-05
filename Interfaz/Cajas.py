@@ -14,7 +14,7 @@ class CajaInic(object):
         logo = tk.Label(símismo.cj, image=símismo.logo, **Fm.formato_LogoInic)
         logo.pack(Fm.ubic_LogoInic)
 
-        bt_empezar = Bt.BotónTexto(símismo.cj, comanda=símismo.acción_bt_empezar, texto='Empezar',
+        bt_empezar = Bt.BotónTexto(símismo, comanda=símismo.acción_bt_empezar, texto='Empezar',
                                    formato_norm=Fm.formato_BtsInic_norm,
                                    formato_bloq=Fm.formato_BtsInic_bloq,
                                    formato_sel=Fm.formato_BtsInic_sel,
@@ -58,12 +58,11 @@ class CajaCentral(object):
 class CajaCabeza(object):
     def __init__(símismo, pariente, apli):
         símismo.apli = apli
-        símismo.cj = tk.Frame(pariente)
+        símismo.cj = tk.Frame(pariente.cj)
         símismo.logo_cabeza = tk.Label(símismo.cj, **Fm.formato_LogoCabz)
         símismo.logo_cabeza.place(**Fm.ubic_LogoCabz)
-        símismo.bt_leng = Bt.BotónImagen(símismo.cj, comanda=símismo.acción_bt_leng,
+        símismo.bt_leng = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_leng,
                                          img_norm=Gr.imagen('BtLeng_norm'),
-                                         img_bloq=Gr.imagen('BtLeng_bloq'),
                                          img_sel=Gr.imagen('BtLeng_sel'),
                                          formato=Fm.formato_BtLeng,
                                          ubicación=Fm.ubic_BtLeng, tipo_ubic='place')
@@ -74,7 +73,7 @@ class CajaCabeza(object):
 
 class CajaIzq(object):
     def __init__(símismo, pariente, cajas_etapas):
-        símismo.cj = tk.Frame(pariente)
+        símismo.cj = tk.Frame(pariente.cj)
 
         símismo.bts = []
         for cj in cajas_etapas:

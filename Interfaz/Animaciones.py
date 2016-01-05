@@ -6,7 +6,7 @@ def intercambiar(actual, nuevo, dirección):
     x_act = actual.winfo_x()
     y_act = actual.winfo_y()
     ancho_act = actual.winfo_width()
-    altura_act = actual.winfo_heigth()
+    altura_act = actual.winfo_height()
 
     if dirección == 'izquierda':
         nuevo.place(x=(x_act + ancho_act), y=y_act)
@@ -35,7 +35,7 @@ def sobreponer(actual, nuevo, dirección):
     x_act = actual.winfo_x()
     y_act = actual.winfo_y()
     ancho_act = actual.winfo_width()
-    altura_act = actual.winfo_heigth()
+    altura_act = actual.winfo_height()
 
     if dirección == 'izquierda':
         nuevo.place(x=(x_act + ancho_act), y=y_act)
@@ -63,7 +63,7 @@ def quitar(actual, dirección):
     x_act = actual.winfo_x()
     y_act = actual.winfo_y()
     ancho_act = actual.winfo_width()
-    altura_act = actual.winfo_heigth()
+    altura_act = actual.winfo_height()
 
     if dirección == 'izquierda' or dirección == 'derecha':
         pos_inic = [x_act]

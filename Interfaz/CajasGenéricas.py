@@ -8,13 +8,13 @@ from Interfaz import Animaciones as Anim
 
 class ContCajaEtps(object):
     def __init__(símismo, pariente, núm_cajas):
-        símismo.cj = tk.Frame(pariente)
+        símismo.cj = tk.Frame(pariente.cj)
         símismo.Cajas = []
 
         for i in range(núm_cajas):
             símismo.Cajas.append(CajaEtapa(símismo.cj, núm=i+1, total=núm_cajas))
         símismo.CajaActual = símismo.Cajas[0]
-        símismo.Cajas[0].lift()
+        símismo.Cajas[0].cj.lift()
 
     def ir_a(símismo, núm_cj_nueva):
         if núm_cj_nueva < símismo.CajaActual.núm:

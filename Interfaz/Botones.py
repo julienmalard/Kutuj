@@ -15,7 +15,7 @@ class Botón(object):
         if texto is not None:
             símismo.formato['text'] = texto
         if formato is not None:
-            for ll, v in formato:
+            for ll, v in formato.items():
                 símismo.formato[ll] = v
 
         símismo.formato_norm = {}
@@ -28,16 +28,25 @@ class Botón(object):
         if img_bloq is not None:
             símismo.formato_bloq['image'] = img_bloq
         if formato_norm is not None:
-            for ll, v in formato_norm: símismo.formato_norm[ll] = v
+            for ll, v in formato_norm.items():
+                símismo.formato_norm[ll] = v
         if formato_sel is not None:
-            for ll, v in formato_sel: símismo.formato_sel[ll] = v
+            for ll, v in formato_sel.items():
+                símismo.formato_sel[ll] = v
         if formato_bloq is not None:
-            for ll, v in formato_bloq: símismo.formato_bloq[ll] = v
+            for ll, v in formato_bloq.items():
+                símismo.formato_bloq[ll] = v
 
         símismo.estado = 'Normal'
 
+        # Hasta que aprende cómo cargar Python 3.5 en esta compu...}
+        if formato is None:
+            formato = {}
+        dic_formato = formato.copy()
+        dic_formato.update(símismo.formato_norm)
+
         símismo.bt = tk.Button(pariente.cj, relief=tk.FLAT, command=comanda,
-                               **símismo.formato_norm, **símismo.formato)
+                               **dic_formato)
 
         símismo.desbloquear()  # Activar el botón
         símismo.bt.bind('<Enter>', lambda event, b=símismo: b.resaltar())
@@ -92,9 +101,9 @@ class BotónImagen(Botón):
 
 class BotónNavIzq(BotónImagen):
     def __init__(símismo, pariente, caja):
-        img_norm = Gr.imagen('BtNavIzq_norm_%i' % caja.núm)
-        img_bloq = Gr.imagen('BtNavIzq_bloq_%i' % caja.núm)
-        img_sel = Gr.imagen('BtNavIzq_sel_%i' % caja.núm)
+        img_norm = Gr.imagen('BtNavIzq_%i_norm' % caja.núm)
+        img_bloq = Gr.imagen('BtNavIzq_%i_bloq' % caja.núm)
+        img_sel = Gr.imagen('BtNavIzq_%i_sel' % caja.núm)
 
         super().__init__(pariente=pariente, comanda=caja.traer_me, img_norm=img_norm, img_bloq=img_bloq,
                          img_sel=img_sel, ubicación=Fm.ubic_BtNavIzq, tipo_ubic='pack',

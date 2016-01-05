@@ -10,12 +10,12 @@ altura_ventana = 600
 color_ventana = col_fondo
 
 # Caja inicial
-formato_CjInic = dict(x=0, y=0, relwidth=1, relheight=1)
-ubic_CjInic = dict(x=0, y=0, relwidth=1, relheigth=1)
+formato_CjInic = dict()
+ubic_CjInic = dict(x=0, y=0, relwidth=1, relheight=1)
 formato_LogoInic = dict(borderwidth=0, highlightthickness=0)
 ubic_LogoInic = dict(pady=(0.5, 0))
 formato_BtsInic = dict(borderwidth=0, highlightthickness=0, activebackground='#6699ff',
-                       font=('arial', 20, 'bold'), heigth=3, width=13)  # Formatos generales
+                       font=('arial', 20, 'bold'), height=3, width=13)  # Formatos generales
 formato_BtsInic_norm = dict(bg='#e5ffff', fg='#000000', **formato_BtsInic)
 formato_BtsInic_bloq = dict()
 formato_BtsInic_sel = dict(bg='#99ccff')
@@ -36,7 +36,7 @@ ubic_CajaCabeza = dict(x=0, y=0, relwidth=1, height=80)
 formato_LogoCabz = dict(borderwidth=0, highlightthickness=0, height=60)
 ubic_LogoCabz = dict(relx=0.5, rely=0)
 formato_BtLeng = dict(borderwidth=0, highlightthickness=0, height=40, width=40)
-ubic_BtLeng = dict(relx=1, rely=0.5, x=-20, anchor=tk.RIGHT)
+ubic_BtLeng = dict(relx=1, rely=0.5, x=-20, anchor=tk.E)
 
 # Botones izquierda
 ubic_CjIzq = dict(x=0, y=ubic_CajaCabeza['height'])

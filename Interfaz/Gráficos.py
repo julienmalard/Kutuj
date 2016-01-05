@@ -7,7 +7,7 @@ def imagen(nombre):
     
     return img
 
-raíz_imgs = 'Interfaz\\Gráficos\\'
+raíz_imgs = 'Imágenes\\'
 archivos_imgs = {'LogoInic': '%sLogoInic.png' % raíz_imgs,
 
                  'BtRegrCent_norm': '%sBtRegrCent_norm.png' % raíz_imgs,
