@@ -65,4 +65,14 @@ formato_MenuOpciones = dict()
 formato_etiq_bloq = dict(fg='#999999')
 formato_etiq_norm = dict(fg='#ffffff')
 
+# Listas
+
+
+# Controles
+formato_Escl = dict()
+ubic_Escl = dict(side='left')
+formato_Ingr = dict()
+ubic_Ingr = dict(side='left')
+
+#
 ubic_CjMóbl = dict(x=0, y=0, anchor=tk.SW, relwidth=1, relheight=1)
