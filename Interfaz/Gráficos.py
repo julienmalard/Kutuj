@@ -13,6 +13,7 @@ archivos_imgs = {'LogoInic': '%sLogoInic.png' % raíz_imgs,
                  'BtRegrCent_norm': '%sBtRegrCent_norm.png' % raíz_imgs,
                  'BtRegrCent_sel': '%sBtRegrCent_sel.png' % raíz_imgs,
 
+                 'LogoCent': '%sLogoCent.png' % raíz_imgs,
                  'BtLeng_norm': '%sBtLeng_norm.png' % raíz_imgs,
                  'BtLeng_sel': '%sBtLeng_sel.png' % raíz_imgs,
                  'BtNavIzq_1_norm': '%sBtNavIzq_1_norm.png' % raíz_imgs,

@@ -74,30 +74,38 @@ def quitar(actual, dirección):
     else:
         raise ValueError
 
-    deslizar([actual], pos_inic, dirección, distancia, paso=0.025, tiempo=0.5)
+    deslizar([actual], pos_inic, dirección, distancia, paso=0.025, tiempo=.5)
+    actual.lower()
 
 
 def deslizar(objetos, pos_inic, dirección, distancia, paso=0.025, método='logístico', tiempo=0.5):
-    for t in range(paso, tiempo+paso, paso):
+
+    for i in range(int(tiempo/paso)):
+        t = i*paso
         if método == 'logístico':
-            nueva_pos = round(distancia/(1+mat.exp(-8/tiempo * (t-tiempo/2))))
+            nueva_pos = mat.ceil(distancia/(1+mat.exp(-12/tiempo * (t-tiempo/2))))
         elif método == 'linear':
-            nueva_pos = round(distancia*t/tiempo)
+            nueva_pos = mat.ceil(distancia*t/tiempo)
         else:
             raise ValueError
 
         if dirección == 'izquierda':
             for n, o in enumerate(objetos):
                 o.place(x=pos_inic[n] - nueva_pos)
+                o.update()
         elif dirección == 'derecha':
             for n, o in enumerate(objetos):
                 o.place(x=pos_inic[n] + nueva_pos)
+                o.update()
         elif dirección == 'arriba':
             for n, o in enumerate(objetos):
                 o.place(y=pos_inic[n] - nueva_pos)
+                o.update()
         elif dirección == 'abajo':
             for n, o in enumerate(objetos):
                 o.place(y=pos_inic[n] + nueva_pos)
+                o.update()
         else:
             raise ValueError
+
         time.sleep(paso)

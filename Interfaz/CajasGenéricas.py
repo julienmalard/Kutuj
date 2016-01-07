@@ -2,19 +2,23 @@ import tkinter as tk
 
 from Interfaz import Formatos as Fm
 from Interfaz import Botones as Bt
+from Interfaz import Controles as Ctrl
 from Interfaz import Gráficos as Gr
 from Interfaz import Animaciones as Anim
 
 
-class ContCajaEtps(object):
-    def __init__(símismo, pariente, núm_cajas):
-        símismo.cj = tk.Frame(pariente.cj)
+class ContCajaEtps(tk.Frame):
+    def __init__(símismo, pariente):
+        super().__init__(pariente, **Fm.formato_CjContCjEtps)
         símismo.Cajas = []
+        símismo.CajaActual = None
+        símismo.pack(**Fm.ubic_CjContCjEtps)
 
-        for i in range(núm_cajas):
-            símismo.Cajas.append(CajaEtapa(símismo.cj, núm=i+1, total=núm_cajas))
+    def establecer_cajas(símismo, cajas_etapas):
+        for n, cj in enumerate(cajas_etapas):
+            símismo.Cajas.append(cj)
         símismo.CajaActual = símismo.Cajas[0]
-        símismo.Cajas[0].cj.lift()
+        símismo.Cajas[0].lift()
 
     def ir_a(símismo, núm_cj_nueva):
         if núm_cj_nueva < símismo.CajaActual.núm:
@@ -27,22 +31,27 @@ class ContCajaEtps(object):
         símismo.CajaActual = símismo.CajaActual[núm_cj_nueva-1]
 
 
-class CajaEtapa(object):
-    def __init__(símismo, pariente, núm, total):
+class CajaEtapa(tk.Frame):
+    def __init__(símismo, pariente, nombre, núm, total):
+        super().__init__(pariente, **Fm.formato_cajas)
         símismo.núm = núm
         símismo.pariente = pariente
-        símismo.cj = tk.Frame(pariente)
-        símismo.cj.place(Fm.ubic_CjEtp)
         símismo.SubCajas = []
         símismo.SubCajaActual = None
+
+        etiq = tk.Label(text=nombre, **Fm.formato_EncbzCjEtp)
+        etiq.place(**Fm.ubic_EmcbzCjEtp)
 
         if núm > 1:
             símismo.BtAtrás = Bt.BotónNavEtapa(símismo, tipo='atrás')
         if núm < total:
             símismo.BtAdelante = Bt.BotónNavEtapa(símismo, tipo='adelante')
 
+        símismo.place(**Fm.ubic_CjEtp)
+
     def especificar_subcajas(símismo, subcajas):
         símismo.SubCajas = subcajas
+        símismo.ir_a_sub(1)
 
     def ir_a_sub(símismo, núm_sub_nueva):
         if símismo.SubCajaActual is None:
@@ -108,7 +117,7 @@ class CajaActivable(object):
         símismo.botones = [x for x in objetos if
                            type(x) is Bt.BotónImagen or
                            type(x) is Bt.BotónTexto or
-                           type(x) is Bt.Menú]
+                           type(x) is Ctrl.Menú]
 
     def bloquear(símismo):
         for etiq in símismo.etiquetas:

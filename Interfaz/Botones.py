@@ -11,7 +11,7 @@ class Botón(object):
 
         símismo.formato = {}
         if tipo_combin is not None:
-            símismo.formato['combine'] = tipo_combin
+            símismo.formato['compound'] = tipo_combin
         if texto is not None:
             símismo.formato['text'] = texto
         if formato is not None:
@@ -21,6 +21,7 @@ class Botón(object):
         símismo.formato_norm = {}
         símismo.formato_bloq = {}
         símismo.formato_sel = {}
+
         if img_norm is not None:
             símismo.formato_norm['image'] = img_norm
         if img_sel is not None:
@@ -39,16 +40,17 @@ class Botón(object):
 
         símismo.estado = 'Normal'
 
-        # Hasta que aprende cómo cargar Python 3.5 en esta compu...}
+        # Hasta que aprende cómo cargar Python 3.5 en esta compu...
         if formato is None:
             formato = {}
-        dic_formato = formato.copy()
+        dic_formato = símismo.formato.copy()
         dic_formato.update(símismo.formato_norm)
 
-        símismo.bt = tk.Button(pariente.cj, relief=tk.FLAT, command=comanda,
+        símismo.bt = tk.Button(pariente, relief=tk.FLAT, command=comanda,
                                **dic_formato)
 
-        símismo.desbloquear()  # Activar el botón
+        símismo.bloquear()
+        símismo.desbloquear()
         símismo.bt.bind('<Enter>', lambda event, b=símismo: b.resaltar())
         símismo.bt.bind('<Leave>', lambda event, b=símismo: b.desresaltar())
 
@@ -59,11 +61,11 @@ class Botón(object):
 
     def bloquear(símismo):
         símismo.estado = 'Bloqueado'
-        símismo.bt.configure(state=tk.DISABLED, **símismo.formato_bloq)
+        símismo.bt.configure(cursor='X_cursor', state='disabled', **símismo.formato_bloq)
 
     def desbloquear(símismo):
         símismo.estado = 'Normal'
-        símismo.bt.configure(state=tk.ACTIVE, **símismo.formato_norm)
+        símismo.bt.configure(cursor='arrow', state='normal', **símismo.formato_norm)
 
     def resaltar(símismo):
         if símismo.estado == 'Normal':
@@ -152,60 +154,3 @@ class BotónNavSub(BotónImagen):
         super().__init__(pariente=pariente, comanda=comanda, img_norm=img_norm, img_bloq=img_bloq,
                          img_sel=img_sel, ubicación=ubicación, tipo_ubic='place',
                          formato=Fm.formato_BtsNavSub)
-
-
-class Menú(object):
-    def __init__(símismo, pariente, opciones, comanda, ubicación, tipo_ubic,
-                 etiq=None, formato=Fm.formato_MenuOpciones):
-        símismo.opciones = opciones
-        símismo.comanda = comanda
-        símismo.etiq = etiq
-        símismo.var = tk.StringVar(símismo)
-        símismo.val = None
-
-        símismo.exclusivos = []
-
-        símismo.MenúOpciones = tk.OptionMenu(pariente, símismo.var, opciones,
-                                             command=símismo.acción_cambio,
-                                             **formato)
-
-        if tipo_ubic == 'pack':
-            símismo.MenúOpciones.pack(**ubicación)
-        elif tipo_ubic == 'place':
-            símismo.MenúOpciones.place(**ubicación)
-
-    def estab_exclusivo(símismo, otro_menú):
-        assert type(otro_menú) is Menú
-        if otro_menú not in símismo.exclusivos:
-            símismo.exclusivos.append(otro_menú)
-        if símismo not in otro_menú.exclusivos:
-            otro_menú.estab_exclusivo(símismo)
-
-    def acción_cambio(símismo, nueva_val):
-        print('valor cambió a %s' % nueva_val)
-        if nueva_val != símismo.val:
-            for menú in símismo.exclusivos:
-                menú.excluir(nueva_val)
-                menú.reinstaurar(símismo.val)
-
-            símismo.val = nueva_val
-            símismo.comanda(nueva_val)
-
-            if símismo.etiq is not None:
-                símismo.etiq.configure(text=nueva_val)
-
-    def excluir(símismo, valor):
-        menú = símismo.MenúOpciones['Menu']
-        i = símismo.opciones.index(valor)
-        menú.entryconfig(i, state=tk.DISABLED)
-
-    def reinstaurar(símismo, valor):
-        menú = símismo.MenúOpciones['Menu']
-        i = símismo.opciones.index(valor)
-        menú.entryconfig(i, state=tk.NORMAL)
-
-    def bloquear(símismo):
-        símismo.MenúOpciones['optionsmenu'].configure(state=tk.DISABLED)
-
-    def desbloquear(símismo):
-        símismo.MenúOpciones['optionsmenu'].configure(state=tk.NORMAL)

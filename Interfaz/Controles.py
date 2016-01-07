@@ -15,6 +15,63 @@ class Itema(object):
         pass
 
 
+class Menú(object):
+    def __init__(símismo, pariente, opciones, comanda, ubicación, tipo_ubic,
+                 etiq=None, formato=Fm.formato_MenuOpciones):
+        símismo.opciones = opciones
+        símismo.comanda = comanda
+        símismo.etiq = etiq
+        símismo.var = tk.StringVar(símismo)
+        símismo.val = None
+
+        símismo.exclusivos = []
+
+        símismo.MenúOpciones = tk.OptionMenu(pariente, símismo.var, opciones,
+                                             command=símismo.acción_cambio,
+                                             **formato)
+
+        if tipo_ubic == 'pack':
+            símismo.MenúOpciones.pack(**ubicación)
+        elif tipo_ubic == 'place':
+            símismo.MenúOpciones.place(**ubicación)
+
+    def estab_exclusivo(símismo, otro_menú):
+        assert type(otro_menú) is Menú
+        if otro_menú not in símismo.exclusivos:
+            símismo.exclusivos.append(otro_menú)
+        if símismo not in otro_menú.exclusivos:
+            otro_menú.estab_exclusivo(símismo)
+
+    def acción_cambio(símismo, nueva_val):
+        print('valor cambió a %s' % nueva_val)
+        if nueva_val != símismo.val:
+            for menú in símismo.exclusivos:
+                menú.excluir(nueva_val)
+                menú.reinstaurar(símismo.val)
+
+            símismo.val = nueva_val
+            símismo.comanda(nueva_val)
+
+            if símismo.etiq is not None:
+                símismo.etiq.configure(text=nueva_val)
+
+    def excluir(símismo, valor):
+        menú = símismo.MenúOpciones['Menu']
+        i = símismo.opciones.index(valor)
+        menú.entryconfig(i, state=tk.DISABLED)
+
+    def reinstaurar(símismo, valor):
+        menú = símismo.MenúOpciones['Menu']
+        i = símismo.opciones.index(valor)
+        menú.entryconfig(i, state=tk.NORMAL)
+
+    def bloquear(símismo):
+        símismo.MenúOpciones['optionsmenu'].configure(state=tk.DISABLED)
+
+    def desbloquear(símismo):
+        símismo.MenúOpciones['optionsmenu'].configure(state=tk.NORMAL)
+
+
 class Escala(object):
     def __init__(símismo, pariente, texto, límites, comanda, ubicación, tipo_ubic):
         símismo.cj = tk.Frame(pariente)
@@ -56,22 +113,39 @@ class Escala(object):
 
 
 class Gráfico(object):
-    def __init__(símismo, pariente, tamaño, func_dibujar, parámetros, ubicación):
+    def __init__(símismo, pariente, func_dibujar, parámetros, ubicación):
         símismo.func_dibujar = func_dibujar
         símismo.parámetros = parámetros
 
-        símismo.fig = Figure(figsize=tamaño)
-        símismo.tela = FigureCanvasTkAgg(símismo.fig, master=pariente.cj)
+        cuadro = Figure()
+        símismo.fig = cuadro.add_subplot(111)
+        símismo.tela = FigureCanvasTkAgg(cuadro, master=pariente.cj)
+        símismo.tela.show()
         símismo.tela.get_tk_widget().place(**ubicación)
 
     def redibujar(símismo):
-        símismo.func_dibujar(símismo.fig.gca(), símismo.parámetros)
+        try:
+            símismo.fig.patches[0].remove()
+        except IndexError:
+            pass
+        try:
+            símismo.fig.lines[0].remove()
+        except IndexError:
+            pass
+        símismo.dibujar()
+
+        símismo.tela.draw()
+
+    def dibujar(símismo):
+        raise NotImplementedError
+
 
 class GráficoInteract(object):
     def __init__(símismo, controles, gráfico):
+        símismo.gráfico = gráfico
         for control in controles:
-            control.comanda = lambda x:
+            pass
 
     def cambio_control(símismo):
-
+        símismo.gráfico.redibujar()
 

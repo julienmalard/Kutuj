@@ -9,12 +9,16 @@ class Apli(tk.Frame):
         tk.Frame.__init__(símismo, pariente)
         pariente.title('Kutuj')
         pariente.geometry('%ix%i' % (Fm.ancho_ventana, Fm.altura_ventana))
-        pariente.configure(background=Fm.color_ventana)
+        pariente.configure(background=Fm.col_fondo)
+        # pariente.resizable(0,0)
 
+        #
         símismo.CajaInic = Cj.CajaInic(símismo)
         símismo.CajaCentral = Cj.CajaCentral(símismo)
         símismo.CajaLenguas = Cj.CajaLeng(símismo)
-        símismo.CajaInic.cj.lift()
+        símismo.CajaCentral.lift()
+        símismo.CajaInic.lift()
+        símismo.pack()
 
 
 if __name__ == '__main__':
