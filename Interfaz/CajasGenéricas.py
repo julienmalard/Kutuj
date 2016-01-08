@@ -10,25 +10,34 @@ from Interfaz import Animaciones as Anim
 class ContCajaEtps(tk.Frame):
     def __init__(símismo, pariente):
         super().__init__(pariente, **Fm.formato_CjContCjEtps)
+        símismo.pariente = pariente
+
         símismo.Cajas = []
         símismo.CajaActual = None
         símismo.pack(**Fm.ubic_CjContCjEtps)
+        símismo.en_transición = False
 
     def establecer_cajas(símismo, cajas_etapas):
         for n, cj in enumerate(cajas_etapas):
             símismo.Cajas.append(cj)
         símismo.CajaActual = símismo.Cajas[0]
-        símismo.Cajas[0].lift()
+        símismo.CajaActual.lift()
 
-    def ir_a(símismo, núm_cj_nueva):
+    def ir_a_caja(símismo, núm_cj_nueva):
         if núm_cj_nueva < símismo.CajaActual.núm:
             dirección = 'abajo'
         elif núm_cj_nueva > símismo.CajaActual.núm:
             dirección = 'arriba'
         else:
             return
-        Anim.intercambiar(símismo.CajaActual, símismo.Cajas[núm_cj_nueva-1], dirección=dirección)
-        símismo.CajaActual = símismo.CajaActual[núm_cj_nueva-1]
+
+        if not símismo.en_transición:
+            símismo.en_transición = True
+            nueva_caja = símismo.Cajas[núm_cj_nueva-1]
+            nueva_caja.lift()
+            Anim.intercambiar(símismo.CajaActual, nueva_caja, dirección=dirección)
+            símismo.CajaActual = nueva_caja
+            símismo.en_transición = False
 
 
 class CajaEtapa(tk.Frame):
@@ -39,9 +48,10 @@ class CajaEtapa(tk.Frame):
         símismo.SubCajas = []
         símismo.SubCajaActual = None
 
-        etiq = tk.Label(text=nombre, **Fm.formato_EncbzCjEtp)
-        etiq.place(**Fm.ubic_EmcbzCjEtp)
+        etiq = tk.Label(símismo, text=nombre, **Fm.formato_EncbzCjEtp)
+        etiq.place(**Fm.ubic_EncbzCjEtp)
 
+        símismo.BtAtrás = símismo.BtAdelante = None
         if núm > 1:
             símismo.BtAtrás = Bt.BotónNavEtapa(símismo, tipo='atrás')
         if núm < total:
@@ -52,6 +62,18 @@ class CajaEtapa(tk.Frame):
     def especificar_subcajas(símismo, subcajas):
         símismo.SubCajas = subcajas
         símismo.ir_a_sub(1)
+
+    def bloquear_transición(símismo, dirección):
+        if dirección == 'anterior' and símismo.BtAtrás is not None:
+            símismo.BtAtrás.bloquear()
+        elif dirección == 'siguiente' and símismo.BtAdelante is not None:
+            símismo.BtAdelante.bloquear()
+
+    def desbloquear_transición(símismo, dirección):
+        if dirección == 'anterior' and símismo.BtAtrás is not None:
+            símismo.BtAtrás.desbloquear()
+        elif dirección == 'siguiente' and símismo.BtAdelante is not None:
+            símismo.BtAdelante.desbloquear()
 
     def ir_a_sub(símismo, núm_sub_nueva):
         if símismo.SubCajaActual is None:
@@ -68,28 +90,31 @@ class CajaEtapa(tk.Frame):
             símismo.SubCajaActual = símismo.SubCajas[núm_sub_nueva-1]
 
     def traer_me(símismo):
-        símismo.pariente.ir_a(símismo.núm)
+        símismo.pariente.ir_a_caja(símismo.núm)
 
     def ir_etp_siguiente(símismo):
-        símismo.pariente.ir_a(símismo.núm + 1)
+        símismo.pariente.ir_a_caja(símismo.núm + 1)
 
     def ir_etp_anterior(símismo):
-        símismo.pariente.ir_a(símismo.núm - 1)
+        símismo.pariente.ir_a_caja(símismo.núm - 1)
 
 
-class CajaSubEtapa(object):
-    def __init__(símismo, pariente, núm, total):
+class CajaSubEtapa(tk.Frame):
+    def __init__(símismo, pariente, nombre, núm, total):
+        super().__init__(pariente, **Fm.formato_cajas)
+
         símismo.pariente = pariente
         símismo.núm = núm
 
-        símismo.cj = tk.Frame(pariente, **Fm.formato_CjSubEtp)
+        etiq = tk.Label(símismo, text=nombre, **Fm.formato_EncbzCjSubEtp)
+        etiq.place(**Fm.ubic_EncbzCjSubEtp)
 
         if núm < total:
             símismo.BtAdelante = Bt.BotónNavSub(símismo, tipo='adelante')
         if núm > 1:
             símismo.BtAtrás = Bt.BotónNavSub(símismo, tipo='atrás')
 
-        símismo.cj.place(Fm.ubic_CjSubEtp)
+        símismo.place(Fm.ubic_CjSubEtp)
 
     def ir_sub_siguiente(símismo):
         símismo.pariente.ir_a_sub(símismo.núm + 1)

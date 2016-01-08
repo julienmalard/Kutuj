@@ -38,6 +38,8 @@ class CajaLeng(tk.Frame):
                                            img_sel=Gr.imagen('BtRegrCent_sel'),
                                            formato=Fm.formato_botones,
                                            ubicación=Fm.ubic_BtRegrCent, tipo_ubic='place')
+        etiq = tk.Label(símismo, text='Opciones de lenguas', **Fm.formato_CbzLeng)
+        etiq.place(**Fm.ubic_CbzLeng)
         símismo.place(**Fm.ubic_CjLeng)
 
     def acción_bt_regreso(símismo):
@@ -50,17 +52,34 @@ class CajaCentral(tk.Frame):
         símismo.CjCabeza = CajaCabeza(símismo, apli=pariente)
 
         símismo.ContCjEtapas = CjG.ContCajaEtps(símismo)
-        núm_etapas=5
+        núm_etapas = 5
         símismo.CajasEtapas = [CajaEtp1(símismo.ContCjEtapas, núm_etapas),
                                CajaEtp2(símismo.ContCjEtapas, núm_etapas),
                                CajaEtp3(símismo.ContCjEtapas, núm_etapas),
                                CajaEtp4(símismo.ContCjEtapas, núm_etapas),
                                CajaEtp5(símismo.ContCjEtapas, núm_etapas)
                                ]
+        símismo.ContCjEtapas.establecer_cajas(símismo.CajasEtapas)
 
         símismo.CjIzq = CajaIzq(símismo, cajas_etapas=símismo.CajasEtapas)
 
+        # símismo.bloquear_cajas(list(range(2, len(símismo.CajasEtapas) + 1)))
+
         símismo.place(**Fm.ubic_CjCent)
+
+    def bloquear_cajas(símismo, núms_cajas):
+        for n in núms_cajas:
+            if n > 1:
+                símismo.CajasEtapas[n - 2].bloquear_transición(dirección='siguiente')
+            if n < len(símismo.CajasEtapas):
+                símismo.CajasEtapas[n].bloquear_transición(dirección='anterior')
+            símismo.CjIzq.bts[n - 1].bloquear()
+
+    def desbloquear_cajas(símismo, núms_cajas):
+        for n in núms_cajas:
+            símismo.CajasEtapas[n - 1].desbloquear_transición(dirección='siguiente')
+            símismo.CajasEtapas[n + 1].desbloquear_transición(dirección='anterior')
+            símismo.CjIzq.bts[n - 1].desbloquear()
 
 
 class CajaCabeza(tk.Frame):
@@ -101,22 +120,38 @@ class CajaEtp1(CjG.CajaEtapa):
     def __init__(símismo, pariente, total):
         super().__init__(pariente, nombre='Base de Datos', núm=1, total=total)
 
+        total_subcajas = 2
+        subcajas = [CajaSubEtp11(símismo, total=total_subcajas),
+                    CajaSubEtp12(símismo, total=total_subcajas)]
+
+        símismo.especificar_subcajas(subcajas)
+
 
 class CajaEtp2(CjG.CajaEtapa):
     def __init__(símismo, pariente, total):
-        super().__init__(pariente, nombre='Base de Datos', núm=2, total=total)
+        super().__init__(pariente, nombre='Variables', núm=2, total=total)
 
 
 class CajaEtp3(CjG.CajaEtapa):
     def __init__(símismo, pariente, total):
-        super().__init__(pariente, nombre='Base de Datos', núm=3, total=total)
+        super().__init__(pariente, nombre='Validar', núm=3, total=total)
 
 
 class CajaEtp4(CjG.CajaEtapa):
     def __init__(símismo, pariente, total):
-        super().__init__(pariente, nombre='Base de Datos', núm=4, total=total)
+        super().__init__(pariente, nombre='Predecir', núm=4, total=total)
 
 
 class CajaEtp5(CjG.CajaEtapa):
     def __init__(símismo, pariente, total):
-        super().__init__(pariente, nombre='Base de Datos', núm=5, total=total)
+        super().__init__(pariente, nombre='Optimizar', núm=5, total=total)
+
+
+class CajaSubEtp11(CjG.CajaSubEtapa):
+    def __init__(símismo, pariente, total):
+        super().__init__(pariente, nombre='Cargar datos', núm=1, total=total)
+
+
+class CajaSubEtp12(CjG.CajaSubEtapa):
+    def __init__(símismo, pariente, total):
+        super().__init__(pariente, nombre='Especificar variables', núm=2, total=total)
