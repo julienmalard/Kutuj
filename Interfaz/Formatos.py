@@ -3,11 +3,12 @@ import tkinter as tk
 
 # Parámetros generales
 col_fondo = 'white'  # El color de fondo del interfaz
-col_texto = '#990000'
+col_1 = '#990000'
+col_2 = '#996600'
 fuente = 'Comic Sans MS'
 formato_cajas = dict(bg=col_fondo, borderwidth=0, highlightthickness=0)
 formato_botones = dict(bd=0, borderwidth=0, highlightthickness=0)
-formato_etiq = dict(bg=col_fondo, fg=col_texto)
+formato_etiq = dict(bg=col_fond)
 
 # Ventana central
 ancho_ventana = 1100
@@ -28,7 +29,7 @@ ubic_BtsInic = dict(side='left', ipadx=5, ipady=5, padx=10, pady=10)
 ubic_CjLeng = dict(relx=0, y=0, relwidth=1, relheight=1)
 ubic_BtRegrCent = dict(x=10, y=10)
 ubic_CbzLeng = dict(relx=0.5, y=20, anchor=tk.N)
-formato_CbzLeng = dict(font=(fuente, 40, 'bold'), **formato_etiq)
+formato_CbzLeng = dict(font=(fuente, 40, 'bold'), fg=col_1, **formato_etiq)
 
 # Caja central
 formato_CjCent = dict(bg='green')
@@ -59,21 +60,20 @@ ubic_CjEtp = dict(relx=0, rely=0, relwidth=1, relheight=1)
 ubic_BtNavEtp_adel = dict(rely=1, relx=0.5, anchor=tk.S)
 ubic_BtNavEtp_atrs = dict(rely=0, relx=0.5, anchor=tk.N)
 formato_BtsNavEtapa = dict(width=270, height=35, bg=col_fondo)
-ubic_CjCbzEtp = dict(x=0, y=0, relwidth=1, height=30)
-formato_EncbzCjEtp = dict(font=(fuente, 35, 'bold'), **formato_etiq)
+# ubic_CjCbzEtp = dict(relx=0, rely=0, relwidth=1, height=30)
+formato_EncbzCjEtp = dict(font=(fuente, 35, 'bold'), fg=col_1, **formato_etiq)
 ubic_EncbzCjEtp = dict(relx=0, rely=0, x=20)
 
 # Cajas sub etapas
-formato_CjSubEtp = dict(x=0, y=0, relwidth=1, relheight=1,
-                        width=-formato_BtsNavEtapa['height'])
-ubic_CjSubEtp = dict(x=0, y=ubic_CjCbzEtp['height'],
-                     relwidth=1, relheight=1, height=-ubic_CjCbzEtp['height'])
-formato_EncbzCjSubEtp = dict(font=(fuente, 20, 'bold'), **formato_etiq)
-ubic_EncbzCjSubEtp = dict(relx=0.5, rely=0)
+ubic_CjSubEtp = dict(relx=0, rely=0, y=formato_BtsNavEtapa['height'],
+                     relwidth=1, relheight=1, 
+                     height=-2*formato_BtsNavEtapa['height'])
+formato_EncbzCjSubEtp = dict(font=(fuente, 20, 'bold'), fg=col_2, **formato_etiq)
+ubic_EncbzCjSubEtp = dict(relx=0, rely=0)
 
 ubic_BtNavSub_adel = dict(relx=1, rely=0.5, anchor=tk.E)
 ubic_BtNavSub_atrs = dict(relx=0, rely=0.5, anchor=tk.W)
-formato_BtsNavSub = dict(width=10, height=40)
+formato_BtsNavSub = dict(width=25, height=205)
 
 formato_MenuOpciones = dict()
 formato_etiq_bloq = dict(fg='#999999')
