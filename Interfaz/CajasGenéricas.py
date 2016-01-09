@@ -47,7 +47,7 @@ class CajaEtapa(tk.Frame):
         símismo.pariente = pariente
         símismo.SubCajas = []
         símismo.SubCajaActual = None
-
+        
         etiq = tk.Label(símismo, text=nombre, **Fm.formato_EncbzCjEtp)
         etiq.place(**Fm.ubic_EncbzCjEtp)
 
@@ -97,6 +97,18 @@ class CajaEtapa(tk.Frame):
 
     def ir_etp_anterior(símismo):
         símismo.pariente.ir_a_caja(símismo.núm - 1)
+        
+    def bloquear_subcajas(símismo, núms_cajas):
+        for n in núms_cajas:
+            if n > 1:
+                símismo.SubCajas[n - 2].bloquear_transición(dirección='siguiente')
+            if n < len(símismo.SubCajas):
+                símismo.SubCajas[n].bloquear_transición(dirección='anterior')
+
+    def desbloquear_subcajas(símismo, núms_cajas):
+        for n in núms_cajas:
+            símismo.SubCajas[n - 1].desbloquear_transición(dirección='siguiente')
+            símismo.SubCajas[n + 1].desbloquear_transición(dirección='anterior')
 
 
 class CajaSubEtapa(tk.Frame):
@@ -105,16 +117,24 @@ class CajaSubEtapa(tk.Frame):
 
         símismo.pariente = pariente
         símismo.núm = núm
-
-        etiq = tk.Label(símismo, text=nombre, **Fm.formato_EncbzCjSubEtp)
-        etiq.place(**Fm.ubic_EncbzCjSubEtp)
-
+        
+        if nombre is not None:
+            etiq = tk.Label(símismo, text=nombre, **Fm.formato_EncbzCjSubEtp)
+            etiq.place(**Fm.ubic_EncbzCjSubEtp)
+            
+        símismo.BtAdelante = símismo.BtAtrás = None
         if núm < total:
             símismo.BtAdelante = Bt.BotónNavSub(símismo, tipo='adelante')
         if núm > 1:
             símismo.BtAtrás = Bt.BotónNavSub(símismo, tipo='atrás')
 
         símismo.place(Fm.ubic_CjSubEtp)
+        
+    def desbloquear_transición(símismo, dirección):
+        if dirección == 'anterior' and símismo.BtAtrás is not None:
+            símismo.BtAtrás.desbloquear()
+        elif dirección == 'siguiente' and símismo.BtAdelante is not None:
+            símismo.BtAdelante.desbloquear()
 
     def ir_sub_siguiente(símismo):
         símismo.pariente.ir_a_sub(símismo.núm + 1)
@@ -130,14 +150,17 @@ class CajaSubEtapa(tk.Frame):
 
 
 class CajaActivable(object):
-    def __init__(símismo, pariente, objetos, ubicación, tipo_ubic):
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
         símismo.cj = tk.Frame(pariente)
-
+        símismo.etiquetas = []
+        símismo.botones = []
+        
         if tipo_ubic == 'pack':
             símismo.cj.pack(**ubicación)
         elif tipo_ubic == 'place':
             símismo.cj.place(**ubicación)
 
+    def especificar_objetos(símismo, objetos):
         símismo.etiquetas = [x for x in objetos if type(x) is tk.Label]
         símismo.botones = [x for x in objetos if
                            type(x) is Bt.BotónImagen or
