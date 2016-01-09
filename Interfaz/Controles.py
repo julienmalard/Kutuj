@@ -54,6 +54,13 @@ class Menú(object):
 
             if símismo.etiq is not None:
                 símismo.etiq.configure(text=nueva_val)
+                
+    def refrescar(símismo, opciones):
+        símismo.opciones = opciones
+        símismo.var.set('')
+        símismo.MenúOpciones['menu'].delete(0, 'end')
+        for opción in opciones:
+            símismo.MenúOpciones['menu'].add_command(label=opción, command=tk._setit(símismo.var, opción))
 
     def excluir(símismo, valor):
         menú = símismo.MenúOpciones['Menu']
