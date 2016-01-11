@@ -258,6 +258,7 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         super().__init__(pariente, nombre='Especificar variables', núm=2, total=total)
 
 
+
 class CajaSubEtp21(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='Variables predictores', núm=1, total=total)
@@ -275,7 +276,7 @@ class CajaSubEtp31(CjG.CajaSubEtapa):
         
 class CajaSubEtp32(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='...y aún mejor validar', núm=2, total=total)
+        super().__init__(pariente, nombre='¡...y aún mejor validar!', núm=2, total=total)
         
         
 class CajaSubEtp41(CjG.CajaSubEtapa):

@@ -5,9 +5,9 @@ from matplotlib.figure import Figure
 from Interfaz import Formatos as Fm
 
 
-class ListaItemas(object):
-    def __init__(símismo):
-        pass
+class ListaItemas(tk.Frame):
+    def __init__(símismo, pariente):
+        super().__init__(pariente, **Fm.formato_CjLstItemas)
 
 
 class Itema(object):
@@ -16,24 +16,32 @@ class Itema(object):
 
 
 class Menú(object):
-    def __init__(símismo, pariente, opciones, comanda, ubicación, tipo_ubic,
-                 etiq=None, formato=Fm.formato_MenuOpciones):
+    def __init__(símismo, pariente, nombre, opciones, comanda, ubicación, tipo_ubic,
+                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn):
         símismo.opciones = opciones
         símismo.comanda = comanda
-        símismo.etiq = etiq
-        símismo.var = tk.StringVar(símismo)
-        símismo.val = None
 
+        símismo.var = tk.StringVar()
+        símismo.var.set('')
+        símismo.var.trace('w', símismo.acción_cambio)
+        símismo.val = None
         símismo.exclusivos = []
 
-        símismo.MenúOpciones = tk.OptionMenu(pariente, símismo.var, opciones,
-                                             command=símismo.acción_cambio,
-                                             **formato)
+        cj = tk.Frame(pariente, **Fm.formato_cajas)
+
+        símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqMenú)
+        símismo.MenúOpciones = tk.OptionMenu(cj, símismo.var, opciones)
+
+        símismo.MenúOpciones.config(**formato_bt)
+        símismo.MenúOpciones['menu'].config(**formato_mn)
+
+        símismo.Etiq.pack(**Fm.ubic_EtiqMenú)
+        símismo.MenúOpciones.pack(**Fm.ubic_Menú)
 
         if tipo_ubic == 'pack':
-            símismo.MenúOpciones.pack(**ubicación)
+            cj.pack(**ubicación)
         elif tipo_ubic == 'place':
-            símismo.MenúOpciones.place(**ubicación)
+            cj.place(**ubicación)
 
     def estab_exclusivo(símismo, otro_menú):
         assert type(otro_menú) is Menú
@@ -42,18 +50,18 @@ class Menú(object):
         if símismo not in otro_menú.exclusivos:
             otro_menú.estab_exclusivo(símismo)
 
-    def acción_cambio(símismo, nueva_val):
+    def acción_cambio(símismo, *args):
+        nueva_val = símismo.var.get()
+
         print('valor cambió a %s' % nueva_val)
-        if nueva_val != símismo.val:
+        if nueva_val != símismo.val and nueva_val != '':
             for menú in símismo.exclusivos:
                 menú.excluir(nueva_val)
-                menú.reinstaurar(símismo.val)
+                if símismo.val is not None:
+                    menú.reinstaurar(símismo.val)
 
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
-
-            if símismo.etiq is not None:
-                símismo.etiq.configure(text=nueva_val)
                 
     def refrescar(símismo, opciones):
         símismo.opciones = opciones
@@ -63,20 +71,22 @@ class Menú(object):
             símismo.MenúOpciones['menu'].add_command(label=opción, command=tk._setit(símismo.var, opción))
 
     def excluir(símismo, valor):
-        menú = símismo.MenúOpciones['Menu']
+        menú = símismo.MenúOpciones['menu']
         i = símismo.opciones.index(valor)
         menú.entryconfig(i, state=tk.DISABLED)
 
     def reinstaurar(símismo, valor):
-        menú = símismo.MenúOpciones['Menu']
+        menú = símismo.MenúOpciones['menu']
         i = símismo.opciones.index(valor)
         menú.entryconfig(i, state=tk.NORMAL)
 
     def bloquear(símismo):
-        símismo.MenúOpciones['optionsmenu'].configure(state=tk.DISABLED)
+        símismo.MenúOpciones.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)
+        símismo.Etiq.config(**Fm.formato_etiq_bloq)
 
     def desbloquear(símismo):
-        símismo.MenúOpciones['optionsmenu'].configure(state=tk.NORMAL)
+        símismo.MenúOpciones.configure(state=tk.NORMAL, cursor='arrow', **Fm.formato_BtMn)
+        símismo.Etiq.config(**Fm.formato_EtiqMenú)
 
 
 class Escala(object):
@@ -102,19 +112,13 @@ class Escala(object):
             símismo.cj.place(**ubicación)
 
     def cambio_ingr(símismo, val):
-        try:
-            val = float(val)
-        except ValueError:
-            símismo.var_ingr.set('')
-            return
         if val != símismo.var_escl.get():
-            símismo.var_escl.set(val)
-
+            símismo.var_escl.set(float(val))
         símismo.comanda(val)
 
     def cambio_escl(símismo, val):
         if val != símismo.var_ingr.get():
-            símismo.var_ingr.set(val)
+            símismo.var_ingr.set(str(val))
 
         símismo.comanda(val)
 

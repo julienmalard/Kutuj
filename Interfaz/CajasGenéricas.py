@@ -107,8 +107,10 @@ class CajaEtapa(tk.Frame):
 
     def desbloquear_subcajas(símismo, núms_cajas):
         for n in núms_cajas:
-            símismo.SubCajas[n - 1].desbloquear_transición(dirección='siguiente')
-            símismo.SubCajas[n + 1].desbloquear_transición(dirección='anterior')
+            if n > 1:
+                símismo.SubCajas[n - 2].desbloquear_transición(dirección='siguiente')
+            if n < len(símismo.SubCajas):
+                símismo.SubCajas[n].desbloquear_transición(dirección='anterior')
 
 
 class CajaSubEtapa(tk.Frame):
@@ -122,14 +124,21 @@ class CajaSubEtapa(tk.Frame):
             etiq = tk.Label(símismo, text=nombre, **Fm.formato_EncbzCjSubEtp)
             etiq.place(**Fm.ubic_EncbzCjSubEtp)
             
-        símismo.BtAdelante = símismo.BtAtrás = None
+        símismo.BtAdelante = None
+        símismo.BtAtrás = None
         if núm < total:
             símismo.BtAdelante = Bt.BotónNavSub(símismo, tipo='adelante')
         if núm > 1:
             símismo.BtAtrás = Bt.BotónNavSub(símismo, tipo='atrás')
 
         símismo.place(Fm.ubic_CjSubEtp)
-        
+
+    def bloquear_transición(símismo, dirección):
+        if dirección == 'anterior' and símismo.BtAtrás is not None:
+            símismo.BtAtrás.bloquear()
+        elif dirección == 'siguiente' and símismo.BtAdelante is not None:
+            símismo.BtAdelante.bloquear()
+
     def desbloquear_transición(símismo, dirección):
         if dirección == 'anterior' and símismo.BtAtrás is not None:
             símismo.BtAtrás.desbloquear()
@@ -149,16 +158,17 @@ class CajaSubEtapa(tk.Frame):
         símismo.pariente.ir_etp_anterior()
 
 
-class CajaActivable(object):
+class CajaActivable(tk.Frame):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
-        símismo.cj = tk.Frame(pariente)
+        super().__init__(pariente, **Fm.formato_cajas)
         símismo.etiquetas = []
+        símismo.colores_etiquetas = []
         símismo.botones = []
         
         if tipo_ubic == 'pack':
-            símismo.cj.pack(**ubicación)
+            símismo.pack(**ubicación)
         elif tipo_ubic == 'place':
-            símismo.cj.place(**ubicación)
+            símismo.place(**ubicación)
 
     def especificar_objetos(símismo, objetos):
         símismo.etiquetas = [x for x in objetos if type(x) is tk.Label]
@@ -167,6 +177,8 @@ class CajaActivable(object):
                            type(x) is Bt.BotónTexto or
                            type(x) is Ctrl.Menú]
 
+        símismo.colores_etiquetas = [x.cget['fg'] for x in símismo.etiquetas]
+
     def bloquear(símismo):
         for etiq in símismo.etiquetas:
             etiq.configure(Fm.formato_etiq_bloq)
@@ -174,19 +186,20 @@ class CajaActivable(object):
             bt.bloquear()
 
     def desbloquear(símismo):
-        for etiq in símismo.etiquetas:
-            etiq.configure(Fm.formato_etiq_norm)
+        for n, etiq in enumerate(símismo.etiquetas):
+            etiq.configure(color=símismo.colores_etiquetas[n])
         for bt in símismo.botones:
             bt.desbloquear()
 
 
-class CajaAvanzada(object):
+class CajaAvanzada(tk.Frame):
     def __init__(símismo, pariente):
-        símismo.cj = tk.Frame(pariente)
+        super().__init__(pariente)
+
         símismo.caja_móbil = None
         símismo.flechita_avnz = Gr.imagen('FlchAvnz')
         símismo.flechita_senc = Gr.imagen('FlchSenc')
-        símismo.bt = tk.Button(símismo.cj, text='Avanzado', image=símismo.flechita_avnz,
+        símismo.bt = tk.Button(símismo, text='Avanzado', image=símismo.flechita_avnz,
                                command=símismo.bajar,
                                compound='right')
         símismo.bt.place()

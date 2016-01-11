@@ -10,10 +10,11 @@ class Apli(tk.Frame):
         pariente.title('Kutuj')
         pariente.geometry('%ix%i' % (Fm.ancho_ventana, Fm.altura_ventana))
         pariente.configure(background=Fm.col_fondo)
-        # pariente.resizable(0,0)
+        pariente.minsize(width=Fm.ancho_ventana, height=Fm.altura_ventana)
 
-        #
-        símismo.CajaInic = Cj.CajaInic(símismo)
+        símismo.modelo = None
+
+        símismo.CajaInic = Cj.CajaInic()
         símismo.CajaCentral = Cj.CajaCentral(símismo)
         símismo.CajaLenguas = Cj.CajaLeng(símismo)
         símismo.CajaCentral.lift()

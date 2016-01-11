@@ -1,16 +1,20 @@
+import os.path
 import numpy as np
 import scipy.stats as estad
 import scipy.optimize as optimizar
 import math as mat
 
-
-class Control(object):
-    def __init_(símismo, base_central):
-        símismo.base_central = base_central
-        símismo.base_derivados = None
+from BD import BaseCentral
 
 
 class Modelo(object):
+    def __init__(símismo, archivo_base_central):
+        tipo_arciho = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
+        símismo.base_central = BaseCentral(archivo_base_central, tipo_arciho)
+        símismo.base_derivados = None
+
+
+class ConfigModelo(object):
     def __init__(símismo, varsx, vary):
         símismo.varsX = varsx
         símismo.varY = vary
