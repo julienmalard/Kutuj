@@ -138,7 +138,7 @@ class CajaEtp2(CjG.CajaEtapa):
 
 class CajaEtp3(CjG.CajaEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Validar', núm=3, total=total)
+        super().__init__(pariente, nombre='Verificar', núm=3, total=total)
         
         total_subcajas = 2
         subcajas = [CjSE.CajaSubEtp31(símismo, apli, total=total_subcajas),

@@ -1,8 +1,5 @@
 from  matplotlib.figure import Figure
-from numpy import arange, sin, pi
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-# implement the default mpl key bindings
-from matplotlib.backend_bases import key_press_handler
 import tkinter as tk
 import numpy as np
 

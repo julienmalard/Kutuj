@@ -5,6 +5,7 @@ from Interfaz import CajasGenéricas as CjG
 from Interfaz import Botones as Bt
 from Interfaz import Formatos as Fm
 from Interfaz import ControlesGenéricos as CtrG
+from Interfaz import Controles as Ctrl
 
 from Modelo import Modelo
 
@@ -104,6 +105,37 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
 class CajaSubEtp12(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='Especificar variables', núm=2, total=total)
+        símismo.apli = apli
+
+        cj_bajo = tk.Frame(símismo, **Fm.formato_cajas)
+
+        cj_ctrls = tk.Frame(cj_bajo, **Fm.formato_cajas)
+        ingr_nombre = CtrG.IngrTexto(cj_ctrls, 'Nombre', ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+
+        símismo.MnCol = CtrG.Menú(cj_ctrls, 'Columna', opciones={},
+                                  ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+
+        escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365),
+                                      ubicación=Fm.ubic_escl_fecha_inic, tipo_ubic='place')
+
+        dic_controles = {'Nombre': ingr_nombre, 'Columna': símismo.MnCol, 'Fecha_inic': escl_fecha_inic}
+        grupo_controles = CtrG.GrupoControles(controles=dic_controles)
+
+        símismo.gráfico = Ctrl.GráfVarBD(cj_bajo, datos=grupo_controles.itema.datos,
+                                         ubicación=Fm.ubic_GráficoVarsBD, tipo_ubic='place')
+
+        símismo.lista = Ctrl.ListaVarsBD(símismo, controles=grupo_controles,
+                                         ubicación=Fm.ubic_CjLstVarsBD, tipo_ubic='place')
+
+        cj_bajo.place(**Fm.ubic_CjBajoSE12)
+        cj_ctrls.place(**Fm.ubic_CjCtrlsVarsBD)
+
+    def acción_desbloquear(símismo):
+        bd = símismo.apli.modelo.base_central
+        cols_potenciales = bd.nombres_cols.copy()
+        cols_potenciales.remove(bd.id_cols['fecha'])
+        cols_potenciales.remove(bd.id_cols['tiempo'])
+        símismo.MnCol.refrescar(cols_potenciales)
 
 
 class CajaSubEtp21(CjG.CajaSubEtapa):

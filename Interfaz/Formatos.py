@@ -78,12 +78,11 @@ formato_etiq_error = dict(bg='#ffffe5', fg='#ff0000', font=('arial', '12'), wrap
                           borderwidth=2, highlightcolor='#ff0000', padx=10, pady=10)
 
 # Listas
-formato_CjLstItemas = dict(highlightthickness=1, highlightbackground='#000000', **formato_cajas)
+formato_CjLstItemas = dict(highlightthickness=1, highlightbackground='#000000', bg=col_fondo)
 formato_TlLstItemas = dict(bg=col_fondo)
 ubic_TlLstItemas = dict(relx=0, rely=0, x=0, y=0, relwidth=1, relheight=1)
 ubic_BaraDesp = dict(side="right", fill="y")
 ubic_CjTl = dict(width=750-20, anchor=tk.NW)
-ubic_CjLstItemas = dict(relx=0.5, rely=0, y=10, width=750, relheight=0.5, anchor=tk.N)
 
 # Controles
 formato_EtiqCtrl = dict(bg=col_fondo, fg=col_3, font=(fuente, 20, 'bold'))
@@ -129,3 +128,9 @@ ubic_CjsCol = dict(side='left', padx=10)
 
 # Caja subetapa 1.2
 ubic_CtrlsVarBD = dict(side='top', pady=20)
+ubic_CjLstVarsBD = dict(relx=0.5, rely=0, y=20, relwidth=0.8, relheight=0.33, anchor=tk.N)
+ubic_CjCtrlsVarsBD = dict(relx=0.25, rely=0, x=10, y=10, relwidth=0.5, relheight=1, width=-20, anchor=tk.N)
+ubic_CjBajoSE12 = dict(relx=0.5, rely=0.33, y=20, relheight=0.67, height=-20, anchor=tk.N)
+ubic_GráficoVarsBD = dict(relx=0.75, rely=0, x=10, y=20, relwidth=0.5, relheight=0.7, width=-20, anchor=tk.N)
+
+ubic_escl_fecha_inic = dict(relx=0.75, rely=0.8, anchor=tk.N)

@@ -6,7 +6,7 @@ from Interfaz import Formatos as Fm
 
 
 class ListaItemas(tk.Frame):
-    def __init__(símismo, pariente):
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
 
         símismo.Tela = tk.Canvas(símismo, **Fm.formato_TlLstItemas)
@@ -21,7 +21,10 @@ class ListaItemas(tk.Frame):
 
         símismo.Caja.bind("<Configure>", símismo.ajust_auto)
 
-        símismo.place(**Fm.ubic_TlLstItemas)
+        if tipo_ubic == 'pack:':
+            símismo.pack(**ubicación)
+        elif tipo_ubic == 'place':
+            símismo.place(**ubicación)
 
     def ajust_auto(símismo, evento):
         símismo.Tela.configure(scrollregion=símismo.Tela.bbox("all"))
@@ -31,7 +34,7 @@ class Itema(tk.Frame):
     def __init__(símismo, lista_itemas, constructor_objeto, gráfico=None):
         super().__init__(lista_itemas.Caja)
         símismo.gráfico = gráfico
-        símismo.objeto =
+        símismo.objeto = None
 
         símismo.pack()
 
@@ -42,23 +45,25 @@ class Itema(tk.Frame):
         símismo.destroy()
 
     def actualizar(símismo):
+        pass
 
     def cambió(símismo):
         if símismo.gráfico is not None:
             símismo.gráfico.redibujar(símismo.controles)
 
-        if símismo.itema is not None:
-            símismo.itema.actualizar(símismo.controles)
+        if símismo.objeto is not None:
+            símismo.objeto.actualizar(símismo.controles)
         else:
-            símismo.itema = símismo.constructor_itema(símismo.controles)
+            símismo.objeto = símismo.constructor_itema(símismo.controles)
 
 
-class CjControles(tk.Frame):
-    def __init__(símismo, pariente, constructor_itema=None, itema=None):
-        super().__init__(pariente, **Fm.formato_cajas)
+class GrupoControles(object):
+    def __init__(símismo, controles, constructor_itema=None, itema=None):
         símismo.itema = itema
         símismo.constructor_itema = constructor_itema
         símismo.controles = {}
+        for ll in símismo.controles:
+            símismo.controles[11].comanda = símismo.cambió_control
 
     def cambió_control(símismo):
         if símismo.itema is not None:
@@ -68,15 +73,18 @@ class CjControles(tk.Frame):
 
 
 class Gráfico(object):
-    def __init__(símismo, pariente, func_dibujar, parámetros, ubicación):
-        símismo.func_dibujar = func_dibujar
-        símismo.parámetros = parámetros
+    def __init__(símismo, pariente, datos, ubicación, tipo_ubic):
+        símismo.parámetros = datos
 
         cuadro = Figure()
         símismo.fig = cuadro.add_subplot(111)
         símismo.tela = FigureCanvasTkAgg(cuadro, master=pariente.cj)
         símismo.tela.show()
-        símismo.tela.get_tk_widget().place(**ubicación)
+
+        if tipo_ubic == 'place':
+            símismo.tela.get_tk_widget().place(**ubicación)
+        elif tipo_ubic == 'pack':
+            símismo.tela.get_tk_widget().pack(**ubicación)
 
     def redibujar(símismo):
         try:
@@ -96,7 +104,7 @@ class Gráfico(object):
 
 
 class IngrNúm(object):
-    def __init__(símismo, pariente, nombre, límites, prec, comanda, ubicación, tipo_ubic):
+    def __init__(símismo, pariente, nombre, límites, prec, ubicación, tipo_ubic, comanda=None):
         símismo.límites = límites
         símismo.comanda = comanda
         if prec not in ['dec', 'int']:
@@ -155,7 +163,7 @@ class IngrNúm(object):
 
 
 class IngrTexto(object):
-    def __init__(símismo, pariente, nombre, comanda, ubicación, tipo_ubic):
+    def __init__(símismo, pariente, nombre, ubicación, tipo_ubic, comanda=None):
         símismo.comanda = comanda
 
         símismo.var = tk.StringVar()
@@ -192,8 +200,8 @@ class IngrTexto(object):
 
 
 class Menú(object):
-    def __init__(símismo, pariente, nombre, opciones, comanda, ubicación, tipo_ubic,
-                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn):
+    def __init__(símismo, pariente, nombre, opciones, ubicación, tipo_ubic,
+                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, comanda=None):
         símismo.opciones = opciones
         símismo.comanda = comanda
 
@@ -266,7 +274,7 @@ class Menú(object):
 
 
 class Escala(object):
-    def __init__(símismo, pariente, texto, límites, comanda, ubicación, tipo_ubic):
+    def __init__(símismo, pariente, texto, límites, ubicación, tipo_ubic, comanda=None):
         símismo.cj = tk.Frame(pariente)
         símismo.comanda = comanda
 

@@ -107,6 +107,7 @@ class CajaEtapa(tk.Frame):
 
     def desbloquear_subcajas(símismo, núms_cajas):
         for n in núms_cajas:
+            símismo.SubCajas[n - 1].acción_desbloquear()
             if n > 1:
                 símismo.SubCajas[n - 2].desbloquear_transición(dirección='siguiente')
             if n < len(símismo.SubCajas):
@@ -156,6 +157,9 @@ class CajaSubEtapa(tk.Frame):
 
     def ir_etp_anterior(símismo):
         símismo.pariente.ir_etp_anterior()
+
+    def acción_desbloquear(símismo):
+        pass  # A implementar en subcajas específicas donde necesario
 
 
 class CajaActivable(tk.Frame):
