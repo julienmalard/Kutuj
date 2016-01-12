@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from Interfaz import Gráficos as Gr
+from Interfaz import Arte as Gr
 from Interfaz import Formatos as Fm
 
 

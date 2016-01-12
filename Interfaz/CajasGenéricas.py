@@ -2,8 +2,8 @@ import tkinter as tk
 
 from Interfaz import Formatos as Fm
 from Interfaz import Botones as Bt
-from Interfaz import Controles as Ctrl
-from Interfaz import Gráficos as Gr
+from Interfaz import ControlesGenéricos as Ctrl
+from Interfaz import Arte as Ic
 from Interfaz import Animaciones as Anim
 
 
@@ -181,7 +181,7 @@ class CajaActivable(tk.Frame):
 
     def bloquear(símismo):
         for etiq in símismo.etiquetas:
-            etiq.configure(Fm.formato_etiq_bloq)
+            etiq.configure(Fm.formato_EtiqCtrl_bloq)
         for bt in símismo.botones:
             bt.bloquear()
 
@@ -197,8 +197,8 @@ class CajaAvanzada(tk.Frame):
         super().__init__(pariente)
 
         símismo.caja_móbil = None
-        símismo.flechita_avnz = Gr.imagen('FlchAvnz')
-        símismo.flechita_senc = Gr.imagen('FlchSenc')
+        símismo.flechita_avnz = Ic.imagen('FlchAvnz')
+        símismo.flechita_senc = Ic.imagen('FlchSenc')
         símismo.bt = tk.Button(símismo, text='Avanzado', image=símismo.flechita_avnz,
                                command=símismo.bajar,
                                compound='right')

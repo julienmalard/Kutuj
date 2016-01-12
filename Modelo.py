@@ -13,11 +13,17 @@ class Modelo(object):
         símismo.base_central = BaseCentral(archivo_base_central, tipo_arciho)
         símismo.base_derivados = None
 
+        símismo.config = ConfigModelo()
+
 
 class ConfigModelo(object):
-    def __init__(símismo, varsx, vary):
+    def __init__(símismo, varsx=None, vary=None):
         símismo.varsX = varsx
         símismo.varY = vary
+
+        if símismo.varsx is None:
+            símismo.varsx = []
+
         símismo.datosX = []
         símismo.datosY = []
         símismo.pesos_vars = None

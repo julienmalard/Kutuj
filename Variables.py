@@ -3,12 +3,12 @@ import datetime as ft
 
 
 class Variable(object):
-    def __init__(símismo, subyacente, fecha_inic):
+    def __init__(símismo, subyacente, fecha_inic, filtros_deriv):
         símismo.subyacente = subyacente
         símismo.fecha_inic = fecha_inic
 
         símismo.mét_derivación = ''
-        símismo.filtros_deriv = []
+        símismo.filtros_deriv = filtros_deriv
         símismo.lím_infer = ()
         símismo.lím_super = ()
         símismo.día_inic_año = 0

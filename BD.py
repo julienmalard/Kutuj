@@ -12,8 +12,8 @@ class BaseCentral(object):
 
         símismo.id_cols = {'fecha': '', 'tiempo': '', 'vars': {}}
         símismo.fecha_inic = None
-        símismo.fechas = None
-        símismo.horas = None
+        símismo.fechas = []
+        símismo.horas = []
         símismo.datos = {}
         símismo.info_datos = {'mét_combin_tiempo': {}, 'mét_interpol': {}}
 
@@ -30,10 +30,19 @@ class BaseCentral(object):
         símismo.horas = leer_tiempo(lista_horas)
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
+        if símismo.fechas is None or símismo.horas is None:
+            return 'Hay que especificar los datos de fechas y horas primero.'
+
         if mét_combin_tiempo is None:
-            mét_combin_tiempo = símismo.info_datos['mét_combin_tiempo'][nombre]
+            try:
+                mét_combin_tiempo = símismo.info_datos['mét_combin_tiempo'][nombre]
+            except KeyError:
+                pass
         if mét_interpol is None:
-            mét_interpol = símismo.info_datos['mét_interpol'][nombre]
+            try:
+                mét_interpol = símismo.info_datos['mét_interpol'][nombre]
+            except KeyError:
+                pass
 
         if col_datos is None:
             col_datos = símismo.id_cols['vars'][nombre]
@@ -47,9 +56,17 @@ class BaseCentral(object):
         símismo.info_datos['mét_combin_tiempo'][nombre] = mét_combin_tiempo
         símismo.info_datos['mét_interpol'][nombre] = mét_interpol
 
+    def olvidar_var(símismo, nombre):
+        símismo.datos.pop(nombre)
+        símismo.info_datos['mét_combin_tiempo'].pop(nombre)
+        símismo.info_datos['mét_interpol'].pop(nombre)
 
-def gen_datos_diarios(datos_crudos, lista_fechas, lista_tiempos=None,
-                      mét_tiempo_a_día='prom', mét_interpol='trap'):
+
+def gen_datos_diarios(datos_crudos, lista_fechas, lista_tiempos, mét_tiempo_a_día, mét_interpol):
+        if mét_tiempo_a_día is None:
+            mét_tiempo_a_día = 'prom'
+        if mét_interpol is None:
+            mét_interpol = 'trap'
         lista_var = []
         vals_var_día = []
 
