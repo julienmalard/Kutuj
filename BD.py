@@ -47,12 +47,8 @@ class BaseCentral(object):
         if col_datos is None:
             col_datos = símismo.id_cols['vars'][nombre]
 
-        datos_crudos = cargar_columna(col_datos, símismo.sistema, símismo.archivo)
-
-        lista_tiempos = cargar_columna(símismo.id_cols['tiempo'], símismo.sistema, símismo.archivo)
-        símismo.datos[nombre] = gen_datos_diarios(datos_crudos=datos_crudos, lista_fechas=símismo.fechas,
-                                                  lista_tiempos=lista_tiempos,
-                                                  mét_tiempo_a_día=mét_combin_tiempo, mét_interpol=mét_interpol)
+        símismo.datos[nombre] = VariableBD(símismo, nombre, columna=col_datos,
+                                           interpol=mét_combin_tiempo, gen_diaria=mét_interpol)
         símismo.info_datos['mét_combin_tiempo'][nombre] = mét_combin_tiempo
         símismo.info_datos['mét_interpol'][nombre] = mét_interpol
 
@@ -62,50 +58,59 @@ class BaseCentral(object):
         símismo.info_datos['mét_interpol'].pop(nombre)
 
 
-def gen_datos_diarios(datos_crudos, lista_fechas, lista_tiempos, mét_tiempo_a_día, mét_interpol):
-        if mét_tiempo_a_día is None:
-            mét_tiempo_a_día = 'prom'
-        if mét_interpol is None:
-            mét_interpol = 'trap'
+class VariableBD(object):
+    def __init__(símismo, base_de_datos, nombre, columna, gen_diaria, interpol):
+        símismo.nombre = nombre
+        símismo.base_de_datos = base_de_datos
+        símismo.fecha_inic = símismo.base_de_datos.fecha_inic
+
+        datos_crudos = cargar_columna(columna, base_de_datos.sistema, base_de_datos.archivo)
+        símismo.lista_fechas = base_de_datos.fechas
+        lista_tiempos = cargar_columna(base_de_datos.id_cols['tiempo'], base_de_datos.sistema, base_de_datos.archivo)
+
+        if interpol is None:
+            interpol = 'promedio'
+        if gen_diaria is None:
+            gen_diaria = 'trapezoidal'
         lista_var = []
         vals_var_día = []
 
-        for n, f in enumerate(lista_fechas[1:]):
-            if mét_interpol == 'trap':
+        for n, f in enumerate(símismo.lista_fechas[1:]):
+            if gen_diaria.lower() == 'trapezoidal':
                 vals_var_día += [(datos_crudos[n] + datos_crudos[n-1])/2 *
                                  (lista_tiempos[n]-lista_tiempos[n-1])]
-            elif mét_interpol == 'ninguno':
+            elif gen_diaria.lower() == 'ninguno':
                 vals_var_día += datos_crudos[n]
             else:
-                raise ValueError('Metodo de interpolación {0} no reconocido.'.format(mét_interpol))
+                raise ValueError('Metodo de interpolación {0} no reconocido.'.format(gen_diaria))
 
-            if lista_fechas[n] != lista_fechas[n + 1] or n == len(lista_fechas):
+            if símismo.lista_fechas[n] != símismo.lista_fechas[n + 1] or n == len(símismo.lista_fechas):
 
                 vals_var_día = np.array(vals_var_día)
-                if mét_interpol == 'trap':
-                    vals_var_día /= np.sum(lista_fechas[-1] - lista_fechas[0])
+                if gen_diaria.lower() == 'trap':
+                    vals_var_día /= np.sum(símismo.lista_fechas[-1] - símismo.lista_fechas[0])
 
-                if mét_tiempo_a_día == 'sumar':
+                if interpol == 'sumar':
                     var = vals_var_día.sum()
-                elif mét_tiempo_a_día == 'máx':
+                elif interpol == 'máx':
                     var = vals_var_día.max()
-                elif mét_tiempo_a_día == 'mín':
+                elif interpol == 'mín':
                     var = vals_var_día.min()
-                elif mét_tiempo_a_día == 'prom':
+                elif interpol == 'prom':
                     var = vals_var_día.mean()
                 else:
                     raise ValueError('Metodo de generación de datos diarios "{0}" '
-                                     'no reconocido.'.format(mét_tiempo_a_día))
+                                     'no reconocido.'.format(interpol))
 
                 lista_var += [var]
                 vals_var_día = []
 
         datos = [lista_var[0]]
 
-        for n, f in enumerate(lista_fechas[1:]):
-            datos += [float('NaN')] * (f - lista_fechas[n] - 1) + lista_var[n+1]
+        for n, f in enumerate(símismo.lista_fechas[1:]):
+            datos += [float('NaN')] * (f - símismo.lista_fechas[n] - 1) + lista_var[n+1]
             
-        return datos
+        símismo.datos = np.array(datos)
 
 
 def leer_columnas(sistema, archivo):
@@ -176,7 +181,7 @@ def leer_fechas(fechas_crudas):
     fechas = [(ft.date(year=int(x[pos_año]), month=int(x[pos_mes]), day=int(x[pos_día]))-fecha_inic).days
               for x in lista_fechas]
 
-    return fecha_inic, fechas
+    return fecha_inic, np.array(fechas)
 
 
 def leer_tiempo(tiempos_crudos):
@@ -189,4 +194,4 @@ def leer_tiempo(tiempos_crudos):
         print('No se pudieron leer los datos de hora de la base de datos.')
         raise ValueError('No se pudieron leer los datos de hora de la base de datos.')
 
-    return tiempos_finales
+    return np.array(tiempos_finales)

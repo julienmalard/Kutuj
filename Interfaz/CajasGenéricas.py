@@ -197,7 +197,7 @@ class CajaActivable(tk.Frame):
 
 
 class CajaAvanzada(tk.Frame):
-    def __init__(símismo, pariente):
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
         super().__init__(pariente)
 
         símismo.caja_móbil = None
@@ -207,6 +207,11 @@ class CajaAvanzada(tk.Frame):
                                command=símismo.bajar,
                                compound='right')
         símismo.bt.place()
+
+        if tipo_ubic == 'place':
+            símismo.place(**ubicación)
+        elif tipo_ubic == 'pack':
+            símismo.pack(**ubicación)
 
     def establecer_caja_móbil(símismo, caja_móbil):
         símismo.caja_móbil = caja_móbil

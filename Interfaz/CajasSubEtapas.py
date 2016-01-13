@@ -114,15 +114,19 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
 
         símismo.MnCol = CtrG.Menú(cj_ctrls, 'Columna', opciones={},
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
-
         escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365),
                                       ubicación=Fm.ubic_escl_fecha_inic, tipo_ubic='place')
+        cj_avanzada = CjG.CajaAvanzada(cj_ctrls, Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+        menú_interpol = CtrG.Menú(cj_avanzada, nombre='Interpolación:',
+                                  opciones=['Trapezoidal', 'Ninguno'], inicial='Trapezoidal',
+                                  ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
-        dic_controles = {'Nombre': ingr_nombre, 'Columna': símismo.MnCol, 'Fecha_inic': escl_fecha_inic}
-        grupo_controles = CtrG.GrupoControles(controles=dic_controles)
+        dic_controles = {'Nombre': ingr_nombre, 'Columna': símismo.MnCol, 'Fecha_inic': escl_fecha_inic,
+                         'Interpol': menú_interpol}
 
-        símismo.gráfico = Ctrl.GráfVarBD(cj_bajo, datos=grupo_controles.itema.datos,
-                                         ubicación=Fm.ubic_GráficoVarsBD, tipo_ubic='place')
+        símismo.gráfico = Ctrl.GráfVarBD(cj_bajo, ubicación=Fm.ubic_GráficoVarsBD, tipo_ubic='place')
+
+        grupo_controles = Ctrl.GrpCtrlsVarBD(apli=apli, controles=dic_controles, gráfico=símismo.gráfico)
 
         símismo.lista = Ctrl.ListaVarsBD(símismo, controles=grupo_controles,
                                          ubicación=Fm.ubic_CjLstVarsBD, tipo_ubic='place')

@@ -47,34 +47,55 @@ class Itema(tk.Frame):
     def actualizar(símismo):
         pass
 
-    def cambió(símismo):
-        if símismo.gráfico is not None:
-            símismo.gráfico.redibujar(símismo.controles)
-
-        if símismo.objeto is not None:
-            símismo.objeto.actualizar(símismo.controles)
-        else:
-            símismo.objeto = símismo.constructor_itema(símismo.controles)
+    def editar(símismo):
+        pass
 
 
 class GrupoControles(object):
-    def __init__(símismo, controles, constructor_itema=None, itema=None):
+    def __init__(símismo, controles, constructor_itema=None, itema=None, gráfico=None):
+        símismo.controles = controles
         símismo.itema = itema
+        símismo.gráfico = gráfico
+        if símismo.gráfico is not None:
+            símismo.gráfico.objeto = símismo.objeto
+            símismo.gráfico.controles = símismo.controles
         símismo.constructor_itema = constructor_itema
-        símismo.controles = {}
+        símismo.objeto = None
+
         for ll in símismo.controles:
-            símismo.controles[11].comanda = símismo.cambió_control
+            símismo.controles[ll].comanda = símismo.cambió_control
 
     def cambió_control(símismo):
+
+        if símismo.verificar_completo() is True:
+            símismo.refrescar_objeto()
+            if símismo.gráfico is not None:
+                símismo.gráfico.redibujar()
+
+    def guardar(símismo):
         if símismo.itema is not None:
             símismo.itema.actualizar(símismo.controles)
         elif símismo.constructor_itema is not None:
             símismo.itema = símismo.constructor_itema(símismo.controles)
+            símismo.controles = None
+
+        símismo.borrar()
+
+    def borrar(símismo):
+        for control in símismo.controles:
+            control.borrar()
+
+    def verificar_completo(símismo):
+        raise NotImplementedError
+
+    def refrescar_objeto(símismo):
+        raise NotImplementedError
 
 
 class Gráfico(object):
-    def __init__(símismo, pariente, datos, ubicación, tipo_ubic):
-        símismo.parámetros = datos
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
+        símismo.objeto = None
+        símismo.controles = None
 
         cuadro = Figure()
         símismo.fig = cuadro.add_subplot(111)
@@ -119,7 +140,7 @@ class IngrNúm(object):
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-        símismo.CampoIngr = tk.Entry(cj, variable=símismo.var, **Fm.formato_CampoIngr)
+        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, **Fm.formato_CampoIngr)
 
         símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
         símismo.CampoIngr.pack(**Fm.ubic_CampoIngr)
@@ -146,12 +167,16 @@ class IngrNúm(object):
 
         except ValueError:
             símismo.var.set('')
+            símismo.val = None
             símismo.CampoIngr.config(**Fm.formato_CampoIngr_error)
             return
 
         if nueva_val != símismo.val and nueva_val != '':
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
+
+    def borrar(símismo):
+        símismo.var.set('')
 
     def bloquear(símismo):
         símismo.CampoIngr.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)
@@ -174,7 +199,7 @@ class IngrTexto(object):
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-        símismo.CampoIngr = tk.Entry(cj, variable=símismo.var, **Fm.formato_CampoIngr)
+        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, **Fm.formato_CampoIngr)
 
         símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
         símismo.CampoIngr.pack(**Fm.ubic_CampoIngr)
@@ -186,9 +211,16 @@ class IngrTexto(object):
 
     def acción_cambio(símismo, *args):
         nueva_val = int(símismo.var.get())
-        if nueva_val != símismo.val and nueva_val != '':
+        if nueva_val == '':
+            símismo.val = None
+            return
+
+        if nueva_val != símismo.val:
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
+
+    def borrar(símismo):
+        símismo.var.set('')
 
     def bloquear(símismo):
         símismo.CampoIngr.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)
@@ -201,12 +233,13 @@ class IngrTexto(object):
 
 class Menú(object):
     def __init__(símismo, pariente, nombre, opciones, ubicación, tipo_ubic,
-                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, comanda=None):
+                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, comanda=None, inicial=''):
         símismo.opciones = opciones
         símismo.comanda = comanda
 
         símismo.var = tk.StringVar()
-        símismo.var.set('')
+        símismo.val_inicial = inicial
+        símismo.var.set(símismo.val_inicial)
         símismo.var.trace('w', símismo.acción_cambio)
         símismo.val = None
         símismo.exclusivos = []
@@ -237,8 +270,11 @@ class Menú(object):
     def acción_cambio(símismo, *args):
         nueva_val = símismo.var.get()
 
-        print('valor cambió a %s' % nueva_val)
-        if nueva_val != símismo.val and nueva_val != '':
+        if nueva_val == '':
+            símismo.val = None
+            return
+
+        if nueva_val != símismo.val:
             for menú in símismo.exclusivos:
                 menú.excluir(nueva_val)
                 if símismo.val is not None:
@@ -264,6 +300,9 @@ class Menú(object):
         i = símismo.opciones.index(valor)
         menú.entryconfig(i, state=tk.NORMAL)
 
+    def borrar(símismo):
+        símismo.var.set(símismo.val_inicial)
+
     def bloquear(símismo):
         símismo.MenúOpciones.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)
         símismo.Etiq.config(**Fm.formato_EtiqCtrl_bloq)
@@ -274,9 +313,12 @@ class Menú(object):
 
 
 class Escala(object):
-    def __init__(símismo, pariente, texto, límites, ubicación, tipo_ubic, comanda=None):
+    def __init__(símismo, pariente, texto, límites, ubicación, tipo_ubic, comanda=None, valor_inicial=None):
         símismo.cj = tk.Frame(pariente)
         símismo.comanda = comanda
+        if valor_inicial is None:
+            valor_inicial = (límites[0] + límites[1])/2
+        símismo.valor_inicial = valor_inicial
 
         símismo.var_escl = tk.DoubleVar()
         símismo.var_escl.trace('w', símismo.cambio_escl)
@@ -284,11 +326,11 @@ class Escala(object):
         símismo.var_ingr.trace('w', símismo.cambio_ingr)
 
         símismo.etiq = tk.Label(símismo.cj, text=texto)
-        símismo.ingr = tk.Entry(símismo.cj, variable=símismo.var_ingr, from_=límites[0], to=límites[1],
-                                **Fm.formato_Ingr)
-        símismo.escl = tk.Scale(símismo.cj, textvariable=símismo.var_escl, **Fm.formato_Escl)
+        símismo.ingr = tk.Entry(símismo.cj, textvariable=símismo.var_ingr, **Fm.formato_CampoIngr)
+        símismo.escl = tk.Scale(símismo.cj, variable=símismo.var_escl, from_=límites[0], to=límites[1],
+                                **Fm.formato_Escl)
 
-        símismo.ingr.pack(**Fm.ubic_Ingr)
+        símismo.ingr.pack(**Fm.ubic_CampoIngr)
         símismo.escl.pack(**Fm.ubic_Escl)
         if tipo_ubic == 'pack':
             símismo.cj.pack(**ubicación)
@@ -305,3 +347,7 @@ class Escala(object):
             símismo.var_ingr.set(str(val))
 
         símismo.comanda(val)
+
+    def borrar(símismo):
+        símismo.var_escl.set(símismo.valor_inicial)
+        símismo.var_ingr.set(símismo.valor_inicial)

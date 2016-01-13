@@ -28,7 +28,7 @@ ubic_BtsInic = dict(side='left', ipadx=5, ipady=5, padx=10, pady=10)
 
 # Caja lenguas
 ubic_CjLeng = dict(relx=0, y=0, relwidth=1, relheight=1)
-ubic_BtRegrCent = dict(x=10, y=10)
+ubic_BtRegrCent = dict(x=20, y=20)
 ubic_CbzLeng = dict(relx=0.5, y=20, anchor=tk.N)
 formato_CbzLeng = dict(font=(fuente, 40, 'bold'), fg=col_1, **formato_etiq)
 
