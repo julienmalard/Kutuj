@@ -6,9 +6,10 @@ col_fondo = 'white'  # El color de fondo del interfaz
 col_1 = '#990000'
 col_2 = '#ffbf00'
 col_3 = '#ffd633'
+col_4 = '#fffae5'
 fuente = 'Comic Sans MS'
 formato_cajas = dict(bg=col_fondo, borderwidth=0, highlightthickness=0)
-formato_botones = dict(bd=0, borderwidth=0, highlightthickness=0)
+formato_botones = dict(bd=0, bg=col_fondo, borderwidth=0, highlightthickness=0)
 formato_etiq = dict(bg=col_fondo)
 
 # Ventana central
@@ -84,14 +85,20 @@ ubic_TlLstItemas = dict(relx=0, rely=0, x=0, y=0, relwidth=1, relheight=1)
 ubic_BaraDesp = dict(side="right", fill="y")
 ubic_CjTl = dict(width=750-20, anchor=tk.NW)
 
+formato_secciones_itemas = dict(height=10, pady=5, **formato_cajas)
+ancho_cj_bts_itemas = 20
+ubic_BtsItemas = dict(side='left')
+formato_etiq_itemas = dict(fg=col_1, font={fuente, 10}, bg=col_fondo)
+ubic_ColsItemas = dict(side='left')
+
 # Controles
 formato_EtiqCtrl = dict(bg=col_fondo, fg=col_3, font=(fuente, 20, 'bold'))
 formato_EtiqCtrl_bloq = dict(fg='#999999')
 
-formato_MnMn = dict(bg=col_fondo, relief='flat', bd=0, activebackground='#fffae5', activeforeground='#000000',
+formato_MnMn = dict(bg=col_fondo, relief='flat', bd=0, activebackground=col_4, activeforeground='#000000',
                     disabledforeground='#cccccc', font=('arial', '12'))
 formato_BtMn = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_3,
-                    relief='flat', activebackground='#fffae5', font=('arial', '12'),
+                    relief='flat', activebackground=col_4, font=('arial', '12'),
                     width=15, anchor=tk.W)
 formato_BtMn_bloq = dict(highlightbackground='#999999')
 
@@ -105,7 +112,7 @@ formato_Escl = dict()
 ubic_Escl = dict(side='left')
 ubic_CampoIngr = dict(side='left')
 formato_CampoIngr = dict(highlightthickness=1, highlightbackground='#000000')
-formato_CampoIngr_error = dict(highlightthickness=2, highlightbackground='#ff0000', activebackground='#fffae5')
+formato_CampoIngr_error = dict(highlightthickness=2, highlightbackground='#ff0000', activebackground=col_4)
 
 #
 ubic_CjMóbl = dict(x=0, y=0, anchor=tk.SW, relwidth=1, relheight=1)
@@ -128,9 +135,10 @@ ubic_CjsCol = dict(side='left', padx=10)
 
 # Caja subetapa 1.2
 ubic_CtrlsVarBD = dict(side='top', pady=20)
-ubic_CjLstVarsBD = dict(relx=0.5, rely=0, y=20, relwidth=0.8, relheight=0.33, anchor=tk.N)
+ubic_CjLstVarsBD = dict(relx=0.5, rely=0, y=50, relwidth=0.8, relheight=0.33, anchor=tk.N)
 ubic_CjCtrlsVarsBD = dict(relx=0.25, rely=0, x=10, y=10, relwidth=0.5, relheight=1, width=-20, anchor=tk.N)
 ubic_CjBajoSE12 = dict(relx=0.5, rely=0.33, y=20, relheight=0.67, height=-20, anchor=tk.N)
 ubic_GráficoVarsBD = dict(relx=0.75, rely=0, x=10, y=20, relwidth=0.5, relheight=0.7, width=-20, anchor=tk.N)
 
 ubic_escl_fecha_inic = dict(relx=0.75, rely=0.8, anchor=tk.N)
+anchos_cols_listavarVB = [0.25, 0.25, 0.25, 0.25]

@@ -201,7 +201,7 @@ class CajaAvanzada(tk.Frame):
         super().__init__(pariente)
 
         símismo.caja_móbil = None
-        símismo.flechita_avnz = Ic.imagen('FlchAvnz')
+        símismo.flechita_avnz = Ic.imagen('FlchAvzd')
         símismo.flechita_senc = Ic.imagen('FlchSenc')
         símismo.bt = tk.Button(símismo, text='Avanzado', image=símismo.flechita_avnz,
                                command=símismo.bajar,

@@ -13,7 +13,8 @@ from Modelo import Modelo
 class CajaSubEtp11(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='Cargar datos', núm=1, total=total)
-        símismo.Modelo = apli.modelo
+        símismo.apli = apli
+        símismo.Modelo = None
 
         cj_bts = tk.Frame(símismo, **Fm.formato_cajas)
         símismo.bt_cargar_bd = Bt.BotónTexto(cj_bts, texto='Base de datos', comanda=símismo.acción_bt_cargar_bd,
@@ -61,6 +62,7 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
                                              title='Cargar base de datos')
         try:
             símismo.Modelo = Modelo(archivo_bd)
+            símismo.apli.modelo = símismo.Modelo
             cols_bd = símismo.Modelo.base_central.nombres_cols
             símismo.EtiqErrCargarBD.pack_forget()
         except (ValueError, FileNotFoundError):
@@ -106,6 +108,7 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='Especificar variables', núm=2, total=total)
         símismo.apli = apli
+        símismo.Modelo = None
 
         cj_bajo = tk.Frame(símismo, **Fm.formato_cajas)
 
@@ -117,25 +120,28 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365),
                                       ubicación=Fm.ubic_escl_fecha_inic, tipo_ubic='place')
         cj_avanzada = CjG.CajaAvanzada(cj_ctrls, Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+        menú_transform = CtrG.Menú(cj_avanzada, nombre='Transformación:',
+                                   opciones=['Sumar', 'Máximo', 'Mínimo', 'Promedio'],
+                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
         menú_interpol = CtrG.Menú(cj_avanzada, nombre='Interpolación:',
                                   opciones=['Trapezoidal', 'Ninguno'], inicial='Trapezoidal',
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
         dic_controles = {'Nombre': ingr_nombre, 'Columna': símismo.MnCol, 'Fecha_inic': escl_fecha_inic,
-                         'Interpol': menú_interpol}
+                         'Transformación': menú_transform, 'Interpol': menú_interpol}
 
         símismo.gráfico = Ctrl.GráfVarBD(cj_bajo, ubicación=Fm.ubic_GráficoVarsBD, tipo_ubic='place')
+        símismo.lista = Ctrl.ListaVarsBD(símismo, ubicación=Fm.ubic_CjLstVarsBD, tipo_ubic='place')
 
-        grupo_controles = Ctrl.GrpCtrlsVarBD(apli=apli, controles=dic_controles, gráfico=símismo.gráfico)
-
-        símismo.lista = Ctrl.ListaVarsBD(símismo, controles=grupo_controles,
-                                         ubicación=Fm.ubic_CjLstVarsBD, tipo_ubic='place')
+        símismo.grupo_controles = Ctrl.GrpCtrlsVarBD(apli=apli, controles=dic_controles, gráfico=símismo.gráfico,
+                                                     lista=símismo.lista)
 
         cj_bajo.place(**Fm.ubic_CjBajoSE12)
         cj_ctrls.place(**Fm.ubic_CjCtrlsVarsBD)
 
     def acción_desbloquear(símismo):
-        bd = símismo.apli.modelo.base_central
+        símismo.Modelo = símismo.apli.modelo
+        bd = símismo.Modelo.base_central
         cols_potenciales = bd.nombres_cols.copy()
         cols_potenciales.remove(bd.id_cols['fecha'])
         cols_potenciales.remove(bd.id_cols['tiempo'])
@@ -145,28 +151,34 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
 class CajaSubEtp21(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='¿Qué quieres predecir?', núm=1, total=total)
+        símismo.apli = apli
 
 
 class CajaSubEtp22(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='¿Con qué lo vas a predecir?', núm=2, total=total)
+        símismo.apli = apli
 
 
 class CajaSubEtp31(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='Sería útil calibrar...', núm=1, total=total)
+        símismo.apli = apli
 
 
 class CajaSubEtp32(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre='¡...y aún mejor validar!', núm=2, total=total)
+        símismo.apli = apli
 
 
 class CajaSubEtp41(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre=None, núm=1, total=total)
+        símismo.apli = apli
 
 
 class CajaSubEtp51(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
         super().__init__(pariente, nombre=None, núm=1, total=total)
+        símismo.apli = apli

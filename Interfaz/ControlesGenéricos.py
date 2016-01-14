@@ -2,12 +2,15 @@ import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+from Interfaz import Arte as Art
 from Interfaz import Formatos as Fm
+from Interfaz import Botones as Bt
 
 
 class ListaItemas(tk.Frame):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
+        símismo.objetos = []
 
         símismo.Tela = tk.Canvas(símismo, **Fm.formato_TlLstItemas)
         símismo.Tela.place(**Fm.ubic_TlLstItemas)
@@ -30,56 +33,116 @@ class ListaItemas(tk.Frame):
         símismo.Tela.configure(scrollregion=símismo.Tela.bbox("all"))
 
 
+class ListaEditable(ListaItemas):
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
+        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
+        símismo.controles = None
+
+    def editar(símismo, itema):
+        símismo.controles.objeto = itema.objeto
+
+
 class Itema(tk.Frame):
-    def __init__(símismo, lista_itemas, constructor_objeto, gráfico=None):
+    def __init__(símismo, lista_itemas):
         super().__init__(lista_itemas.Caja)
-        símismo.gráfico = gráfico
-        símismo.objeto = None
+        símismo.objeto = NotImplemented
+        símismo.lista = lista_itemas
+        lista_itemas.objetos.append(símismo.objeto)
 
         símismo.pack()
 
-    def añadir(símismo):
-        símismo.pack(fill=tk.X, expand=True)
-
     def quitar(símismo):
+        símismo.lista.objetos.pop(símismo.objeto)
         símismo.destroy()
 
-    def actualizar(símismo):
-        pass
+
+class ItemaEditable(Itema):
+    def __init__(símismo, grupo_control, lista_itemas, columnas, ancho):
+        super().__init__(lista_itemas.Caja)
+        símismo.objeto = grupo_control.objeto
+        símismo.receta = grupo_control.receta
+        símismo.columnas = columnas
+
+        cj_bts = tk.Frame(width=Fm.ancho_cj_bts_itemas, **Fm.formato_secciones_itemas)
+        símismo.bt_editar = Bt.BotónImagen(cj_bts, comanda=símismo.editar, formato=Fm.formato_botones,
+                                           img_norm=Art.imagen('BtEditarItema_norm'),
+                                           img_sel=Art.imagen('BtEditarItema_sel'),
+                                           ubicación=Fm.ubic_BtsItemas, tipo_ubic='pack')
+        símismo.bt_borrar = Bt.BotónImagen(cj_bts, comanda=símismo.quitar, formato=Fm.formato_botones,
+                                           img_norm=Art.imagen('BtBorrarItema_norm'),
+                                           img_sel=Art.imagen('BtBorrarItema_sel'),
+                                           ubicación=Fm.ubic_BtsItemas, tipo_ubic='pack')
+
+        símismo.columnas.append(cj_bts)
+
+        for n, col in enumerate(símismo.columnas):
+            col.config(width=int(ancho[n]*(lista_itemas.ancho - Fm.ancho_cj_bts_itemas)))
+            col.pack(**Fm.ubic_ColsItemas)
+
+        símismo.bind('<Enter>', lambda event, i=símismo: i.resaltar())
+        símismo.bind('<Leave>', lambda event, i=símismo: i.desresaltar())
 
     def editar(símismo):
-        pass
+        símismo.lista.editar(símismo)
+
+    def actualizar(símismo):
+        raise NotImplementedError
+
+    def resaltar(símismo):
+        raise NotImplementedError
+
+    def desresaltar(símismo):
+        raise NotImplementedError
 
 
 class GrupoControles(object):
-    def __init__(símismo, controles, constructor_itema=None, itema=None, gráfico=None):
+    def __init__(símismo, controles, constructor_itema=None, itema=None, gráfico=None, lista=None,
+                 bt_guardar=None, bt_borrar=None):
         símismo.controles = controles
+        símismo.constructor_itema = constructor_itema
         símismo.itema = itema
         símismo.gráfico = gráfico
-        if símismo.gráfico is not None:
-            símismo.gráfico.objeto = símismo.objeto
-            símismo.gráfico.controles = símismo.controles
-        símismo.constructor_itema = constructor_itema
+        símismo.lista = lista
+        símismo.bt_guardar = bt_guardar
+        símismo.bt_borrar = bt_borrar
         símismo.objeto = None
+        símismo.receta = {}
 
         for ll in símismo.controles:
             símismo.controles[ll].comanda = símismo.cambió_control
 
-    def cambió_control(símismo):
+        if símismo.lista is not None:
+            símismo.lista.controles = símismo
 
+        if símismo.gráfico is not None:
+            símismo.gráfico.objeto = símismo.objeto
+            símismo.gráfico.controles = símismo.controles
+
+        if símismo.bt_guardar is not None:
+            símismo.bt_guardar.comanda = símismo.guardar
+        if símismo.bt_borrar is not None:
+            símismo.bt_borrar.comanda = símismo.borrar
+
+    def cambió_control(símismo):
         if símismo.verificar_completo() is True:
-            símismo.refrescar_objeto()
+            símismo.recrear_objeto()
             if símismo.gráfico is not None:
                 símismo.gráfico.redibujar()
+            if símismo.bt_guardar is not None:
+                símismo.bt_guardar.desbloquear()
+        else:
+            if símismo.bt_guardar is not None:
+                símismo.bt_guardar.bloquear()
 
     def guardar(símismo):
         if símismo.itema is not None:
-            símismo.itema.actualizar(símismo.controles)
+            símismo.itema.actualizar()
         elif símismo.constructor_itema is not None:
-            símismo.itema = símismo.constructor_itema(símismo.controles)
+            símismo.itema = símismo.constructor_itema(símismo, símismo.lista)
             símismo.controles = None
 
         símismo.borrar()
+        símismo.itema = None
 
     def borrar(símismo):
         for control in símismo.controles:
@@ -88,7 +151,7 @@ class GrupoControles(object):
     def verificar_completo(símismo):
         raise NotImplementedError
 
-    def refrescar_objeto(símismo):
+    def recrear_objeto(símismo):
         raise NotImplementedError
 
 
@@ -99,7 +162,7 @@ class Gráfico(object):
 
         cuadro = Figure()
         símismo.fig = cuadro.add_subplot(111)
-        símismo.tela = FigureCanvasTkAgg(cuadro, master=pariente.cj)
+        símismo.tela = FigureCanvasTkAgg(cuadro, master=pariente)
         símismo.tela.show()
 
         if tipo_ubic == 'place':

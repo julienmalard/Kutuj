@@ -21,8 +21,8 @@ class ConfigModelo(object):
         símismo.varsX = varsx
         símismo.varY = vary
 
-        if símismo.varsx is None:
-            símismo.varsx = []
+        if símismo.varsX is None:
+            símismo.varsX = []
 
         símismo.datosX = []
         símismo.datosY = []

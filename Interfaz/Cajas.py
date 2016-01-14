@@ -1,14 +1,14 @@
 import tkinter as tk
 
 from Interfaz import CajasGenéricas as CjG
-from Interfaz import Formatos as Fm, Botones as Bt, Arte as Gr, Animaciones as Anim
+from Interfaz import Formatos as Fm, Botones as Bt, Arte as Art, Animaciones as Anim
 from Interfaz import CajasSubEtapas as CjSE
 
 
 class CajaInic(tk.Frame):
     def __init__(símismo):
         super().__init__(**Fm.formato_CjInic)
-        símismo.logo = Gr.imagen('LogoInic')
+        símismo.logo = Art.imagen('LogoInic')
         logo = tk.Label(símismo, image=símismo.logo, **Fm.formato_LogoInic)
         logo.pack(Fm.ubic_LogoInic)
 
@@ -32,8 +32,8 @@ class CajaLeng(tk.Frame):
         super().__init__(**Fm.formato_cajas)
         símismo.apli = pariente
         símismo. bt_regreso = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_regreso,
-                                             img_norm=Gr.imagen('BtRegrCent_norm'),
-                                             img_sel=Gr.imagen('BtRegrCent_sel'),
+                                             img_norm=Art.imagen('BtRegrCent_norm'),
+                                             img_sel=Art.imagen('BtRegrCent_sel'),
                                              formato=Fm.formato_botones,
                                              ubicación=Fm.ubic_BtRegrCent, tipo_ubic='place')
         etiq = tk.Label(símismo, text='Opciones de lenguas', **Fm.formato_CbzLeng)
@@ -61,7 +61,7 @@ class CajaCentral(tk.Frame):
 
         símismo.CjIzq = CajaIzq(símismo, cajas_etapas=símismo.CajasEtapas)
 
-        # símismo.bloquear_cajas(list(range(2, len(símismo.CajasEtapas) + 1)))
+        símismo.bloquear_cajas(list(range(2, len(símismo.CajasEtapas) + 1)))
 
         símismo.place(**Fm.ubic_CjCent)
 
@@ -84,13 +84,13 @@ class CajaCabeza(tk.Frame):
     def __init__(símismo, pariente, apli):
         super().__init__(pariente, **Fm.formato_CjCabeza)
         símismo.apli = apli
-        símismo.logo_cabeza = Gr.imagen('LogoCent')
+        símismo.logo_cabeza = Art.imagen('LogoCent')
         logo_cabeza = tk.Label(símismo, image=símismo.logo_cabeza, **Fm.formato_LogoCabz)
         logo_cabeza.place(**Fm.ubic_LogoCabz)
 
         símismo.bt_leng = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_leng,
-                                         img_norm=Gr.imagen('BtLeng_norm'),
-                                         img_sel=Gr.imagen('BtLeng_sel'),
+                                         img_norm=Art.imagen('BtLeng_norm'),
+                                         img_sel=Art.imagen('BtLeng_sel'),
                                          formato=Fm.formato_botones,
                                          ubicación=Fm.ubic_BtLeng, tipo_ubic='place')
         símismo.pack(**Fm.ubic_CjCabeza)

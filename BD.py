@@ -22,12 +22,14 @@ class BaseCentral(object):
             col = símismo.id_cols['fecha']
         lista_fechas = cargar_columna(col, símismo.sistema, símismo.archivo)
         símismo.fecha_inic, símismo.fechas = leer_fechas(lista_fechas)
+        símismo.id_cols['fecha'] = col
 
     def estab_col_hora(símismo, col=None):
         if col is None:
             col = símismo.id_cols['tiempo']
         lista_horas = cargar_columna(col, símismo.sistema, símismo.archivo)
         símismo.horas = leer_tiempo(lista_horas)
+        símismo.id_cols['tiempo'] = col
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
         if símismo.fechas is None or símismo.horas is None:
@@ -48,7 +50,7 @@ class BaseCentral(object):
             col_datos = símismo.id_cols['vars'][nombre]
 
         símismo.datos[nombre] = VariableBD(símismo, nombre, columna=col_datos,
-                                           interpol=mét_combin_tiempo, gen_diaria=mét_interpol)
+                                           interpol=mét_combin_tiempo, transformación=mét_interpol)
         símismo.info_datos['mét_combin_tiempo'][nombre] = mét_combin_tiempo
         símismo.info_datos['mét_interpol'][nombre] = mét_interpol
 
@@ -59,7 +61,7 @@ class BaseCentral(object):
 
 
 class VariableBD(object):
-    def __init__(símismo, base_de_datos, nombre, columna, gen_diaria, interpol):
+    def __init__(símismo, base_de_datos, nombre, columna, transformación, interpol):
         símismo.nombre = nombre
         símismo.base_de_datos = base_de_datos
         símismo.fecha_inic = símismo.base_de_datos.fecha_inic
@@ -70,24 +72,24 @@ class VariableBD(object):
 
         if interpol is None:
             interpol = 'promedio'
-        if gen_diaria is None:
-            gen_diaria = 'trapezoidal'
+        if transformación is None:
+            transformación = 'trapezoidal'
         lista_var = []
         vals_var_día = []
 
         for n, f in enumerate(símismo.lista_fechas[1:]):
-            if gen_diaria.lower() == 'trapezoidal':
+            if transformación.lower() == 'trapezoidal':
                 vals_var_día += [(datos_crudos[n] + datos_crudos[n-1])/2 *
                                  (lista_tiempos[n]-lista_tiempos[n-1])]
-            elif gen_diaria.lower() == 'ninguno':
+            elif transformación.lower() == 'ninguno':
                 vals_var_día += datos_crudos[n]
             else:
-                raise ValueError('Metodo de interpolación {0} no reconocido.'.format(gen_diaria))
+                raise ValueError('Metodo de interpolación {0} no reconocido.'.format(transformación))
 
             if símismo.lista_fechas[n] != símismo.lista_fechas[n + 1] or n == len(símismo.lista_fechas):
 
                 vals_var_día = np.array(vals_var_día)
-                if gen_diaria.lower() == 'trap':
+                if transformación.lower() == 'trap':
                     vals_var_día /= np.sum(símismo.lista_fechas[-1] - símismo.lista_fechas[0])
 
                 if interpol == 'sumar':

@@ -30,7 +30,9 @@ def cambiar():
         eje.lines[0].remove()
     except IndexError:
         pass
-    eje.hist(x, 20, normed=1, histtype='stepfilled', facecolor='g', alpha=0.75)
+    x[:500] = float('NaN')
+    eje.plot(x)
+    # eje.hist(x, 20, normed=1, histtype='stepfilled', facecolor='g', alpha=0.75)
 
     canvas.draw()
 
