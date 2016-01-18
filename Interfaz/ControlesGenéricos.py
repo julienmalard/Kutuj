@@ -18,7 +18,7 @@ class ListaItemas(tk.Frame):
         símismo.BaraDesp = tk.Scrollbar(símismo.Tela, orient="vertical", command=símismo.Tela.yview)
         símismo.Tela.configure(yscrollcommand=símismo.BaraDesp.set)
 
-        símismo.BaraDesp.pack()
+        símismo.BaraDesp.pack(**Fm.ubic_BaraDesp)
 
         símismo.Tela.create_window((1, 1), window=símismo.Caja, tags="self.frame", **Fm.ubic_CjTl)
 
@@ -123,7 +123,7 @@ class GrupoControles(object):
         if símismo.bt_borrar is not None:
             símismo.bt_borrar.comanda = símismo.borrar
 
-    def cambió_control(símismo):
+    def cambió_control(símismo, *args):
         if símismo.verificar_completo() is True:
             símismo.recrear_objeto()
             if símismo.gráfico is not None:
@@ -161,6 +161,7 @@ class Gráfico(object):
         símismo.controles = None
 
         cuadro = Figure()
+        cuadro.patch.set_facecolor(Fm.col_fondo)
         símismo.fig = cuadro.add_subplot(111)
         símismo.tela = FigureCanvasTkAgg(cuadro, master=pariente)
         símismo.tela.show()
@@ -256,13 +257,13 @@ class IngrTexto(object):
 
         símismo.var = tk.StringVar()
         símismo.var.set('')
-        símismo.var.trace('w', símismo.acción_cambio)
         símismo.val = None
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
         símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, **Fm.formato_CampoIngr)
+        símismo.CampoIngr.bind('<FocusOut>', símismo.acción_cambio)
 
         símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
         símismo.CampoIngr.pack(**Fm.ubic_CampoIngr)
@@ -273,7 +274,7 @@ class IngrTexto(object):
             cj.place(**ubicación)
 
     def acción_cambio(símismo, *args):
-        nueva_val = int(símismo.var.get())
+        nueva_val = símismo.var.get()
         if nueva_val == '':
             símismo.val = None
             return
@@ -302,15 +303,16 @@ class Menú(object):
 
         símismo.var = tk.StringVar()
         símismo.val_inicial = inicial
-        símismo.var.set(símismo.val_inicial)
-        símismo.var.trace('w', símismo.acción_cambio)
+
         símismo.val = None
         símismo.exclusivos = []
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-        símismo.MenúOpciones = tk.OptionMenu(cj, símismo.var, opciones)
+        símismo.MenúOpciones = tk.OptionMenu(cj, símismo.var, '')
+        símismo.refrescar(opciones)
+        símismo.var.trace('w', símismo.acción_cambio)
 
         símismo.MenúOpciones.config(**formato_bt)
         símismo.MenúOpciones['menu'].config(**formato_mn)
@@ -348,10 +350,11 @@ class Menú(object):
                 
     def refrescar(símismo, opciones):
         símismo.opciones = opciones
-        símismo.var.set('')
         símismo.MenúOpciones['menu'].delete(0, 'end')
         for opción in opciones:
             símismo.MenúOpciones['menu'].add_command(label=opción, command=tk._setit(símismo.var, opción))
+
+        símismo.var.set(símismo.val_inicial)
 
     def excluir(símismo, valor):
         menú = símismo.MenúOpciones['menu']

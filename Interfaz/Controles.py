@@ -8,8 +8,9 @@ from BD import VariableBD
 
 
 class GrpCtrlsVarBD(CtrG.GrupoControles):
-    def __init__(símismo, apli, controles, gráfico, lista):
-        super().__init__(controles, constructor_itema=ItemaVarBD, gráfico=gráfico, lista=lista)
+    def __init__(símismo, apli, controles, gráfico, lista, bt_guardar, bt_borrar):
+        super().__init__(controles, constructor_itema=ItemaVarBD, gráfico=gráfico, lista=lista,
+                         bt_guardar=bt_guardar, bt_borrar=bt_borrar)
         símismo.apli = apli
         símismo.datos = None
 

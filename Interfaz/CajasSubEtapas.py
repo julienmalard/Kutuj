@@ -30,13 +30,13 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
         símismo.CjAct = CjG.CajaActivable(símismo, ubicación=Fm.ubic_CjFechaHora, tipo_ubic='place')
 
         cj_mn_col_fecha = tk.Frame(símismo.CjAct, **Fm.formato_cajas)
-        símismo.MnColFecha = CtrG.Menú(cj_mn_col_fecha, nombre='Columna Fecha:', opciones=[],
+        símismo.MnColFecha = CtrG.Menú(cj_mn_col_fecha, nombre='Columna Fecha:', opciones='',
                                        comanda=símismo.acción_mn_col_fecha,
                                        ubicación=Fm.ubic_MnCol, tipo_ubic='pack')
         cj_mn_col_fecha.pack(**Fm.ubic_CjMnCol)
 
         cj_mn_col_hora = tk.Frame(símismo.CjAct, **Fm.formato_cajas)
-        símismo.MnColHora = CtrG.Menú(cj_mn_col_hora, nombre='Columna Hora:', opciones=[],
+        símismo.MnColHora = CtrG.Menú(cj_mn_col_hora, nombre='Columna Hora:', opciones='',
                                       comanda=símismo.acción_mn_col_hora,
                                       ubicación=Fm.ubic_MnCol, tipo_ubic='pack')
         cj_mn_col_hora.pack(**Fm.ubic_CjMnCol)
@@ -85,7 +85,7 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
         except ValueError:
             símismo.EtiqErrColFecha.pack(**Fm.ubic_EtiqErrCol)
 
-        if len(símismo.Modelo.base_central.fechas) and len(símismo.Modelo.base_central.horas):
+        if símismo.verificar_completo():
             símismo.pariente.desbloquear_subcajas([2])
         else:
             símismo.pariente.bloquear_subcajas([2])
@@ -98,10 +98,16 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
             print('Error de valor')
             símismo.EtiqErrColHora.pack(**Fm.ubic_EtiqErrCol)
 
-        if len(símismo.Modelo.base_central.fechas) and len(símismo.Modelo.base_central.horas):
+        if símismo.verificar_completo():
             símismo.pariente.desbloquear_subcajas([2])
         else:
             símismo.pariente.bloquear_subcajas([2])
+
+    def verificar_completo(símismo):
+        if len(símismo.Modelo.base_central.fechas) and len(símismo.Modelo.base_central.horas):
+            return True
+        else:
+            return False
 
 
 class CajaSubEtp12(CjG.CajaSubEtapa):
@@ -113,19 +119,37 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         cj_bajo = tk.Frame(símismo, **Fm.formato_cajas)
 
         cj_ctrls = tk.Frame(cj_bajo, **Fm.formato_cajas)
-        ingr_nombre = CtrG.IngrTexto(cj_ctrls, 'Nombre', ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+        ingr_nombre = CtrG.IngrTexto(cj_ctrls, 'Nombre:', ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
-        símismo.MnCol = CtrG.Menú(cj_ctrls, 'Columna', opciones={},
+        símismo.MnCol = CtrG.Menú(cj_ctrls, 'Columna:', opciones='',
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+
         escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365),
                                       ubicación=Fm.ubic_escl_fecha_inic, tipo_ubic='place')
-        cj_avanzada = CjG.CajaAvanzada(cj_ctrls, Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
-        menú_transform = CtrG.Menú(cj_avanzada, nombre='Transformación:',
+
+        menú_transform = CtrG.Menú(cj_ctrls, nombre='Transformación:',
                                    opciones=['Sumar', 'Máximo', 'Mínimo', 'Promedio'],
                                    ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
-        menú_interpol = CtrG.Menú(cj_avanzada, nombre='Interpolación:',
+
+        menú_interpol = CtrG.Menú(cj_ctrls, nombre='Interpolación:',
                                   opciones=['Trapezoidal', 'Ninguno'], inicial='Trapezoidal',
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
+
+        cj_bts = tk.Frame(cj_ctrls, **Fm.formato_cajas)
+
+        bt_guardar = Bt.BotónTexto(cj_bts, texto='Guardar',
+                                   ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
+                                   formato_norm=Fm.formato_BtGuardarGrupoCtrl_norm,
+                                   formato_sel=Fm.formato_BtGuardarGrupoCtrl_sel,
+                                   formato_bloq=Fm.formato_BtGuardarsGrupoCtrl_bloq,
+                                   )
+        bt_borrar = Bt.BotónTexto(cj_bts, texto='Borrar',
+                                  ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
+                                  formato_norm=Fm.formato_BtBorrarGrupoCtrl_norm,
+                                  formato_sel=Fm.formato_BtBorrarGrupoCtrl_sel,
+                                  formato_bloq=Fm.formato_BtBorrarsGrupoCtrl_bloq,
+                                  )
+        cj_bts.pack(**Fm.ubic_CjBtsGrupoCtrl)
 
         dic_controles = {'Nombre': ingr_nombre, 'Columna': símismo.MnCol, 'Fecha_inic': escl_fecha_inic,
                          'Transformación': menú_transform, 'Interpol': menú_interpol}
@@ -134,10 +158,10 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         símismo.lista = Ctrl.ListaVarsBD(símismo, ubicación=Fm.ubic_CjLstVarsBD, tipo_ubic='place')
 
         símismo.grupo_controles = Ctrl.GrpCtrlsVarBD(apli=apli, controles=dic_controles, gráfico=símismo.gráfico,
-                                                     lista=símismo.lista)
-
-        cj_bajo.place(**Fm.ubic_CjBajoSE12)
+                                                     lista=símismo.lista, bt_guardar=bt_guardar,
+                                                     bt_borrar=bt_borrar)
         cj_ctrls.place(**Fm.ubic_CjCtrlsVarsBD)
+        cj_bajo.place(**Fm.ubic_CjBajoSE12)
 
     def acción_desbloquear(símismo):
         símismo.Modelo = símismo.apli.modelo
@@ -146,6 +170,12 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         cols_potenciales.remove(bd.id_cols['fecha'])
         cols_potenciales.remove(bd.id_cols['tiempo'])
         símismo.MnCol.refrescar(cols_potenciales)
+
+        if símismo.verificar_completo():
+            símismo.pariente.desbloquear_subcajas([2])
+
+    def verificar_completo(símismo):
+        return False
 
 
 class CajaSubEtp21(CjG.CajaSubEtapa):

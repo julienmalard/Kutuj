@@ -5,7 +5,7 @@ from Interfaz import Formatos as Fm
 
 
 class Botón(object):
-    def __init__(símismo, pariente, comanda, formato=None, img_norm=None, img_sel=None, img_bloq=None,
+    def __init__(símismo, pariente, comanda=None, formato=None, img_norm=None, img_sel=None, img_bloq=None,
                  texto=None, formato_norm=None, formato_sel=None, formato_bloq=None,
                  ubicación=None, tipo_ubic=None, tipo_combin='left'):
 
@@ -85,8 +85,8 @@ class Botón(object):
 
 
 class BotónTexto(Botón):
-    def __init__(símismo, pariente, comanda, texto, formato_norm, formato_sel,
-                 ubicación, tipo_ubic, formato_bloq=None):
+    def __init__(símismo, pariente, texto, formato_norm, formato_sel,
+                 ubicación, tipo_ubic, comanda=None, formato_bloq=None):
 
         super().__init__(pariente, comanda, texto=texto, formato_norm=formato_norm,
                          formato_sel=formato_sel, formato_bloq=formato_bloq,

@@ -124,6 +124,7 @@ class CajaEtp1(CjG.CajaEtapa):
 
         símismo.especificar_subcajas(subcajas)
         símismo.bloquear_subcajas([2])
+        símismo.ir_a_sub(2)
 
 
 class CajaEtp2(CjG.CajaEtapa):

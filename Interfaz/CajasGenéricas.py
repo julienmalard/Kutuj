@@ -39,6 +39,12 @@ class ContCajaEtps(tk.Frame):
             símismo.CajaActual = nueva_caja
             símismo.en_transición = False
 
+    def bloquear_cajas(símismo, núms_cajas):
+        símismo.pariente.bloquear_cajas(núms_cajas)
+
+    def desbloquear_cajas(símismo, núms_cajas):
+        símismo.pariente.desbloquear_cajas(núms_cajas)
+
 
 class CajaEtapa(tk.Frame):
     def __init__(símismo, pariente, nombre, núm, total):
@@ -62,6 +68,12 @@ class CajaEtapa(tk.Frame):
     def especificar_subcajas(símismo, subcajas):
         símismo.SubCajas = subcajas
         símismo.ir_a_sub(1)
+
+    def bloquear_cajas(símismo, núms_cajas):
+        símismo.pariente.bloquear_cajas(núms_cajas)
+
+    def desbloquear_cajas(símismo, núms_cajas):
+        símismo.pariente.desbloquear_cajas(núms_cajas)
 
     def bloquear_transición(símismo, dirección):
         if dirección == 'anterior' and símismo.BtAtrás is not None:
@@ -114,6 +126,7 @@ class CajaEtapa(tk.Frame):
                 símismo.SubCajas[n].desbloquear_transición(dirección='anterior')
 
 
+
 class CajaSubEtapa(tk.Frame):
     def __init__(símismo, pariente, nombre, núm, total):
         super().__init__(pariente, **Fm.formato_cajas)
@@ -161,6 +174,9 @@ class CajaSubEtapa(tk.Frame):
     def acción_desbloquear(símismo):
         pass  # A implementar en subcajas específicas donde necesario
 
+    def verificar_completo(símismo):
+        pass  # A implementar en subcajas específicas donde necesario
+
 
 class CajaActivable(tk.Frame):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
@@ -206,7 +222,7 @@ class CajaAvanzada(tk.Frame):
         símismo.bt = tk.Button(símismo, text='Avanzado', image=símismo.flechita_avnz,
                                command=símismo.bajar,
                                compound='right')
-        símismo.bt.place()
+        símismo.bt.pack()
 
         if tipo_ubic == 'place':
             símismo.place(**ubicación)
@@ -218,14 +234,14 @@ class CajaAvanzada(tk.Frame):
         símismo.caja_móbil.cj.place(**Fm.ubic_CjMóbl)
 
     def bajar(símismo):
-        símismo.bt.configure(texto='Sencillo', image=símismo.flechita_senc, command=símismo.subir)
+        símismo.bt.configure(text='Sencillo', image=símismo.flechita_senc, command=símismo.subir)
         Anim.deslizar(objetos=[símismo.caja_móbil, símismo.bt],
                       pos_inic=[símismo.caja_móbil.winfo_y(), símismo.bt.winfo_y()],
                       dirección='abajo',
                       distancia=símismo.caja_móbil.winfo_height())
 
     def subir(símismo):
-        símismo.bt.configure(texto='Avanzado', image=símismo.flechita_avnz, command=símismo.bajar)
+        símismo.bt.configure(text='Avanzado', image=símismo.flechita_avnz, command=símismo.bajar)
         Anim.deslizar(objetos=[símismo.caja_móbil, símismo.bt],
                       pos_inic=[símismo.caja_móbil.winfo_y(), símismo.bt.winfo_y()],
                       dirección='arriba',
