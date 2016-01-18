@@ -97,7 +97,7 @@ formato_EtiqCtrl_bloq = dict(fg='#999999')
 
 formato_MnMn = dict(bg=col_fondo, relief='flat', bd=0, activebackground=col_4, activeforeground='#000000',
                     disabledforeground='#cccccc', font=(fuente, '13'))
-formato_BtMn = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_3,
+formato_BtMn = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_3, highlightcolor=col_3,
                     relief='flat', activebackground=col_4, font=(fuente, '13'),
                     width=15, anchor=tk.W)
 formato_BtMn_bloq = dict(highlightbackground='#999999')
@@ -108,26 +108,30 @@ ubic_Menú = dict(side='left')
 ubic_EtiqIngrNúm = dict(side='left', padx=20)
 ubic_IngrNúm = dict(side='left')
 
-formato_Escl = dict()
+formato_lín_escl = dict(fill=col_1, outline=col_1, disabledfill='#cccccc', disabledoutline='#cccccc')
 ubic_Escl = dict(side='left')
-ubic_CampoIngr = dict(side='left')
+ubic_CampoIngrEscl = dict(side='left', padx=10)
+formato_EtiqNúmEscl = dict(font={fuente, 6}, fg=col_1, **formato_etiq)
+ubic_EtiqNúmEscl = dict(side='left')
+ubic_EtiqEscl = dict(side='left', padx=20)
+
+
 formato_CampoIngr = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_3,
-                         relief='flat', highlightcolor=col_3, font=(fuente, '13'),
-                         width=20)
-formato_CampoIngr_error = dict(highlightthickness=2, highlightbackground='#ff0000', activebackground=col_4)
+                         relief='flat', highlightcolor=col_3, font=(fuente, '13'))
+formato_CampoIngr_error = dict(highlightthickness=2, highlightbackground='#ff0000')
 
 formato_BtGuardarGrupoCtrl_norm = dict(bg='#7dcf7d', fg='#ffffff', borderwidth=0, highlightthickness=0,
                                        activebackground='#45ba45', activeforeground='#ffffff',
                                        font=(fuente, 15, 'bold'), width=7)
 formato_BtGuardarGrupoCtrl_sel = dict(bg='#45ba45', fg='#ffffff')
-formato_BtGuardarsGrupoCtrl_bloq = dict(bg='#ecf8ec', fg='#ffffff')
+formato_BtGuardarsGrupoCtrl_bloq = dict(bg='#ecf8ec', fg='#ffffff', activeforeground='#ffffff')
 formato_BtBorrarGrupoCtrl_norm = dict(bg='#ff8966', fg='#ffffff', borderwidth=0, highlightthickness=0,
                                       activebackground='#ff6233', activeforeground='#ffffff',
                                       font=(fuente, 15, 'bold'), width=7)
 formato_BtBorrarGrupoCtrl_sel = dict(bg='#ff6233', fg='#ffffff')
 formato_BtBorrarsGrupoCtrl_bloq = dict(bg='#ffebe5', fg='#ffffff')
 ubic_BtsGrupoCtrl = dict(side='left', expand=True)
-ubic_CjBtsGrupoCtrl = dict(side='top', fill=tk.X, expand=True)
+ubic_CjBtsGrupoCtrl = dict(side='top', padx=20, fill=tk.X, expand=True)
 
 #
 ubic_CjMóbl = dict(x=0, y=0, anchor=tk.SW, relwidth=1, relheight=1)
@@ -157,5 +161,5 @@ ubic_CjBajoSE12 = dict(relx=0.5, rely=0.3, y=40, relheight=0.75, height=-25,
 ubic_CjCtrlsVarsBD = dict(relx=0.25, rely=0, x=10, y=10, relwidth=0.5, relheight=.8, width=-20, anchor=tk.N)
 ubic_GráficoVarsBD = dict(relx=0.75, rely=0, x=10, y=10, relwidth=0.5, relheight=0.7, width=-20, anchor=tk.N)
 
-ubic_escl_fecha_inic = dict(relx=0.75, rely=0.8, anchor=tk.N)
+ubic_escl_fecha_inic = dict(relx=0.75, rely=0.75, anchor=tk.N)
 anchos_cols_listavarVB = [0.25, 0.25, 0.25, 0.25]

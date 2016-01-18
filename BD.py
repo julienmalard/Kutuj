@@ -13,7 +13,7 @@ class BaseCentral(object):
         símismo.id_cols = {'fecha': '', 'tiempo': '', 'vars': {}}
         símismo.fecha_inic = None
         símismo.fechas = []
-        símismo.horas = []
+        símismo.tiempos = []
         símismo.datos = {}
         símismo.info_datos = {'mét_combin_tiempo': {}, 'mét_interpol': {}}
 
@@ -28,11 +28,11 @@ class BaseCentral(object):
         if col is None:
             col = símismo.id_cols['tiempo']
         lista_horas = cargar_columna(col, símismo.sistema, símismo.archivo)
-        símismo.horas = leer_tiempo(lista_horas)
+        símismo.tiempos = leer_tiempo(lista_horas)
         símismo.id_cols['tiempo'] = col
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
-        if símismo.fechas is None or símismo.horas is None:
+        if símismo.fechas is None or símismo.tiempos is None:
             return 'Hay que especificar los datos de fechas y horas primero.'
 
         if mét_combin_tiempo is None:
@@ -50,7 +50,7 @@ class BaseCentral(object):
             col_datos = símismo.id_cols['vars'][nombre]
 
         símismo.datos[nombre] = VariableBD(símismo, nombre, columna=col_datos,
-                                           interpol=mét_combin_tiempo, transformación=mét_interpol)
+                                           transformación=mét_combin_tiempo, interpol=mét_interpol)
         símismo.info_datos['mét_combin_tiempo'][nombre] = mét_combin_tiempo
         símismo.info_datos['mét_interpol'][nombre] = mét_interpol
 
@@ -61,48 +61,49 @@ class BaseCentral(object):
 
 
 class VariableBD(object):
-    def __init__(símismo, base_de_datos, nombre, columna, transformación, interpol):
+    def __init__(símismo, base_de_datos, nombre, columna, interpol, transformación):
         símismo.nombre = nombre
         símismo.base_de_datos = base_de_datos
         símismo.fecha_inic = símismo.base_de_datos.fecha_inic
 
-        datos_crudos = cargar_columna(columna, base_de_datos.sistema, base_de_datos.archivo)
+        datos_crudos_tx = cargar_columna(columna, base_de_datos.sistema, base_de_datos.archivo)
+        datos_crudos = [float(x) for x in datos_crudos_tx]
         símismo.lista_fechas = base_de_datos.fechas
-        lista_tiempos = cargar_columna(base_de_datos.id_cols['tiempo'], base_de_datos.sistema, base_de_datos.archivo)
+        lista_tiempos = base_de_datos.tiempos
 
-        if interpol is None:
-            interpol = 'promedio'
         if transformación is None:
-            transformación = 'trapezoidal'
+            transformación = 'promedio'
+        if interpol is None:
+            interpol = 'trapezoidal'
         lista_var = []
         vals_var_día = []
 
         for n, f in enumerate(símismo.lista_fechas[1:]):
-            if transformación.lower() == 'trapezoidal':
+            if interpol.lower() == 'trapezoidal':
                 vals_var_día += [(datos_crudos[n] + datos_crudos[n-1])/2 *
                                  (lista_tiempos[n]-lista_tiempos[n-1])]
-            elif transformación.lower() == 'ninguno':
+            elif interpol.lower() == 'ninguno':
                 vals_var_día += datos_crudos[n]
             else:
-                raise ValueError('Metodo de interpolación {0} no reconocido.'.format(transformación))
+                raise ValueError('Metodo de interpolación {0} no reconocido.'.format(interpol))
 
             if símismo.lista_fechas[n] != símismo.lista_fechas[n + 1] or n == len(símismo.lista_fechas):
 
                 vals_var_día = np.array(vals_var_día)
-                if transformación.lower() == 'trap':
+                if interpol.lower() == 'trap':
                     vals_var_día /= np.sum(símismo.lista_fechas[-1] - símismo.lista_fechas[0])
 
-                if interpol == 'sumar':
+                if transformación.lower() == 'sumar':
                     var = vals_var_día.sum()
-                elif interpol == 'máx':
+                elif transformación.lower() == 'máx':
                     var = vals_var_día.max()
-                elif interpol == 'mín':
+                elif transformación.lower() == 'mín':
                     var = vals_var_día.min()
-                elif interpol == 'prom':
+                elif transformación.lower() == 'prom':
                     var = vals_var_día.mean()
                 else:
                     raise ValueError('Metodo de generación de datos diarios "{0}" '
-                                     'no reconocido.'.format(interpol))
+                                     'no reconocido.'.format(transformación))
 
                 lista_var += [var]
                 vals_var_día = []
@@ -142,8 +143,10 @@ def cargar_columna(columna, sistema, archivo):
         except FileNotFoundError:
             print('¡Error!')
             raise FileNotFoundError
+
         n_col = doc[0].split(',').index(columna)
         datos = [l.split(',')[n_col] for l in doc[1:]]
+
     else:
         raise NotImplementedError('Falta código para comunicar con el formato de datos'
                                   '{0}'.format(sistema))
@@ -189,9 +192,9 @@ def leer_fechas(fechas_crudas):
 def leer_tiempo(tiempos_crudos):
     lista_tiempos = [x.split(':') for x in tiempos_crudos]
     if len(lista_tiempos[0]) == 3:
-        tiempos_finales = [((x[0] * 60) + x[1]) * 60 + x[2] for x in lista_tiempos]
+        tiempos_finales = [((int(x[0]) * 60) + int(x[1]) * 60 + int(x[2])) for x in lista_tiempos]
     elif len(lista_tiempos[0]) == 2:
-        tiempos_finales = [((x[0] * 60) + x[1]) * 60 for x in lista_tiempos]
+        tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 for x in lista_tiempos]
     else:
         print('No se pudieron leer los datos de hora de la base de datos.')
         raise ValueError('No se pudieron leer los datos de hora de la base de datos.')

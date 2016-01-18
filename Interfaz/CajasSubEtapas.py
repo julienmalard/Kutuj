@@ -104,7 +104,7 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
             símismo.pariente.bloquear_subcajas([2])
 
     def verificar_completo(símismo):
-        if len(símismo.Modelo.base_central.fechas) and len(símismo.Modelo.base_central.horas):
+        if len(símismo.Modelo.base_central.fechas) and len(símismo.Modelo.base_central.tiempos):
             return True
         else:
             return False
@@ -124,7 +124,7 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         símismo.MnCol = CtrG.Menú(cj_ctrls, 'Columna:', opciones='',
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
-        escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365),
+        escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365), valor_inicial=0, prec='ent',
                                       ubicación=Fm.ubic_escl_fecha_inic, tipo_ubic='place')
 
         menú_transform = CtrG.Menú(cj_ctrls, nombre='Transformación:',

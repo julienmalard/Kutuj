@@ -83,6 +83,9 @@ class Botón(object):
         if símismo.estado == 'Normal':
             símismo.bt.configure(**símismo.formato_norm)
 
+    def estab_comanda(símismo, comanda):
+        símismo.bt.config(command=comanda)
+
 
 class BotónTexto(Botón):
     def __init__(símismo, pariente, texto, formato_norm, formato_sel,

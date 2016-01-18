@@ -16,7 +16,8 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
 
     def verificar_completo(símismo):
         campos_necesarios = ['Nombre', 'Columna', 'Fecha_inic', 'Interpol', 'Transformación']
-        completos = [símismo.controles[x].val is not None for x in campos_necesarios]
+        completos = [símismo.controles[x].val is not None and símismo.controles[x].val is not ''
+                     for x in campos_necesarios]
         if min(completos):
             return True
         else:
@@ -27,9 +28,9 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
             símismo.receta[ll] = control.val
         rec = símismo.receta
 
-        símismo.objeto = VariableBD(base_de_datos=símismo.apli.base_central,
-                                    nombre=rec['Nombre'], columna=rec['Columna'], interpol=['Interpol'],
-                                    transformación=['Transformación'])
+        símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
+                                    nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
+                                    transformación=rec['Transformación'])
 
 
 class ListaVarsBD(CtrG.ListaEditable):
@@ -81,6 +82,7 @@ class GráfVarBD(CtrG.Gráfico):
         super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
 
     def dibujar(símismo):
+        print('Dibujando...')
         símismo.fig.set_title(símismo.objeto.nombre)
         fecha_inic = símismo.objeto.fecha_inic
         n_día_inic_año = símismo.controles['Fecha_inic'].val

@@ -119,9 +119,9 @@ class GrupoControles(object):
             símismo.gráfico.controles = símismo.controles
 
         if símismo.bt_guardar is not None:
-            símismo.bt_guardar.comanda = símismo.guardar
+            símismo.bt_guardar.estab_comanda(símismo.guardar)
         if símismo.bt_borrar is not None:
-            símismo.bt_borrar.comanda = símismo.borrar
+            símismo.bt_borrar.estab_comanda(símismo.borrar)
 
     def cambió_control(símismo, *args):
         if símismo.verificar_completo() is True:
@@ -145,7 +145,7 @@ class GrupoControles(object):
         símismo.itema = None
 
     def borrar(símismo):
-        for control in símismo.controles:
+        for ll, control in símismo.controles.items():
             control.borrar()
 
     def verificar_completo(símismo):
@@ -189,25 +189,35 @@ class Gráfico(object):
 
 
 class IngrNúm(object):
-    def __init__(símismo, pariente, nombre, límites, prec, ubicación, tipo_ubic, comanda=None):
+    def __init__(símismo, pariente, nombre, límites, val_inic, prec, ubicación, tipo_ubic, ancho=5, comanda=None):
         símismo.límites = límites
         símismo.comanda = comanda
-        if prec not in ['dec', 'int']:
-            raise ValueError('"Prec" debe ser uno de "int" o "dec".')
+        if prec not in ['dec', 'ent']:
+            raise ValueError('"Prec" debe ser uno de "ent" o "dec".')
         símismo.prec = prec
 
+        if val_inic is None:
+            val_inic = (límites[0] + límites[1])/2
+        símismo.val_inic = val_inic
+
+        if prec == 'ent':
+            símismo.val_inic = round(símismo.val_inic)
+        else:
+            símismo.val_inic = round(símismo.val_inic, 2)
+
         símismo.var = tk.StringVar()
-        símismo.var.set('')
+        símismo.var.set(símismo.val_inic)
         símismo.var.trace('w', símismo.acción_cambio)
         símismo.val = None
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
-        símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, **Fm.formato_CampoIngr)
+        if nombre is not None:
+            símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
+            símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
 
-        símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
-        símismo.CampoIngr.pack(**Fm.ubic_CampoIngr)
+        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, width=ancho, **Fm.formato_CampoIngr)
+        símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
 
         if tipo_ubic == 'pack':
             cj.pack(**ubicación)
@@ -216,15 +226,15 @@ class IngrNúm(object):
 
     def acción_cambio(símismo, *args):
         try:
-            if símismo.prec == 'int':
+            if símismo.prec == 'ent':
                 nueva_val = int(símismo.var.get())
             elif símismo.prec == 'dec':
-                nueva_val = int(símismo.var.get())
+                nueva_val = round(float(símismo.var.get()), 3)
             else:
-                print('"Prec" debe ser uno de "int" o "dec".')
+                print('"Prec" debe ser uno de "ent" o "dec".')
                 return
 
-            if not (símismo.límites[0] < nueva_val < símismo.límites[1]):
+            if not (símismo.límites[0] <= nueva_val <= símismo.límites[1]):
                 raise ValueError
 
             símismo.CampoIngr.config(**Fm.formato_CampoIngr)
@@ -262,11 +272,11 @@ class IngrTexto(object):
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, **Fm.formato_CampoIngr)
+        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, width=20, **Fm.formato_CampoIngr)
         símismo.CampoIngr.bind('<FocusOut>', símismo.acción_cambio)
 
         símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
-        símismo.CampoIngr.pack(**Fm.ubic_CampoIngr)
+        símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
 
         if tipo_ubic == 'pack':
             cj.pack(**ubicación)
@@ -301,16 +311,17 @@ class Menú(object):
         símismo.opciones = opciones
         símismo.comanda = comanda
 
-        símismo.var = tk.StringVar()
         símismo.val_inicial = inicial
+        símismo.var = tk.StringVar()
 
-        símismo.val = None
+        símismo.val = inicial
         símismo.exclusivos = []
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
         símismo.MenúOpciones = tk.OptionMenu(cj, símismo.var, '')
+        símismo.MenúOpciones.config(takefocus=True)
         símismo.refrescar(opciones)
         símismo.var.trace('w', símismo.acción_cambio)
 
@@ -379,41 +390,113 @@ class Menú(object):
 
 
 class Escala(object):
-    def __init__(símismo, pariente, texto, límites, ubicación, tipo_ubic, comanda=None, valor_inicial=None):
-        símismo.cj = tk.Frame(pariente)
+    def __init__(símismo, pariente, texto, límites, prec, ubicación, tipo_ubic, comanda=None, valor_inicial=None):
+        símismo.cj = tk.Frame(pariente, **Fm.formato_cajas)
         símismo.comanda = comanda
         if valor_inicial is None:
             valor_inicial = (límites[0] + límites[1])/2
         símismo.valor_inicial = valor_inicial
 
-        símismo.var_escl = tk.DoubleVar()
-        símismo.var_escl.trace('w', símismo.cambio_escl)
-        símismo.var_ingr = tk.StringVar()
-        símismo.var_ingr.trace('w', símismo.cambio_ingr)
+        símismo.val = símismo.valor_inicial
 
-        símismo.etiq = tk.Label(símismo.cj, text=texto)
-        símismo.ingr = tk.Entry(símismo.cj, textvariable=símismo.var_ingr, **Fm.formato_CampoIngr)
-        símismo.escl = tk.Scale(símismo.cj, variable=símismo.var_escl, from_=límites[0], to=límites[1],
-                                **Fm.formato_Escl)
+        símismo.etiq = tk.Label(símismo.cj, text=texto, **Fm.formato_EtiqCtrl)
 
-        símismo.ingr.pack(**Fm.ubic_CampoIngr)
+        etiq_inic = tk.Label(símismo.cj, text=límites[0], **Fm.formato_EtiqNúmEscl)
+        símismo.escl = CosoEscala(símismo, límites, val_inic=valor_inicial, prec=prec)
+        etiq_fin = tk.Label(símismo.cj, text=límites[1], **Fm.formato_EtiqNúmEscl)
+
+        símismo.etiq.pack(**Fm.ubic_EtiqEscl)
+        etiq_inic.pack(**Fm.ubic_EtiqNúmEscl)
         símismo.escl.pack(**Fm.ubic_Escl)
+        etiq_fin.pack(**Fm.ubic_EtiqNúmEscl)
+
+        símismo.ingr = IngrNúm(símismo.cj, nombre=None, límites=límites, val_inic=valor_inicial, prec=prec,
+                               ubicación=Fm.ubic_CampoIngrEscl, tipo_ubic='pack',
+                               comanda=símismo.cambio_ingr)
+
         if tipo_ubic == 'pack':
             símismo.cj.pack(**ubicación)
         elif tipo_ubic == 'place':
             símismo.cj.place(**ubicación)
 
     def cambio_ingr(símismo, val):
-        if val != símismo.var_escl.get():
-            símismo.var_escl.set(float(val))
-        símismo.comanda(val)
+        if val != símismo.escl.val:
+            símismo.escl.poner(float(val))
+            símismo.val = float(val)
+            if símismo.comanda is not None:
+                símismo.comanda(val)
 
     def cambio_escl(símismo, val):
-        if val != símismo.var_ingr.get():
-            símismo.var_ingr.set(str(val))
+        if str(val) != símismo.val:
+            símismo.val = val
+            símismo.ingr.var.set(val)
 
-        símismo.comanda(val)
+            if símismo.comanda is not None:
+                símismo.comanda(val)
 
     def borrar(símismo):
-        símismo.var_escl.set(símismo.valor_inicial)
-        símismo.var_ingr.set(símismo.valor_inicial)
+        pass
+        # símismo.escl.poner(símismo.valor_inicial)
+        # símismo.ingr.var.set(símismo.valor_inicial)
+        # símismo.val = símismo.valor_inicial
+
+
+class CosoEscala(tk.Canvas):
+    def __init__(símismo, pariente, límites, val_inic, ancho=150, altura=30, prec='cont'):
+        super().__init__(pariente.cj, width=ancho, height=altura, background=Fm.col_fondo, highlightthickness=0)
+
+        símismo.dim = (ancho, altura)
+        símismo.límites = límites
+        símismo.pariente = pariente
+        símismo.tipo = prec
+        símismo.val = val_inic
+
+        símismo.create_rectangle(0, 0, 1, altura, **Fm.formato_lín_escl)
+        símismo.create_rectangle(ancho-2, 0, ancho, altura, **Fm.formato_lín_escl)
+        símismo.create_line(0, round(altura/2), ancho, round(altura/2), fill=Fm.col_1)
+
+        símismo.info_mov = {"x": 0, "y": 0}
+
+        símismo.manilla = símismo.create_rectangle(float(ancho / 2) - 3, 0, float(ancho / 2) + 3, altura,
+                                                   outline=Fm.col_2, fill=Fm.col_2)
+
+        símismo.tag_bind(símismo.manilla, "<ButtonPress-1>", símismo.acción_empujar)
+        símismo.tag_bind(símismo.manilla, "<ButtonRelease-1>", símismo.acción_soltar)
+        símismo.tag_bind(símismo.manilla, "<B1-Motion>", símismo.acción_movimiento)
+        símismo.bind("<ButtonRelease-1>", símismo.acción_soltar)
+
+        símismo.poner(símismo.val)
+
+    def acción_empujar(símismo, event):
+        símismo.info_mov["x"] = (símismo.coords(símismo.manilla)[0] + símismo.coords(símismo.manilla)[2])/2
+
+    def acción_soltar(símismo, event):
+        símismo.info_mov["x"] = 0
+
+    def acción_movimiento(símismo, event):
+        x = event.x
+        if x > símismo.dim[0]:
+            x = símismo.dim[0]
+        elif x < 0:
+            x = 0
+
+        símismo.val = round(x/símismo.dim[0] * (símismo.límites[1] - símismo.límites[0]) + símismo.límites[0], 3)
+
+        if símismo.tipo == 'ent':
+            símismo.val = int(símismo.val)
+            x = (símismo.val - símismo.límites[0])/(símismo.límites[1] - símismo.límites[0])*símismo.dim[0]
+
+        delta_x = x - símismo.info_mov["x"]
+
+        símismo.move(símismo.manilla, delta_x, 0)
+
+        símismo.info_mov["x"] = x
+
+        símismo.pariente.cambio_escl(símismo.val)
+
+    def poner(símismo, val):
+        símismo.val = val
+        x_manilla = (símismo.coords(símismo.manilla)[0] + símismo.coords(símismo.manilla)[2])/2
+        nuevo_x = (símismo.val - símismo.límites[0])/(símismo.límites[1] - símismo.límites[0])*símismo.dim[0]
+        delta_x = nuevo_x - x_manilla
+        símismo.move(símismo.manilla, delta_x, 0)
