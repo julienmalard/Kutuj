@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 import datetime as ft
 
 from Interfaz import Formatos as Fm
@@ -27,10 +28,12 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         for ll, control in símismo.controles.items():
             símismo.receta[ll] = control.val
         rec = símismo.receta
-
-        símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
-                                    nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
-                                    transformación=rec['Transformación'])
+        try:
+            símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
+                                        nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
+                                        transformación=rec['Transformación'])
+        except ValueError:
+            print('Error cargando datos... :(')
 
 
 class ListaVarsBD(CtrG.ListaEditable):
@@ -40,6 +43,7 @@ class ListaVarsBD(CtrG.ListaEditable):
 
 class ItemaVarBD(CtrG.ItemaEditable):
     def __init__(símismo, grupo_control, lista_itemas):
+        super().__init__(grupo_control=grupo_control, lista_itemas=lista_itemas, ancho=Fm.anchos_cols_listavarVB)
 
         cj_nombre = tk.Frame(símismo, **Fm.formato_secciones_itemas)
         cj_columna = tk.Frame(símismo, **Fm.formato_secciones_itemas)
@@ -53,8 +57,7 @@ class ItemaVarBD(CtrG.ItemaEditable):
 
         columnas = [cj_nombre, cj_columna, cj_trans, cj_interpol]
 
-        super().__init__(grupo_control=grupo_control, lista_itemas=lista_itemas,
-                         columnas=columnas, ancho=Fm.anchos_cols_listavarVB)
+        símismo.estab_columnas(columnas)
 
         símismo.actualizar()
 
@@ -82,34 +85,52 @@ class GráfVarBD(CtrG.Gráfico):
         super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
 
     def dibujar(símismo):
-        print('Dibujando...')
-        símismo.fig.set_title(símismo.objeto.nombre)
+        if símismo.objeto is not None:
+            símismo.fig.set_title(símismo.objeto.nombre)
+        else:
+            símismo.fig.set_title('')
+            return
+
         fecha_inic = símismo.objeto.fecha_inic
         n_día_inic_año = símismo.controles['Fecha_inic'].val
         datos = símismo.objeto.datos
 
         datos_por_año = []
         if n_día_inic_año > (fecha_inic - ft.date(fecha_inic.year, 1, 1)).days:
-            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + n_día_inic_año
+            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
         else:
-            fecha_ref = ft.date(fecha_inic.year, 1, 1) + n_día_inic_año
+            fecha_ref = ft.date(fecha_inic.year, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
 
-        datos_año_actual = [float('NaN')] * (fecha_inic-fecha_ref).days
-        fecha_inic_año = fecha_inic
+        fecha_inic_año_act = fecha_ref
         while True:
-            fecha_inic_año_próx = ft.date(fecha_ref.year + 1, 1, 1) + ft.timedelta(days=n_día_inic_año)
+            datos_año_actual = []
+            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
 
-            inic = (fecha_inic_año - fecha_inic).days
+            inic = (fecha_inic_año_act - fecha_inic).days
+            if inic < 0:
+                datos_año_actual = [float('NaN')] * (fecha_inic-fecha_ref).days
+                inic = 0
             fin = (fecha_inic_año_próx - fecha_inic).days
+
             if fin > len(datos):
-                datos_año_actual += datos[inic:]
+                datos_año_actual = np.concatenate((datos_año_actual, datos[inic:]))
                 datos_por_año.append(datos_año_actual)
                 break
 
-            datos_año_actual += datos[inic:fin]
+            datos_año_actual = np.concatenate((datos_año_actual, datos[inic:fin]))
             datos_por_año.append(datos_año_actual)
-            fecha_inic_año = fecha_inic_año_próx
-            datos_año_actual = []
+            fecha_inic_año_act = fecha_inic_año_próx
 
-        for año in datos_por_año:
-            símismo.fig.plot(año)
+        def escalar(val1, val2, m):
+            escl = [val1 + (val2 - val1)*(i+1)/m for i in range(m)]
+            return escl
+        r = escalar(Fm.colores_gráficos[0][0]/256, Fm.colores_gráficos[1][0]/256, len(datos_por_año))
+        v = escalar(Fm.colores_gráficos[0][1]/256, Fm.colores_gráficos[1][1]/256, len(datos_por_año))
+        a = escalar(Fm.colores_gráficos[0][2]/256, Fm.colores_gráficos[1][2]/256, len(datos_por_año))
+
+        colores = list(zip(r, v, a))
+        for n, año in enumerate(datos_por_año):
+            símismo.fig.plot(año, color=colores[n])
+
+        símismo.fig.relim()
+        símismo.fig.autoscale_view()

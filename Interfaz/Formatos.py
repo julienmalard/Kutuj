@@ -120,16 +120,16 @@ formato_CampoIngr = dict(bg=col_fondo, highlightthickness=1, highlightbackground
                          relief='flat', highlightcolor=col_3, font=(fuente, '13'))
 formato_CampoIngr_error = dict(highlightthickness=2, highlightbackground='#ff0000')
 
-formato_BtGuardarGrupoCtrl_norm = dict(bg='#7dcf7d', fg='#ffffff', borderwidth=0, highlightthickness=0,
-                                       activebackground='#45ba45', activeforeground='#ffffff',
+formato_BtGuardarGrupoCtrl_norm = dict(bg='#6ac86a', fg='#ffffff', borderwidth=0, highlightthickness=0,
+                                       activebackground='#3ea73e', activeforeground='#ffffff',
                                        font=(fuente, 15, 'bold'), width=7)
-formato_BtGuardarGrupoCtrl_sel = dict(bg='#45ba45', fg='#ffffff')
-formato_BtGuardarsGrupoCtrl_bloq = dict(bg='#ecf8ec', fg='#ffffff', activeforeground='#ffffff')
-formato_BtBorrarGrupoCtrl_norm = dict(bg='#ff8966', fg='#ffffff', borderwidth=0, highlightthickness=0,
-                                      activebackground='#ff6233', activeforeground='#ffffff',
+formato_BtGuardarGrupoCtrl_sel = dict(bg='#3ea73e', fg='#ffffff')
+formato_BtGuardarsGrupoCtrl_bloq = dict(bg='#ecf8ec', disabledforeground='#ffffff')
+formato_BtBorrarGrupoCtrl_norm = dict(bg='#ff6233', fg='#ffffff', borderwidth=0, highlightthickness=0,
+                                      activebackground='#e63500', activeforeground='#ffffff',
                                       font=(fuente, 15, 'bold'), width=7)
-formato_BtBorrarGrupoCtrl_sel = dict(bg='#ff6233', fg='#ffffff')
-formato_BtBorrarsGrupoCtrl_bloq = dict(bg='#ffebe5', fg='#ffffff')
+formato_BtBorrarGrupoCtrl_sel = dict(bg='#e63500', fg='#ffffff')
+formato_BtBorrarsGrupoCtrl_bloq = dict(bg='#ffebe5', disabledforeground='#ffffff')
 ubic_BtsGrupoCtrl = dict(side='left', expand=True)
 ubic_CjBtsGrupoCtrl = dict(side='top', padx=20, fill=tk.X, expand=True)
 
@@ -154,7 +154,7 @@ ubic_CjsCol = dict(side='left', padx=10)
 
 # Caja subetapa 1.2
 ubic_CtrlsVarBD = dict(side='top', pady=10, anchor=tk.W)
-ubic_CjLstVarsBD = dict(relx=0.5, rely=0, y=50, relwidth=0.8, relheight=0.25, anchor=tk.N)
+ubic_CjLstVarsBD = dict(relx=0.5, rely=0, y=50, width=0.8*ancho_ventana, height=150, anchor=tk.N)
 ubic_CjBajoSE12 = dict(relx=0.5, rely=0.3, y=40, relheight=0.75, height=-25,
                        relwidth=1, width=-2*formato_BtsNavSub['width'],
                        anchor=tk.N)
@@ -163,3 +163,5 @@ ubic_GráficoVarsBD = dict(relx=0.75, rely=0, x=10, y=10, relwidth=0.5, relheigh
 
 ubic_escl_fecha_inic = dict(relx=0.75, rely=0.75, anchor=tk.N)
 anchos_cols_listavarVB = [0.25, 0.25, 0.25, 0.25]
+
+colores_gráficos = [(156, 106, 73), (115, 199, 31)]

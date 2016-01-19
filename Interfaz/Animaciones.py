@@ -32,7 +32,6 @@ def intercambiar(actual, nuevo, dirección):
 
 
 def sobreponer(actual, nuevo, dirección):
-    nuevo.lift()
     x_act = actual.winfo_x()
     y_act = actual.winfo_y()
     ancho_act = actual.winfo_width()
@@ -56,6 +55,7 @@ def sobreponer(actual, nuevo, dirección):
         distancia = altura_act
     else:
         raise ValueError
+    nuevo.lift()
 
     deslizar([nuevo], pos_inic, dirección, distancia, paso=0.025, tiempo=0.5)
 

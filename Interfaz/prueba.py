@@ -22,17 +22,15 @@ canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 def cambiar():
     x = mu + sigma*np.random.randn(10000)
-    try:
-        eje.patches[0].remove()
-    except IndexError:
-        pass
-    try:
-        eje.lines[0].remove()
-    except IndexError:
-        pass
-    x[:500] = float('NaN')
-    eje.plot(x)
+    for bloque in eje.patches:
+        bloque.remove()
+    for lín in eje.lines:
+        lín.remove()
+
     # eje.hist(x, 20, normed=1, histtype='stepfilled', facecolor='g', alpha=0.75)
+
+    x[300:500] = float('NaN')
+    eje.plot(x)
 
     canvas.draw()
 

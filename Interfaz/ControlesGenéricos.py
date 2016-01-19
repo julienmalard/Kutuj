@@ -10,6 +10,7 @@ from Interfaz import Botones as Bt
 class ListaItemas(tk.Frame):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
+        símismo.ancho = ubicación['width']
         símismo.objetos = []
 
         símismo.Tela = tk.Canvas(símismo, **Fm.formato_TlLstItemas)
@@ -57,30 +58,37 @@ class Itema(tk.Frame):
 
 
 class ItemaEditable(Itema):
-    def __init__(símismo, grupo_control, lista_itemas, columnas, ancho):
-        super().__init__(lista_itemas.Caja)
+    def __init__(símismo, grupo_control, lista_itemas, ancho):
+        super().__init__(lista_itemas)
         símismo.objeto = grupo_control.objeto
         símismo.receta = grupo_control.receta
-        símismo.columnas = columnas
+        símismo.lista_itemas = lista_itemas
+        símismo.ancho = ancho
+        símismo.columnas = []
 
-        cj_bts = tk.Frame(width=Fm.ancho_cj_bts_itemas, **Fm.formato_secciones_itemas)
-        símismo.bt_editar = Bt.BotónImagen(cj_bts, comanda=símismo.editar, formato=Fm.formato_botones,
+        símismo.cj_bts = tk.Frame(símismo, width=Fm.ancho_cj_bts_itemas, **Fm.formato_secciones_itemas)
+
+        símismo.bt_editar = Bt.BotónImagen(símismo.cj_bts, comanda=símismo.editar, formato=Fm.formato_botones,
                                            img_norm=Art.imagen('BtEditarItema_norm'),
                                            img_sel=Art.imagen('BtEditarItema_sel'),
                                            ubicación=Fm.ubic_BtsItemas, tipo_ubic='pack')
-        símismo.bt_borrar = Bt.BotónImagen(cj_bts, comanda=símismo.quitar, formato=Fm.formato_botones,
+        símismo.bt_borrar = Bt.BotónImagen(símismo.cj_bts, comanda=símismo.quitar, formato=Fm.formato_botones,
                                            img_norm=Art.imagen('BtBorrarItema_norm'),
                                            img_sel=Art.imagen('BtBorrarItema_sel'),
                                            ubicación=Fm.ubic_BtsItemas, tipo_ubic='pack')
 
-        símismo.columnas.append(cj_bts)
-
-        for n, col in enumerate(símismo.columnas):
-            col.config(width=int(ancho[n]*(lista_itemas.ancho - Fm.ancho_cj_bts_itemas)))
-            col.pack(**Fm.ubic_ColsItemas)
-
         símismo.bind('<Enter>', lambda event, i=símismo: i.resaltar())
         símismo.bind('<Leave>', lambda event, i=símismo: i.desresaltar())
+
+    def estab_columnas(símismo, columnas):
+        símismo.columnas = columnas
+
+        for n, col in enumerate(símismo.columnas):
+            col.config(width=int(símismo.ancho[n]*(símismo.lista_itemas.ancho - Fm.ancho_cj_bts_itemas)))
+            col.pack(**Fm.ubic_ColsItemas)
+
+        símismo.columnas.append(símismo.cj_bts)
+        símismo.cj_bts.pack(**Fm.ubic_ColsItemas)
 
     def editar(símismo):
         símismo.lista.editar(símismo)
@@ -115,18 +123,22 @@ class GrupoControles(object):
             símismo.lista.controles = símismo
 
         if símismo.gráfico is not None:
-            símismo.gráfico.objeto = símismo.objeto
             símismo.gráfico.controles = símismo.controles
 
         if símismo.bt_guardar is not None:
             símismo.bt_guardar.estab_comanda(símismo.guardar)
+            símismo.bt_guardar.bloquear()
         if símismo.bt_borrar is not None:
             símismo.bt_borrar.estab_comanda(símismo.borrar)
+            símismo.bt_borrar.bloquear()
 
     def cambió_control(símismo, *args):
+        if símismo.bt_borrar is not None:
+            símismo.bt_borrar.desbloquear()
         if símismo.verificar_completo() is True:
             símismo.recrear_objeto()
             if símismo.gráfico is not None:
+                símismo.gráfico.objeto = símismo.objeto
                 símismo.gráfico.redibujar()
             if símismo.bt_guardar is not None:
                 símismo.bt_guardar.desbloquear()
@@ -139,7 +151,6 @@ class GrupoControles(object):
             símismo.itema.actualizar()
         elif símismo.constructor_itema is not None:
             símismo.itema = símismo.constructor_itema(símismo, símismo.lista)
-            símismo.controles = None
 
         símismo.borrar()
         símismo.itema = None
@@ -147,6 +158,14 @@ class GrupoControles(object):
     def borrar(símismo):
         for ll, control in símismo.controles.items():
             control.borrar()
+
+        if símismo.gráfico is not None:
+            símismo.gráfico.borrar()
+
+        if símismo.bt_guardar is not None:
+            símismo.bt_guardar.bloquear()
+        if símismo.bt_borrar is not None:
+            símismo.bt_borrar.bloquear()
 
     def verificar_completo(símismo):
         raise NotImplementedError
@@ -172,16 +191,15 @@ class Gráfico(object):
             símismo.tela.get_tk_widget().pack(**ubicación)
 
     def redibujar(símismo):
-        try:
-            símismo.fig.patches[0].remove()
-        except IndexError:
-            pass
-        try:
-            símismo.fig.lines[0].remove()
-        except IndexError:
-            pass
+        símismo.borrar()
         símismo.dibujar()
+        símismo.tela.draw()
 
+    def borrar(símismo):
+        while len(símismo.fig.patches):
+            símismo.fig.patches[0].remove()
+        while len(símismo.fig.lines):
+            símismo.fig.lines[0].remove()
         símismo.tela.draw()
 
     def dibujar(símismo):
@@ -273,7 +291,7 @@ class IngrTexto(object):
 
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
         símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, width=20, **Fm.formato_CampoIngr)
-        símismo.CampoIngr.bind('<FocusOut>', símismo.acción_cambio)
+        símismo.var.trace('w', símismo.acción_cambio)
 
         símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
         símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
@@ -307,8 +325,13 @@ class IngrTexto(object):
 
 class Menú(object):
     def __init__(símismo, pariente, nombre, opciones, ubicación, tipo_ubic,
-                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, comanda=None, inicial=''):
+                 comanda=None, texto_opciones=None, inicial='',
+                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, ):
         símismo.opciones = opciones
+        if texto_opciones is None:
+            texto_opciones = opciones
+        símismo.conv = {}
+
         símismo.comanda = comanda
 
         símismo.val_inicial = inicial
@@ -322,8 +345,8 @@ class Menú(object):
         símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
         símismo.MenúOpciones = tk.OptionMenu(cj, símismo.var, '')
         símismo.MenúOpciones.config(takefocus=True)
-        símismo.refrescar(opciones)
-        símismo.var.trace('w', símismo.acción_cambio)
+        símismo.refrescar(opciones, texto_opciones)
+        símismo.var.trace('w', símismo.acción_cambió)
 
         símismo.MenúOpciones.config(**formato_bt)
         símismo.MenúOpciones['menu'].config(**formato_mn)
@@ -343,8 +366,10 @@ class Menú(object):
         if símismo not in otro_menú.exclusivos:
             otro_menú.estab_exclusivo(símismo)
 
-    def acción_cambio(símismo, *args):
-        nueva_val = símismo.var.get()
+    def acción_cambió(símismo, *args):
+        texto_campo = símismo.var.get()
+
+        nueva_val = [ll for ll, v in símismo.conv.items() if v == texto_campo][0]
 
         if nueva_val == '':
             símismo.val = None
@@ -359,13 +384,16 @@ class Menú(object):
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
                 
-    def refrescar(símismo, opciones):
+    def refrescar(símismo, opciones, texto_opciones):
         símismo.opciones = opciones
         símismo.MenúOpciones['menu'].delete(0, 'end')
-        for opción in opciones:
-            símismo.MenúOpciones['menu'].add_command(label=opción, command=tk._setit(símismo.var, opción))
 
-        símismo.var.set(símismo.val_inicial)
+        símismo.conv = {'': ''}
+        for op, tx in zip(opciones, texto_opciones):
+            símismo.conv[op] = tx
+            símismo.MenúOpciones['menu'].add_command(label=tx, command=tk._setit(símismo.var, tx))
+
+        símismo.borrar()
 
     def excluir(símismo, valor):
         menú = símismo.MenúOpciones['menu']
@@ -378,7 +406,8 @@ class Menú(object):
         menú.entryconfig(i, state=tk.NORMAL)
 
     def borrar(símismo):
-        símismo.var.set(símismo.val_inicial)
+        símismo.val = símismo.val_inicial
+        símismo.var.set(símismo.conv[símismo.val])
 
     def bloquear(símismo):
         símismo.MenúOpciones.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)

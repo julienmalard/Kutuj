@@ -70,8 +70,8 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
             return
 
         símismo.CjAct.desbloquear()
-        símismo.MnColFecha.refrescar(cols_bd)
-        símismo.MnColHora.refrescar(cols_bd)
+        símismo.MnColFecha.refrescar(opciones=cols_bd, texto_opciones=cols_bd)
+        símismo.MnColHora.refrescar(opciones=cols_bd, texto_opciones=cols_bd)
 
     def acción_bt_cargar_pr(símismo):
         archivo_bd = diálogo.askopenfilename(filetypes=[('Proyecto Kutuj', '*.kut')],
@@ -95,7 +95,6 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
             símismo.Modelo.base_central.estab_col_hora(col)
             símismo.EtiqErrColHora.pack_forget()
         except ValueError:
-            print('Error de valor')
             símismo.EtiqErrColHora.pack(**Fm.ubic_EtiqErrCol)
 
         if símismo.verificar_completo():
@@ -124,15 +123,18 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         símismo.MnCol = CtrG.Menú(cj_ctrls, 'Columna:', opciones='',
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
-        escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(0, 365), valor_inicial=0, prec='ent',
+        escl_fecha_inic = CtrG.Escala(cj_bajo, texto='Día inicio año', límites=(1, 365), valor_inicial=1, prec='ent',
                                       ubicación=Fm.ubic_escl_fecha_inic, tipo_ubic='place')
 
         menú_transform = CtrG.Menú(cj_ctrls, nombre='Transformación:',
-                                   opciones=['Sumar', 'Máximo', 'Mínimo', 'Promedio'],
+                                   opciones=['sumar', 'máx', 'mín', 'prom'],
+                                   texto_opciones=['Sumar', 'Máximo', 'Mínimo', 'Promedio'],
                                    ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
         menú_interpol = CtrG.Menú(cj_ctrls, nombre='Interpolación:',
-                                  opciones=['Trapezoidal', 'Ninguno'], inicial='Trapezoidal',
+                                  opciones=['trap', 'ninguno'],
+                                  texto_opciones=['Trapezoidal', 'Ninguno'],
+                                  inicial='trap',
                                   ubicación=Fm.ubic_CtrlsVarBD, tipo_ubic='pack')
 
         cj_bts = tk.Frame(cj_ctrls, **Fm.formato_cajas)
@@ -169,7 +171,7 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         cols_potenciales = bd.nombres_cols.copy()
         cols_potenciales.remove(bd.id_cols['fecha'])
         cols_potenciales.remove(bd.id_cols['tiempo'])
-        símismo.MnCol.refrescar(cols_potenciales)
+        símismo.MnCol.refrescar(opciones=cols_potenciales, texto_opciones=cols_potenciales)
 
         if símismo.verificar_completo():
             símismo.pariente.desbloquear_subcajas([2])

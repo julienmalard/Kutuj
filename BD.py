@@ -13,6 +13,7 @@ class BaseCentral(object):
         símismo.id_cols = {'fecha': '', 'tiempo': '', 'vars': {}}
         símismo.fecha_inic = None
         símismo.fechas = []
+        símismo.fechas_únicas = []
         símismo.tiempos = []
         símismo.datos = {}
         símismo.info_datos = {'mét_combin_tiempo': {}, 'mét_interpol': {}}
@@ -22,6 +23,8 @@ class BaseCentral(object):
             col = símismo.id_cols['fecha']
         lista_fechas = cargar_columna(col, símismo.sistema, símismo.archivo)
         símismo.fecha_inic, símismo.fechas = leer_fechas(lista_fechas)
+        símismo.fechas_únicas = list(set(símismo.fechas))
+        símismo.fechas_únicas.sort()
         símismo.id_cols['fecha'] = col
 
     def estab_col_hora(símismo, col=None):
@@ -32,7 +35,7 @@ class BaseCentral(object):
         símismo.id_cols['tiempo'] = col
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
-        if símismo.fechas is None or símismo.tiempos is None:
+        if símismo.fechas_únicas is None or símismo.tiempos is None:
             return 'Hay que especificar los datos de fechas y horas primero.'
 
         if mét_combin_tiempo is None:
@@ -72,47 +75,62 @@ class VariableBD(object):
         lista_tiempos = base_de_datos.tiempos
 
         if transformación is None:
-            transformación = 'promedio'
+            transformación = 'prom'
         if interpol is None:
-            interpol = 'trapezoidal'
-        lista_var = []
+            interpol = 'trap'
+        datos = []
         vals_var_día = []
+        pesos = []
+        terminado = False
 
-        for n, f in enumerate(símismo.lista_fechas[1:]):
-            if interpol.lower() == 'trapezoidal':
-                vals_var_día += [(datos_crudos[n] + datos_crudos[n-1])/2 *
-                                 (lista_tiempos[n]-lista_tiempos[n-1])]
-            elif interpol.lower() == 'ninguno':
-                vals_var_día += datos_crudos[n]
+        if interpol == 'trap':
+            fin = -2
+        elif interpol == 'ninguno':
+            fin = -1
+        else:
+            raise ValueError
+
+        for n, f in enumerate(símismo.lista_fechas[:fin]):
+            if interpol == 'trap':
+                vals_var_día.append((datos_crudos[n] + datos_crudos[n+1])/2)
+                ajust_día = símismo.lista_fechas[n + 1] - f
+                pesos.append((lista_tiempos[n+1]-lista_tiempos[n] + ajust_día*24*60*60)/(60*60))
+
+                if n+1 == len(símismo.lista_fechas) or f != símismo.lista_fechas[n + 1]:
+                    terminado = True
+            elif interpol == 'ninguno':
+                vals_var_día.append(datos_crudos[n])
+                if n == len(símismo.lista_fechas) or f != símismo.lista_fechas[n + 1]:
+                    terminado = True
             else:
                 raise ValueError('Metodo de interpolación {0} no reconocido.'.format(interpol))
 
-            if símismo.lista_fechas[n] != símismo.lista_fechas[n + 1] or n == len(símismo.lista_fechas):
-
+            if terminado:
                 vals_var_día = np.array(vals_var_día)
-                if interpol.lower() == 'trap':
-                    vals_var_día /= np.sum(símismo.lista_fechas[-1] - símismo.lista_fechas[0])
 
-                if transformación.lower() == 'sumar':
-                    var = vals_var_día.sum()
-                elif transformación.lower() == 'máx':
+                if interpol == 'ninguno':
+                    pesos = [1]*len(vals_var_día)
+                elif interpol == 'ninguno':
+                    pesos = np.divide(pesos, np.sum(pesos))
+
+                if transformación == 'sumar':
+                    var = np.sum(vals_var_día*pesos)
+                elif transformación == 'máx':
                     var = vals_var_día.max()
-                elif transformación.lower() == 'mín':
+                elif transformación == 'mín':
                     var = vals_var_día.min()
-                elif transformación.lower() == 'prom':
-                    var = vals_var_día.mean()
+                elif transformación == 'prom':
+                    var = np.average(vals_var_día, weights=pesos)
                 else:
                     raise ValueError('Metodo de generación de datos diarios "{0}" '
                                      'no reconocido.'.format(transformación))
 
-                lista_var += [var]
+                datos += [var] + [float('NaN')] * (símismo.lista_fechas[n+1] - f - 1)
                 vals_var_día = []
+                pesos = []
 
-        datos = [lista_var[0]]
+                terminado = False
 
-        for n, f in enumerate(símismo.lista_fechas[1:]):
-            datos += [float('NaN')] * (f - símismo.lista_fechas[n] - 1) + lista_var[n+1]
-            
         símismo.datos = np.array(datos)
 
 
@@ -160,7 +178,7 @@ def leer_fechas(fechas_crudas):
 
     for div in ['/', '-', '.']:
         if len(fechas_crudas[0].split(div)) == 3:
-            lista_fechas = [x.split(div) for x in fechas_crudas]
+            lista_fechas = [x.split(div) for x in fechas_crudas if x != '\n' and x != '']
             for n in lista_fechas:
                 for i in lista_pos:
                     if int(n[i]) > 31:
@@ -176,6 +194,7 @@ def leer_fechas(fechas_crudas):
                     break
         else:
             continue
+
     if pos_año is None or pos_mes is None or pos_día is None:
         raise ValueError('No se pudieron leer las fechas de la base de datos.')
 
@@ -190,9 +209,9 @@ def leer_fechas(fechas_crudas):
 
 
 def leer_tiempo(tiempos_crudos):
-    lista_tiempos = [x.split(':') for x in tiempos_crudos]
+    lista_tiempos = [x.split(':') for x in tiempos_crudos if x != '\n' and x != '']
     if len(lista_tiempos[0]) == 3:
-        tiempos_finales = [((int(x[0]) * 60) + int(x[1]) * 60 + int(x[2])) for x in lista_tiempos]
+        tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 + int(x[2]) for x in lista_tiempos]
     elif len(lista_tiempos[0]) == 2:
         tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 for x in lista_tiempos]
     else:
