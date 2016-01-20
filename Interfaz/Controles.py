@@ -35,29 +35,44 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         except ValueError:
             print('Error cargando datos... :(')
 
+    def editar(sîmismo, objeto, receta):
+        sîmismo.objeto = objeto
+        sîmismo.receta = receta
+        for i in sîmismo.receta:
+            sîmismo.controles[i].poner(sîmismo.receta[i])
+
 
 class ListaVarsBD(CtrG.ListaEditable):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
         super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
+        símismo.pariente = pariente
+
+    def añadir(símismo, itema):
+        super().añadir(itema)
+        símismo.pariente.verificar_completo()
 
 
 class ItemaVarBD(CtrG.ItemaEditable):
     def __init__(símismo, grupo_control, lista_itemas):
-        super().__init__(grupo_control=grupo_control, lista_itemas=lista_itemas, ancho=Fm.anchos_cols_listavarVB)
+        super().__init__(grupo_control=grupo_control, lista_itemas=lista_itemas)
 
-        cj_nombre = tk.Frame(símismo, **Fm.formato_secciones_itemas)
-        cj_columna = tk.Frame(símismo, **Fm.formato_secciones_itemas)
-        cj_trans = tk.Frame(símismo, **Fm.formato_secciones_itemas)
-        cj_interpol = tk.Frame(símismo, **Fm.formato_secciones_itemas)
+        símismo.cj_cols = cj_cols = tk.Frame(símismo, bg='yellow')
+        cj_nombre = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
+        cj_columna = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
+        cj_trans = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
+        cj_interpol = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
 
-        símismo.etiq_nombre = tk.Label(cj_nombre, **Fm.formato_etiq)
-        símismo.etiq_columna = tk.Label(cj_columna, **Fm.formato_etiq)
-        símismo.etiq_trans = tk.Label(cj_trans, **Fm.formato_etiq)
-        símismo.etiq_interpol = tk.Label(cj_interpol, **Fm.formato_etiq)
+        símismo.etiq_nombre = tk.Label(cj_nombre, **Fm.formato_texto_itemas)
+        símismo.etiq_columna = tk.Label(cj_columna, **Fm.formato_texto_itemas)
+        símismo.etiq_trans = tk.Label(cj_trans, **Fm.formato_texto_itemas)
+        símismo.etiq_interpol = tk.Label(cj_interpol, **Fm.formato_texto_itemas)
 
-        columnas = [cj_nombre, cj_columna, cj_trans, cj_interpol]
+        símismo.etiquetas = [símismo.etiq_nombre, símismo.etiq_columna, símismo.etiq_trans, símismo.etiq_interpol]
+        símismo.columnas = [cj_nombre, cj_columna, cj_trans, cj_interpol]
+        for etiq in símismo.etiquetas:
+            etiq.pack(**Fm.ubic_EtiqItemas)
 
-        símismo.estab_columnas(columnas)
+        símismo.estab_columnas(anchuras=Fm.anchos_cols_listavarVB)
 
         símismo.actualizar()
 
@@ -68,16 +83,12 @@ class ItemaVarBD(CtrG.ItemaEditable):
         símismo.etiq_interpol.config(text=símismo.receta['Interpol'])
 
     def resaltar(símismo):
-        símismo.etiq_nombre.config(bg=Fm.col_4)
-        símismo.etiq_columna.config(bg=Fm.col_4)
-        símismo.etiq_trans.config(bg=Fm.col_4)
-        símismo.etiq_interpol.config(bg=Fm.col_4)
+        for etiq in símismo.etiquetas:
+            etiq.config(font=Fm.fuente_etiq_itema_sel)
 
     def desresaltar(símismo):
-        símismo.etiq_nombre.config(bg=Fm.col_fondo)
-        símismo.etiq_columna.config(bg=Fm.col_fondo)
-        símismo.etiq_trans.config(bg=Fm.col_fondo)
-        símismo.etiq_interpol.config(bg=Fm.col_fondo)
+        for etiq in símismo.etiquetas:
+            etiq.config(font=Fm.fuente_etiq_itema_norm)
 
 
 class GráfVarBD(CtrG.Gráfico):

@@ -177,7 +177,12 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
             símismo.pariente.desbloquear_subcajas([2])
 
     def verificar_completo(símismo):
-        return False
+        if len(símismo.lista.objetos) > 0:
+            símismo.pariente.desbloquear_cajas([2])
+            return True
+        else:
+            símismo.pariente.bloquear_cajas([2])
+            return False
 
 
 class CajaSubEtp21(CjG.CajaSubEtapa):

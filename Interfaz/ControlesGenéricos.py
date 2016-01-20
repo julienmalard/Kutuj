@@ -1,4 +1,5 @@
 import tkinter as tk
+import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
@@ -15,13 +16,14 @@ class ListaItemas(tk.Frame):
 
         símismo.Tela = tk.Canvas(símismo, **Fm.formato_TlLstItemas)
         símismo.Tela.place(**Fm.ubic_TlLstItemas)
-        símismo.Caja = tk.Frame(símismo.Tela)
+        símismo.Caja = tk.Frame(símismo.Tela, **Fm.formato_cajas)
         símismo.BaraDesp = tk.Scrollbar(símismo.Tela, orient="vertical", command=símismo.Tela.yview)
         símismo.Tela.configure(yscrollcommand=símismo.BaraDesp.set)
 
         símismo.BaraDesp.pack(**Fm.ubic_BaraDesp)
 
-        símismo.Tela.create_window((1, 1), window=símismo.Caja, tags="self.frame", **Fm.ubic_CjTl)
+        símismo.Tela.create_window((1, 1), window=símismo.Caja, tags="self.frame", width=símismo.ancho-20,
+                                   **Fm.ubic_CjTl)
 
         símismo.Caja.bind("<Configure>", símismo.ajust_auto)
 
@@ -40,31 +42,34 @@ class ListaEditable(ListaItemas):
         símismo.controles = None
 
     def editar(símismo, itema):
-        símismo.controles.objeto = itema.objeto
+        símismo.controles.editar(itema.objeto, itema.receta)
+
+    def añadir(símismo, itema):
+        símismo.objetos.append(itema.objeto)
+        itema.pack(**Fm.ubic_CjItemas)
 
 
 class Itema(tk.Frame):
-    def __init__(símismo, lista_itemas):
-        super().__init__(lista_itemas.Caja)
-        símismo.objeto = NotImplemented
+    def __init__(símismo, lista_itemas, objeto):
+        super().__init__(lista_itemas.Caja, **Fm.formato_cajas)
+        símismo.objeto = objeto
         símismo.lista = lista_itemas
-        lista_itemas.objetos.append(símismo.objeto)
 
-        símismo.pack()
+        símismo.lista.añadir(símismo)
 
     def quitar(símismo):
-        símismo.lista.objetos.pop(símismo.objeto)
+        símismo.lista.objetos.remove(símismo.objeto)
         símismo.destroy()
 
 
 class ItemaEditable(Itema):
-    def __init__(símismo, grupo_control, lista_itemas, ancho):
-        super().__init__(lista_itemas)
-        símismo.objeto = grupo_control.objeto
+    def __init__(símismo, grupo_control, lista_itemas):
+        super().__init__(lista_itemas, grupo_control.objeto)
         símismo.receta = grupo_control.receta
         símismo.lista_itemas = lista_itemas
-        símismo.ancho = ancho
         símismo.columnas = []
+
+        símismo.cj_cols = NotImplemented
 
         símismo.cj_bts = tk.Frame(símismo, width=Fm.ancho_cj_bts_itemas, **Fm.formato_secciones_itemas)
 
@@ -80,15 +85,13 @@ class ItemaEditable(Itema):
         símismo.bind('<Enter>', lambda event, i=símismo: i.resaltar())
         símismo.bind('<Leave>', lambda event, i=símismo: i.desresaltar())
 
-    def estab_columnas(símismo, columnas):
-        símismo.columnas = columnas
-
+    def estab_columnas(símismo, anchuras):
+        x = [np.sum(anchuras[:n]) for n in range(len(anchuras))]
         for n, col in enumerate(símismo.columnas):
-            col.config(width=int(símismo.ancho[n]*(símismo.lista_itemas.ancho - Fm.ancho_cj_bts_itemas)))
-            col.pack(**Fm.ubic_ColsItemas)
+            col.place(relx=x[n], relwidth=anchuras[n], **Fm.formato_ColsItemasEdit)
 
-        símismo.columnas.append(símismo.cj_bts)
-        símismo.cj_bts.pack(**Fm.ubic_ColsItemas)
+        símismo.cj_cols.pack(**Fm.ubic_CjColsItemas)
+        símismo.cj_bts.pack(**Fm.ubic_CjBtsItemas)
 
     def editar(símismo):
         símismo.lista.editar(símismo)
@@ -166,6 +169,9 @@ class GrupoControles(object):
             símismo.bt_guardar.bloquear()
         if símismo.bt_borrar is not None:
             símismo.bt_borrar.bloquear()
+
+    def editar(sîmismo, objeto, receta):
+        raise NotImplementedError
 
     def verificar_completo(símismo):
         raise NotImplementedError
@@ -278,6 +284,9 @@ class IngrNúm(object):
         símismo.CampoIngr.configure(state=tk.NORMAL, cursor='arrow', **Fm.formato_BtMn)
         símismo.Etiq.config(**Fm.formato_EtiqCtrl)
 
+    def poner(símismo, valor):
+        símismo.var.set(str(valor))
+
 
 class IngrTexto(object):
     def __init__(símismo, pariente, nombre, ubicación, tipo_ubic, comanda=None):
@@ -321,6 +330,9 @@ class IngrTexto(object):
     def desbloquear(símismo):
         símismo.CampoIngr.configure(state=tk.NORMAL, cursor='arrow', **Fm.formato_BtMn)
         símismo.Etiq.config(**Fm.formato_EtiqCtrl)
+
+    def poner(símismo, valor):
+        símismo.var.set(valor)
 
 
 class Menú(object):
@@ -417,6 +429,10 @@ class Menú(object):
         símismo.MenúOpciones.configure(state=tk.NORMAL, cursor='arrow', **Fm.formato_BtMn)
         símismo.Etiq.config(**Fm.formato_EtiqCtrl)
 
+    def poner(símismo, valor):
+        símismo.var.set(símismo.conv[valor])
+        símismo.val = valor
+
 
 class Escala(object):
     def __init__(símismo, pariente, texto, límites, prec, ubicación, tipo_ubic, comanda=None, valor_inicial=None):
@@ -468,6 +484,11 @@ class Escala(object):
         # símismo.escl.poner(símismo.valor_inicial)
         # símismo.ingr.var.set(símismo.valor_inicial)
         # símismo.val = símismo.valor_inicial
+
+    def poner(símismo, valor):
+        símismo.escl.poner(valor)
+        símismo.ingr.var.set(valor)
+        símismo.val = valor
 
 
 class CosoEscala(tk.Canvas):
