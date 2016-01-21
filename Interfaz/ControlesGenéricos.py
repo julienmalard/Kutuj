@@ -9,13 +9,17 @@ from Interfaz import Botones as Bt
 
 
 class ListaItemas(tk.Frame):
-    def __init__(símismo, pariente, ubicación, tipo_ubic):
+    def __init__(símismo, pariente, ubicación, tipo_ubic, encabezado=False):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
         símismo.ancho = ubicación['width']
         símismo.objetos = []
 
+        ubic_tela = Fm.ubic_TlLstItemas
+        if encabezado:
+            ubic_tela['y'] = Fm.ubic_EncbzLstItemas['height']
+            ubic_tela['height'] = -Fm.ubic_EncbzLstItemas['height']
         símismo.Tela = tk.Canvas(símismo, **Fm.formato_TlLstItemas)
-        símismo.Tela.place(**Fm.ubic_TlLstItemas)
+        símismo.Tela.place(**ubic_tela)
         símismo.Caja = tk.Frame(símismo.Tela, **Fm.formato_cajas)
         símismo.BaraDesp = tk.Scrollbar(símismo.Tela, orient="vertical", command=símismo.Tela.yview)
         símismo.Tela.configure(yscrollcommand=símismo.BaraDesp.set)
@@ -38,15 +42,34 @@ class ListaItemas(tk.Frame):
 
 class ListaEditable(ListaItemas):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
-        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
+        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic, encabezado=True)
         símismo.controles = None
 
+    def gen_encbz(símismo, nombres_cols, anchuras):
+        cj_encbz = tk.Frame(símismo, **Fm.formato_cajas)
+
+        ancho_bts = Fm.ancho_cj_bts_itemas
+        x = [-ancho_bts*n/len(anchuras) for n in range(len(anchuras))]
+        relx = [np.sum(anchuras[:n]) for n in range(len(anchuras))]
+        ajust_ancho = [0] * (len(anchuras)-1) + [ancho_bts]
+        cols = []
+        for n, col in enumerate(nombres_cols):
+            cols.append(tk.Label(cj_encbz, text=col, **Fm.formato_EtiqEncbzLst))
+            cols[-1].place(relx=relx[n], x=x[n], width=ajust_ancho[n], relwidth=anchuras[n],
+                           **Fm.ubic_ColsEncbzLst)
+
+        cj_encbz.place(**Fm.ubic_EncbzLstItemas)
+
     def editar(símismo, itema):
-        símismo.controles.editar(itema.objeto, itema.receta)
+        símismo.controles.editar(itema)
 
     def añadir(símismo, itema):
         símismo.objetos.append(itema.objeto)
         itema.pack(**Fm.ubic_CjItemas)
+
+    def quitar(símismo, itema):
+        símismo.objetos.remove(itema.objeto)
+        itema.destroy()
 
 
 class Itema(tk.Frame):
@@ -58,8 +81,7 @@ class Itema(tk.Frame):
         símismo.lista.añadir(símismo)
 
     def quitar(símismo):
-        símismo.lista.objetos.remove(símismo.objeto)
-        símismo.destroy()
+        símismo.lista.quitar(símismo)
 
 
 class ItemaEditable(Itema):
@@ -71,7 +93,7 @@ class ItemaEditable(Itema):
 
         símismo.cj_cols = NotImplemented
 
-        símismo.cj_bts = tk.Frame(símismo, width=Fm.ancho_cj_bts_itemas, **Fm.formato_secciones_itemas)
+        símismo.cj_bts = tk.Frame(símismo, **Fm.formato_cajas)
 
         símismo.bt_editar = Bt.BotónImagen(símismo.cj_bts, comanda=símismo.editar, formato=Fm.formato_botones,
                                            img_norm=Art.imagen('BtEditarItema_norm'),
@@ -88,7 +110,7 @@ class ItemaEditable(Itema):
     def estab_columnas(símismo, anchuras):
         x = [np.sum(anchuras[:n]) for n in range(len(anchuras))]
         for n, col in enumerate(símismo.columnas):
-            col.place(relx=x[n], relwidth=anchuras[n], **Fm.formato_ColsItemasEdit)
+            col.place(relx=x[n], relwidth=anchuras[n], **Fm.ubic_ColsItemasEdit)
 
         símismo.cj_cols.pack(**Fm.ubic_CjColsItemas)
         símismo.cj_bts.pack(**Fm.ubic_CjBtsItemas)
@@ -143,6 +165,8 @@ class GrupoControles(object):
             if símismo.gráfico is not None:
                 símismo.gráfico.objeto = símismo.objeto
                 símismo.gráfico.redibujar()
+            if símismo.itema is not None:
+                símismo.lista.objeto = símismo.objeto
             if símismo.bt_guardar is not None:
                 símismo.bt_guardar.desbloquear()
         else:
@@ -170,7 +194,7 @@ class GrupoControles(object):
         if símismo.bt_borrar is not None:
             símismo.bt_borrar.bloquear()
 
-    def editar(sîmismo, objeto, receta):
+    def editar(sîmismo, itema):
         raise NotImplementedError
 
     def verificar_completo(símismo):

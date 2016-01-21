@@ -79,23 +79,26 @@ formato_etiq_error = dict(bg='#ffffe5', fg='#ff0000', font=('arial', '12'), wrap
                           borderwidth=2, highlightcolor='#ff0000', padx=10, pady=10)
 
 # Listas
-formato_CjLstItemas = dict(highlightthickness=1, highlightbackground=col_2, bg=col_fondo)
-formato_TlLstItemas = dict(bg=col_fondo)
-ubic_TlLstItemas = dict(relx=0, rely=0, x=0, y=0, relwidth=1, relheight=1)
+formato_CjLstItemas = dict(highlightthickness=1, highlightbackground=col_1, bg=col_fondo)
+formato_TlLstItemas = dict(bg=col_fondo, highlightthickness=0)
+formato_EtiqEncbzLst = dict(bg=col_4, fg=col_1, font=(fuente, 14, 'bold'), anchor=tk.W)
+ubic_ColsEncbzLst = dict(y=0, relheight=1, anchor=tk.NW)
+ubic_EncbzLstItemas = dict(x=0, y=0, relx=0, rely=0, height=25, relwidth=1, anchor=tk.NW)
+ubic_TlLstItemas = dict(x=0, y=0, relx=0, rely=0, relheight=1, relwidth=1, anchor=tk.NW)
 ubic_BaraDesp = dict(side="right", fill="y")
 ubic_CjTl = dict(anchor=tk.NW)
 
-formato_secciones_itemas = dict(height=10, pady=5, **formato_cajas)
+formato_secciones_itemas = dict(height=20, **formato_cajas)
 ubic_CjItemas = dict(side='top', fill=tk.X, expand=True)
+ancho_cj_bts_itemas = 85
 ubic_CjColsItemas = dict(side='left', fill=tk.BOTH, expand=True)
-ancho_cj_bts_itemas = 20
 ubic_BtsItemas = dict(side='left', padx=5)
-ubic_CjBtsItemas = dict(side='left')
+ubic_CjBtsItemas = dict(side='right')
 ubic_EtiqItemas = dict(side='left')
 fuente_etiq_itema_sel = (fuente, 14, 'bold')
 fuente_etiq_itema_norm = (fuente, 14)
 formato_texto_itemas = dict(font=(fuente, 14), fg='#000000', **formato_etiq)
-formato_ColsItemasEdit = dict(y=0, relheight=1, anchor=tk.NW)
+ubic_ColsItemasEdit = dict(y=0, relheight=1, anchor=tk.NW)
 
 # Controles
 formato_EtiqCtrl = dict(bg=col_fondo, fg=col_3, font=(fuente, 20, 'bold'))

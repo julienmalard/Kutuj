@@ -35,20 +35,29 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         except ValueError:
             print('Error cargando datos... :(')
 
-    def editar(sîmismo, objeto, receta):
-        sîmismo.objeto = objeto
-        sîmismo.receta = receta
-        for i in sîmismo.receta:
-            sîmismo.controles[i].poner(sîmismo.receta[i])
+    def editar(símismo, itema):
+        símismo.itema = itema
+        símismo.objeto = itema.objeto
+        símismo.receta = itema.receta
+        for i in símismo.receta:
+            símismo.controles[i].poner(símismo.receta[i])
 
 
 class ListaVarsBD(CtrG.ListaEditable):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
         super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
+
         símismo.pariente = pariente
+        nombres_cols = ['Nombre', 'Columna', 'Transformación', 'Interpolación']
+        anchuras = Fm.anchos_cols_listavarVB
+        símismo.gen_encbz(nombres_cols, anchuras)
 
     def añadir(símismo, itema):
         super().añadir(itema)
+        símismo.pariente.verificar_completo()
+
+    def quitar(símismo, itema):
+        super().quitar(itema)
         símismo.pariente.verificar_completo()
 
 
@@ -56,7 +65,7 @@ class ItemaVarBD(CtrG.ItemaEditable):
     def __init__(símismo, grupo_control, lista_itemas):
         super().__init__(grupo_control=grupo_control, lista_itemas=lista_itemas)
 
-        símismo.cj_cols = cj_cols = tk.Frame(símismo, bg='yellow')
+        símismo.cj_cols = cj_cols = tk.Frame(símismo, **Fm.formato_cajas)
         cj_nombre = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
         cj_columna = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
         cj_trans = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
