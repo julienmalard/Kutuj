@@ -28,6 +28,7 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         for ll, control in símismo.controles.items():
             símismo.receta[ll] = control.val
         rec = símismo.receta
+        print('Recreando...', rec)
         try:
             símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
                                         nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
@@ -36,16 +37,19 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
             print('Error cargando datos... :(')
 
     def editar(símismo, itema):
+        print('Obj. controles', símismo.receta)
+        print('Obj. itema', itema.receta)
         símismo.itema = itema
         símismo.objeto = itema.objeto
+        for i in itema.receta:
+            símismo.controles[i].poner(itema.receta[i])
+
         símismo.receta = itema.receta
-        for i in símismo.receta:
-            símismo.controles[i].poner(símismo.receta[i])
 
 
 class ListaVarsBD(CtrG.ListaEditable):
-    def __init__(símismo, pariente, ubicación, tipo_ubic):
-        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
+    def __init__(símismo, pariente, lista, ubicación, tipo_ubic):
+        super().__init__(pariente, lista=lista, ubicación=ubicación, tipo_ubic=tipo_ubic)
 
         símismo.pariente = pariente
         nombres_cols = ['Nombre', 'Columna', 'Transformación', 'Interpolación']

@@ -18,6 +18,8 @@ class BaseCentral(object):
         símismo.datos = {}
         símismo.info_datos = {'mét_combin_tiempo': {}, 'mét_interpol': {}}
 
+        símismo.vars = []
+
     def estab_col_fecha(símismo, col=None):
         if col is None:
             col = símismo.id_cols['fecha']

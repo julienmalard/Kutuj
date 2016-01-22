@@ -9,10 +9,10 @@ from Interfaz import Botones as Bt
 
 
 class ListaItemas(tk.Frame):
-    def __init__(símismo, pariente, ubicación, tipo_ubic, encabezado=False):
+    def __init__(símismo, pariente, lista, ubicación, tipo_ubic, encabezado=False):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
         símismo.ancho = ubicación['width']
-        símismo.objetos = []
+        símismo.objetos = lista
 
         ubic_tela = Fm.ubic_TlLstItemas
         if encabezado:
@@ -41,8 +41,8 @@ class ListaItemas(tk.Frame):
 
 
 class ListaEditable(ListaItemas):
-    def __init__(símismo, pariente, ubicación, tipo_ubic):
-        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic, encabezado=True)
+    def __init__(símismo, pariente, lista, ubicación, tipo_ubic):
+        super().__init__(pariente, lista=lista, ubicación=ubicación, tipo_ubic=tipo_ubic, encabezado=True)
         símismo.controles = None
 
     def gen_encbz(símismo, nombres_cols, anchuras):
@@ -68,6 +68,7 @@ class ListaEditable(ListaItemas):
         itema.pack(**Fm.ubic_CjItemas)
 
     def quitar(símismo, itema):
+        símismo.controles.borrar()
         símismo.objetos.remove(itema.objeto)
         itema.destroy()
 
@@ -183,6 +184,8 @@ class GrupoControles(object):
         símismo.itema = None
 
     def borrar(símismo):
+        símismo.objeto = None
+        símismo.receta = {}
         for ll, control in símismo.controles.items():
             control.borrar()
 
@@ -236,66 +239,52 @@ class Gráfico(object):
         raise NotImplementedError
 
 
-class IngrNúm(object):
-    def __init__(símismo, pariente, nombre, límites, val_inic, prec, ubicación, tipo_ubic, ancho=5, comanda=None):
-        símismo.límites = límites
+class CampoIngreso(object):
+    def __init__(símismo, pariente, nombre, val_inic, comanda, ubicación, tipo_ubic, ancho, orden='texto'):
         símismo.comanda = comanda
-        if prec not in ['dec', 'ent']:
-            raise ValueError('"Prec" debe ser uno de "ent" o "dec".')
-        símismo.prec = prec
-
-        if val_inic is None:
-            val_inic = (límites[0] + límites[1])/2
         símismo.val_inic = val_inic
-
-        if prec == 'ent':
-            símismo.val_inic = round(símismo.val_inic)
-        else:
-            símismo.val_inic = round(símismo.val_inic, 2)
 
         símismo.var = tk.StringVar()
         símismo.var.set(símismo.val_inic)
-        símismo.var.trace('w', símismo.acción_cambio)
+        símismo.var.trace('w', símismo.acción_cambió)
         símismo.val = None
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
+        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, width=ancho, **Fm.formato_CampoIngr)
+
         if nombre is not None:
             símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-            símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
 
-        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, width=ancho, **Fm.formato_CampoIngr)
-        símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
+        if orden is 'texto':
+            if nombre is not None:
+                símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
+            símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
+        else:
+            símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
+            if nombre is not None:
+                símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
 
         if tipo_ubic == 'pack':
             cj.pack(**ubicación)
         elif tipo_ubic == 'place':
             cj.place(**ubicación)
 
-    def acción_cambio(símismo, *args):
+    def acción_cambió(símismo, *args):
+        nueva_val = símismo.var.get()
         try:
-            if símismo.prec == 'ent':
-                nueva_val = int(símismo.var.get())
-            elif símismo.prec == 'dec':
-                nueva_val = round(float(símismo.var.get()), 3)
-            else:
-                print('"Prec" debe ser uno de "ent" o "dec".')
-                return
-
-            if not (símismo.límites[0] <= nueva_val <= símismo.límites[1]):
-                raise ValueError
-
+            nueva_val = símismo.validar_ingreso(nueva_val)
             símismo.CampoIngr.config(**Fm.formato_CampoIngr)
+
+            if nueva_val != símismo.val and nueva_val != '':
+                símismo.val = nueva_val
+                símismo.comanda(nueva_val)
 
         except ValueError:
             símismo.var.set('')
             símismo.val = None
             símismo.CampoIngr.config(**Fm.formato_CampoIngr_error)
             return
-
-        if nueva_val != símismo.val and nueva_val != '':
-            símismo.val = nueva_val
-            símismo.comanda(nueva_val)
 
     def borrar(símismo):
         símismo.var.set('')
@@ -311,31 +300,51 @@ class IngrNúm(object):
     def poner(símismo, valor):
         símismo.var.set(str(valor))
 
+    def validar_ingreso(símismo, nueva_val):
+        raise NotImplementedError
 
-class IngrTexto(object):
+
+class IngrNúm(CampoIngreso):
+    def __init__(símismo, pariente, límites, prec, ubicación, tipo_ubic, ancho=5, comanda=None,
+                 nombre=None, val_inic=None, orden='texto'):
+        super().__init__(pariente, nombre, val_inic, comanda, ubicación, tipo_ubic, ancho, orden=orden)
+        if límites is None:
+            límites = (float('-Inf'), float('Inf'))
+        símismo.límites = límites
+
+        if prec not in ['dec', 'ent']:
+            raise ValueError('"Prec" debe ser uno de "ent" o "dec".')
+        símismo.prec = prec
+
+        if símismo.val_inic is None:
+            símismo.val_inic = (límites[0] + límites[1])/2
+
+        if prec == 'ent':
+            símismo.val_inic = round(símismo.val_inic)
+        else:
+            símismo.val_inic = round(símismo.val_inic, 2)
+
+    def validar_ingreso(símismo, nueva_val):
+        if símismo.prec == 'ent':
+            nueva_val = int(nueva_val)
+        elif símismo.prec == 'dec':
+            nueva_val = round(float(nueva_val), 3)
+        else:
+            print('"Prec" debe ser uno de "ent" o "dec".')
+            raise KeyError
+
+        if not (símismo.límites[0] <= nueva_val <= símismo.límites[1]):
+            raise ValueError
+
+        return nueva_val
+
+
+class IngrTexto(CampoIngreso):
     def __init__(símismo, pariente, nombre, ubicación, tipo_ubic, comanda=None):
-        símismo.comanda = comanda
+        super().__init__(pariente, nombre=nombre, val_inic=None, comanda=comanda,
+                         ubicación=ubicación, tipo_ubic=tipo_ubic, ancho=20)
 
-        símismo.var = tk.StringVar()
-        símismo.var.set('')
-        símismo.val = None
-
-        cj = tk.Frame(pariente, **Fm.formato_cajas)
-
-        símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
-        símismo.CampoIngr = tk.Entry(cj, textvariable=símismo.var, width=20, **Fm.formato_CampoIngr)
-        símismo.var.trace('w', símismo.acción_cambio)
-
-        símismo.Etiq.pack(**Fm.ubic_EtiqIngrNúm)
-        símismo.CampoIngr.pack(**Fm.ubic_CampoIngrEscl)
-
-        if tipo_ubic == 'pack':
-            cj.pack(**ubicación)
-        elif tipo_ubic == 'place':
-            cj.place(**ubicación)
-
-    def acción_cambio(símismo, *args):
-        nueva_val = símismo.var.get()
+    def validar_ingreso(símismo, nueva_val):
         if nueva_val == '':
             símismo.val = None
             return
@@ -344,25 +353,11 @@ class IngrTexto(object):
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
 
-    def borrar(símismo):
-        símismo.var.set('')
-
-    def bloquear(símismo):
-        símismo.CampoIngr.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)
-        símismo.Etiq.config(**Fm.formato_EtiqCtrl_bloq)
-
-    def desbloquear(símismo):
-        símismo.CampoIngr.configure(state=tk.NORMAL, cursor='arrow', **Fm.formato_BtMn)
-        símismo.Etiq.config(**Fm.formato_EtiqCtrl)
-
-    def poner(símismo, valor):
-        símismo.var.set(valor)
-
 
 class Menú(object):
-    def __init__(símismo, pariente, nombre, opciones, ubicación, tipo_ubic,
-                 comanda=None, texto_opciones=None, inicial='',
-                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, ):
+    def __init__(símismo, pariente, opciones, ubicación, tipo_ubic,
+                 nombre=None, comanda=None, texto_opciones=None, inicial='',
+                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn):
         símismo.opciones = opciones
         if texto_opciones is None:
             texto_opciones = opciones
@@ -378,7 +373,10 @@ class Menú(object):
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
-        símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
+        if nombre is not None:
+            símismo.Etiq = tk.Label(cj, text=nombre, **Fm.formato_EtiqCtrl)
+            símismo.Etiq.pack(**Fm.ubic_EtiqMenú)
+
         símismo.MenúOpciones = tk.OptionMenu(cj, símismo.var, '')
         símismo.MenúOpciones.config(takefocus=True)
         símismo.refrescar(opciones, texto_opciones)
@@ -387,7 +385,6 @@ class Menú(object):
         símismo.MenúOpciones.config(**formato_bt)
         símismo.MenúOpciones['menu'].config(**formato_mn)
 
-        símismo.Etiq.pack(**Fm.ubic_EtiqMenú)
         símismo.MenúOpciones.pack(**Fm.ubic_Menú)
 
         if tipo_ubic == 'pack':

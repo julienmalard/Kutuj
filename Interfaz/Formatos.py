@@ -174,3 +174,12 @@ ubic_escl_fecha_inic = dict(relx=0.75, rely=0.75, anchor=tk.N)
 anchos_cols_listavarVB = [0.25, 0.25, 0.25, 0.25]
 
 colores_gráficos = [(156, 106, 73), (115, 199, 31)]
+
+# Caja subetapa 2.1
+
+
+# Caja subetapa 2.2
+ubic_CtrlsVarX = dict(side='top', pady=10, anchor=tk.W)
+
+ubic_CtrlsFltrTmp = dict(side='left', padx=5)
+
