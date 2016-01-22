@@ -9,10 +9,10 @@ from Interfaz import Botones as Bt
 
 
 class ListaItemas(tk.Frame):
-    def __init__(símismo, pariente, lista, ubicación, tipo_ubic, encabezado=False):
+    def __init__(símismo, pariente, ubicación, tipo_ubic, encabezado=False):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
         símismo.ancho = ubicación['width']
-        símismo.objetos = lista
+        símismo.objetos = []
 
         ubic_tela = Fm.ubic_TlLstItemas
         if encabezado:
@@ -41,8 +41,8 @@ class ListaItemas(tk.Frame):
 
 
 class ListaEditable(ListaItemas):
-    def __init__(símismo, pariente, lista, ubicación, tipo_ubic):
-        super().__init__(pariente, lista=lista, ubicación=ubicación, tipo_ubic=tipo_ubic, encabezado=True)
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
+        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic, encabezado=True)
         símismo.controles = None
 
     def gen_encbz(símismo, nombres_cols, anchuras):
@@ -247,6 +247,7 @@ class CampoIngreso(object):
         símismo.var = tk.StringVar()
         símismo.var.set(símismo.val_inic)
         símismo.var.trace('w', símismo.acción_cambió)
+
         símismo.val = None
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
@@ -272,11 +273,15 @@ class CampoIngreso(object):
 
     def acción_cambió(símismo, *args):
         nueva_val = símismo.var.get()
+
         try:
             nueva_val = símismo.validar_ingreso(nueva_val)
             símismo.CampoIngr.config(**Fm.formato_CampoIngr)
 
-            if nueva_val != símismo.val and nueva_val != '':
+            if nueva_val == '':
+                símismo.val = None
+                return
+            if nueva_val != símismo.val:
                 símismo.val = nueva_val
                 símismo.comanda(nueva_val)
 
@@ -306,23 +311,26 @@ class CampoIngreso(object):
 
 class IngrNúm(CampoIngreso):
     def __init__(símismo, pariente, límites, prec, ubicación, tipo_ubic, ancho=5, comanda=None,
-                 nombre=None, val_inic=None, orden='texto'):
-        super().__init__(pariente, nombre, val_inic, comanda, ubicación, tipo_ubic, ancho, orden=orden)
-        if límites is None:
-            límites = (float('-Inf'), float('Inf'))
-        símismo.límites = límites
+                 nombre=None, val_inic=0, orden='texto'):
 
         if prec not in ['dec', 'ent']:
             raise ValueError('"Prec" debe ser uno de "ent" o "dec".')
         símismo.prec = prec
 
-        if símismo.val_inic is None:
-            símismo.val_inic = (límites[0] + límites[1])/2
+        símismo.val_inic = val_inic
+        if límites is not None:
+            if símismo.val_inic is None:
+                símismo.val_inic = (límites[0] + límites[1])/2
+            if prec == 'ent':
+                símismo.val_inic = round(símismo.val_inic)
+            else:
+                símismo.val_inic = round(símismo.val_inic, 2)
 
-        if prec == 'ent':
-            símismo.val_inic = round(símismo.val_inic)
-        else:
-            símismo.val_inic = round(símismo.val_inic, 2)
+        if límites is None:
+            límites = (float('-Inf'), float('Inf'))
+        símismo.límites = límites
+
+        super().__init__(pariente, nombre, val_inic, comanda, ubicación, tipo_ubic, ancho, orden=orden)
 
     def validar_ingreso(símismo, nueva_val):
         if símismo.prec == 'ent':
@@ -341,17 +349,11 @@ class IngrNúm(CampoIngreso):
 
 class IngrTexto(CampoIngreso):
     def __init__(símismo, pariente, nombre, ubicación, tipo_ubic, comanda=None):
-        super().__init__(pariente, nombre=nombre, val_inic=None, comanda=comanda,
+        super().__init__(pariente, nombre=nombre, val_inic='', comanda=comanda,
                          ubicación=ubicación, tipo_ubic=tipo_ubic, ancho=20)
 
     def validar_ingreso(símismo, nueva_val):
-        if nueva_val == '':
-            símismo.val = None
-            return
-
-        if nueva_val != símismo.val:
-            símismo.val = nueva_val
-            símismo.comanda(nueva_val)
+        return nueva_val
 
 
 class Menú(object):
@@ -417,8 +419,11 @@ class Menú(object):
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
                 
-    def refrescar(símismo, opciones, texto_opciones):
+    def refrescar(símismo, opciones, texto_opciones=None):
         símismo.opciones = opciones
+        if texto_opciones is None:
+            texto_opciones = opciones
+
         símismo.MenúOpciones['menu'].delete(0, 'end')
 
         símismo.conv = {'': ''}

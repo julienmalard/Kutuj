@@ -136,6 +136,7 @@ class CajaEtp2(CjG.CajaEtapa):
                     CjSE.CajaSubEtp22(símismo, apli, total=total_subcajas)]
 
         símismo.especificar_subcajas(subcajas)
+        símismo.bloquear_subcajas([2])
 
 
 class CajaEtp3(CjG.CajaEtapa):
