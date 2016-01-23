@@ -37,14 +37,6 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         except ValueError:
             print('Error cargando datos... :(')
 
-    def editar(símismo, itema):
-        símismo.itema = itema
-        símismo.objeto = itema.objeto
-        for i in itema.receta:
-            símismo.controles[i].poner(itema.receta[i])
-
-        símismo.receta = itema.receta
-
 
 class ListaVarsBD(CtrG.ListaEditable):
     def __init__(símismo, pariente, ubicación, tipo_ubic):
@@ -168,35 +160,33 @@ class GrpCtrlsVarX(CtrG.GrupoControles):
         símismo.datos = None
 
     def verificar_completo(símismo):
-        campos_necesarios = ['Nombre', 'Columna', 'Fecha_inic', 'Interpol', 'Transformación']
-        completos = [símismo.controles[x].val is not None and símismo.controles[x].val is not ''
-                     for x in campos_necesarios]
-        if min(completos):
-            return True
-        else:
+        símismo.controles = ctrls
+        campos_necesarios = ['Nombre', 'VarBD', 'MétodoCalc', 'FiltroVal', 
+                             'FiltroTmpInic', 'RefTmpInic', 'FiltroTmpFin', 'RefTmpFin']
+        completos = [ctrls[x].val is not None and ctrls[x].val != '' for x in campos_necesarios]
+        if not min(completos):
             return False
+        else:
+            if ctrls['FiltroTmpInic'].val in ['igual', 'sup', 'inf']:
+                filtro = ctrls['FiltroValÚn'].val
+                if filtro is None or filtro == '':
+                    return False
+            elif ctrls['FiltroTmpInic'].val == 'entre':
+                filtros = [ctrls['FiltroValEntre1'].val, ctrls['FiltroValEntre2'].val]
+                if None in filtros or '' in filtros:
+                    return False
+                    
+            return True
 
     def recrear_objeto(símismo):
         for ll, control in símismo.controles.items():
             símismo.receta[ll] = control.val
         rec = símismo.receta
-        print('Recreando...', rec)
         try:
-            símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
-                                        nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
-                                        transformación=rec['Transformación'])
+            símismo.objeto = Variable(nombre=rec['Nombre'], subyacente=rec['VarBD'],
+                                     )
         except ValueError:
-            print('Error cargando datos... :(')
-
-    def editar(símismo, itema):
-        print('Obj. controles', símismo.receta)
-        print('Obj. itema', itema.receta)
-        símismo.itema = itema
-        símismo.objeto = itema.objeto
-        for i in itema.receta:
-            símismo.controles[i].poner(itema.receta[i])
-
-        símismo.receta = itema.receta
+            print('Error generando datos... :(')
 
 
 class ListaVarsX(CtrG.ListaEditable):
