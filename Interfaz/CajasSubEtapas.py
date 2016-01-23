@@ -180,9 +180,8 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
             símismo.pariente.desbloquear_subcajas([2])
 
     def verificar_completo(símismo):
-        if len(símismo.lista.objetos) > 0:
+        if len(símismo.apli.modelo.base_central.vars) > 0:
             símismo.pariente.desbloquear_cajas([2])
-            print(símismo.Modelo.base_central.vars)
             return True
         else:
             símismo.pariente.bloquear_cajas([2])
@@ -316,14 +315,12 @@ class CajaSubEtp22(CjG.CajaSubEtapa):
             símismo.pariente.desbloquear_subcajas([2])
 
     def verificar_completo(símismo):
-        pass
-        # asdfasdfsad
-        # if len(símismo.lista.objetos) > 0:
-        #     símismo.pariente.desbloquear_cajas([2])
-        #     return True
-        # else:
-        #     símismo.pariente.bloquear_cajas([2])
-        #     return False
+        if len(símismo.apli.modelo.config.varsX) > 0:
+            símismo.pariente.desbloquear_cajas([2])
+            return True
+        else:
+            símismo.pariente.bloquear_cajas([2])
+            return False
 
     def cambió_filtro_val(símismo, val):
         símismo.cj_ingr_fltr_val.pack_forget()
