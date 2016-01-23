@@ -198,7 +198,12 @@ class GrupoControles(object):
             símismo.bt_borrar.bloquear()
 
     def editar(sîmismo, itema):
-        raise NotImplementedError
+        símismo.itema = itema
+        símismo.objeto = itema.objeto
+        for i in itema.receta:
+            símismo.controles[i].poner(itema.receta[i])
+
+        símismo.receta = itema.receta
 
     def verificar_completo(símismo):
         raise NotImplementedError
