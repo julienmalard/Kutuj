@@ -12,7 +12,7 @@ class ListaItemas(tk.Frame):
     def __init__(símismo, pariente, ubicación, tipo_ubic, encabezado=False):
         super().__init__(pariente, **Fm.formato_CjLstItemas)
         símismo.ancho = ubicación['width']
-        símismo.objetos = []
+        símismo.objetos = {}
 
         ubic_tela = Fm.ubic_TlLstItemas
         if encabezado:
@@ -64,12 +64,12 @@ class ListaEditable(ListaItemas):
         símismo.controles.editar(itema)
 
     def añadir(símismo, itema):
-        símismo.objetos.append(itema.objeto)
+        símismo.objetos[itema.objeto.nombre] = itema.objeto
         itema.pack(**Fm.ubic_CjItemas)
 
     def quitar(símismo, itema):
         símismo.controles.borrar()
-        símismo.objetos.remove(itema.objeto)
+        símismo.objetos.pop(itema.objeto.nombre)
         itema.destroy()
 
 
@@ -159,6 +159,7 @@ class GrupoControles(object):
             símismo.bt_borrar.bloquear()
 
     def cambió_control(símismo, *args):
+
         if símismo.bt_borrar is not None:
             símismo.bt_borrar.desbloquear()
         if símismo.verificar_completo() is True:
@@ -174,14 +175,15 @@ class GrupoControles(object):
             if símismo.bt_guardar is not None:
                 símismo.bt_guardar.bloquear()
 
-    def guardar(símismo):
+    def guardar(símismo, borrar=True):
         if símismo.itema is not None:
             símismo.itema.actualizar()
         elif símismo.constructor_itema is not None:
             símismo.itema = símismo.constructor_itema(símismo, símismo.lista)
 
-        símismo.borrar()
-        símismo.itema = None
+        if borrar:
+            símismo.borrar()
+            símismo.itema = None
 
     def borrar(símismo):
         símismo.objeto = None
@@ -197,7 +199,7 @@ class GrupoControles(object):
         if símismo.bt_borrar is not None:
             símismo.bt_borrar.bloquear()
 
-    def editar(sîmismo, itema):
+    def editar(símismo, itema):
         símismo.itema = itema
         símismo.objeto = itema.objeto
         for i in itema.receta:
@@ -253,7 +255,7 @@ class CampoIngreso(object):
         símismo.var.set(símismo.val_inic)
         símismo.var.trace('w', símismo.acción_cambió)
 
-        símismo.val = None
+        símismo.val = val_inic
 
         cj = tk.Frame(pariente, **Fm.formato_cajas)
 
@@ -297,7 +299,7 @@ class CampoIngreso(object):
             return
 
     def borrar(símismo):
-        símismo.var.set('')
+        símismo.var.set(símismo.val_inic)
 
     def bloquear(símismo):
         símismo.CampoIngr.configure(state=tk.DISABLED, cursor='X_cursor', **Fm.formato_BtMn_bloq)
@@ -316,20 +318,13 @@ class CampoIngreso(object):
 
 class IngrNúm(CampoIngreso):
     def __init__(símismo, pariente, límites, prec, ubicación, tipo_ubic, ancho=5, comanda=None,
-                 nombre=None, val_inic=0, orden='texto'):
+                 nombre=None, val_inic='', orden='texto'):
 
         if prec not in ['dec', 'ent']:
             raise ValueError('"Prec" debe ser uno de "ent" o "dec".')
         símismo.prec = prec
 
         símismo.val_inic = val_inic
-        if límites is not None:
-            if símismo.val_inic is None:
-                símismo.val_inic = (límites[0] + límites[1])/2
-            if prec == 'ent':
-                símismo.val_inic = round(símismo.val_inic)
-            else:
-                símismo.val_inic = round(símismo.val_inic, 2)
 
         if límites is None:
             límites = (float('-Inf'), float('Inf'))
@@ -343,8 +338,7 @@ class IngrNúm(CampoIngreso):
         elif símismo.prec == 'dec':
             nueva_val = round(float(nueva_val), 3)
         else:
-            print('"Prec" debe ser uno de "ent" o "dec".')
-            raise KeyError
+            raise KeyError('"Prec" debe ser uno de "ent" o "dec".')
 
         if not (símismo.límites[0] <= nueva_val <= símismo.límites[1]):
             raise ValueError
@@ -364,7 +358,7 @@ class IngrTexto(CampoIngreso):
 class Menú(object):
     def __init__(símismo, pariente, opciones, ubicación, tipo_ubic,
                  nombre=None, comanda=None, texto_opciones=None, inicial='',
-                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn):
+                 formato_bt=Fm.formato_BtMn, formato_mn=Fm.formato_MnMn, ancho=15):
         símismo.opciones = opciones
         if texto_opciones is None:
             texto_opciones = opciones
@@ -389,7 +383,7 @@ class Menú(object):
         símismo.refrescar(opciones, texto_opciones)
         símismo.var.trace('w', símismo.acción_cambió)
 
-        símismo.MenúOpciones.config(**formato_bt)
+        símismo.MenúOpciones.config(width=ancho, **formato_bt)
         símismo.MenúOpciones['menu'].config(**formato_mn)
 
         símismo.MenúOpciones.pack(**Fm.ubic_Menú)
@@ -406,9 +400,22 @@ class Menú(object):
         if símismo not in otro_menú.exclusivos:
             otro_menú.estab_exclusivo(símismo)
 
+    def refrescar(símismo, opciones, texto_opciones=None):
+        símismo.opciones = opciones
+        if texto_opciones is None:
+            texto_opciones = opciones
+
+        símismo.MenúOpciones['menu'].delete(0, 'end')
+
+        símismo.conv = {'': ''}
+        for op, tx in zip(opciones, texto_opciones):
+            símismo.conv[op] = tx
+            símismo.MenúOpciones['menu'].add_command(label=tx, command=tk._setit(símismo.var, tx))
+
+        símismo.borrar()
+
     def acción_cambió(símismo, *args):
         texto_campo = símismo.var.get()
-
         nueva_val = [ll for ll, v in símismo.conv.items() if v == texto_campo][0]
 
         if nueva_val == '':
@@ -423,20 +430,6 @@ class Menú(object):
 
             símismo.val = nueva_val
             símismo.comanda(nueva_val)
-                
-    def refrescar(símismo, opciones, texto_opciones=None):
-        símismo.opciones = opciones
-        if texto_opciones is None:
-            texto_opciones = opciones
-
-        símismo.MenúOpciones['menu'].delete(0, 'end')
-
-        símismo.conv = {'': ''}
-        for op, tx in zip(opciones, texto_opciones):
-            símismo.conv[op] = tx
-            símismo.MenúOpciones['menu'].add_command(label=tx, command=tk._setit(símismo.var, tx))
-
-        símismo.borrar()
 
     def excluir(símismo, valor):
         menú = símismo.MenúOpciones['menu']
@@ -539,7 +532,7 @@ class CosoEscala(tk.Canvas):
         símismo.info_mov = {"x": 0, "y": 0}
 
         símismo.manilla = símismo.create_rectangle(float(ancho / 2) - 3, 0, float(ancho / 2) + 3, altura,
-                                                   outline=Fm.col_2, fill=Fm.col_2)
+                                                   outline=Fm.col_5, fill=Fm.col_5)
 
         símismo.tag_bind(símismo.manilla, "<ButtonPress-1>", símismo.acción_empujar)
         símismo.tag_bind(símismo.manilla, "<ButtonRelease-1>", símismo.acción_soltar)

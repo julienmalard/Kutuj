@@ -18,7 +18,7 @@ class BaseCentral(object):
         símismo.datos = {}
         símismo.info_datos = {'mét_combin_tiempo': {}, 'mét_interpol': {}}
 
-        símismo.vars = []
+        símismo.vars = {}
 
     def estab_col_fecha(símismo, col=None):
         if col is None:
@@ -66,7 +66,7 @@ class BaseCentral(object):
 
 
 class VariableBD(object):
-    def __init__(símismo, base_de_datos, nombre, columna, interpol, transformación):
+    def __init__(símismo, base_de_datos, nombre, columna, interpol, transformación, fecha_inic_año):
         símismo.nombre = nombre
         símismo.base_de_datos = base_de_datos
         símismo.fecha_inic = símismo.base_de_datos.fecha_inic
@@ -134,6 +134,38 @@ class VariableBD(object):
                 terminado = False
 
         símismo.datos = np.array(datos)
+
+        fecha_inic = símismo.fecha_inic
+        n_día_inic_año = fecha_inic_año
+        datos = símismo.datos
+
+        datos_por_año = []
+        if n_día_inic_año > (fecha_inic - ft.date(fecha_inic.year, 1, 1)).days:
+            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+        else:
+            fecha_ref = ft.date(fecha_inic.year, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+
+        fecha_inic_año_act = fecha_ref
+        while True:
+            datos_año_actual = []
+            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+
+            inic = (fecha_inic_año_act - fecha_inic).days
+            if inic < 0:
+                datos_año_actual = [float('NaN')] * (fecha_inic-fecha_ref).days
+                inic = 0
+            fin = (fecha_inic_año_próx - fecha_inic).days
+
+            if fin > len(datos):
+                datos_año_actual = np.concatenate((datos_año_actual, datos[inic:]))
+                datos_por_año.append(datos_año_actual)
+                break
+
+            datos_año_actual = np.concatenate((datos_año_actual, datos[inic:fin]))
+            datos_por_año.append(datos_año_actual)
+            fecha_inic_año_act = fecha_inic_año_próx
+
+        símismo.datos = datos_por_año
 
 
 def leer_columnas(sistema, archivo):

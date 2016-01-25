@@ -75,6 +75,7 @@ class CajaCentral(tk.Frame):
 
     def desbloquear_cajas(símismo, núms_cajas):
         for n in núms_cajas:
+            símismo.CajasEtapas[n-1].desbloquear()
             if n > 1:
                 símismo.CajasEtapas[n - 2].desbloquear_transición(dirección='siguiente')
             if n < len(símismo.CajasEtapas):
@@ -136,7 +137,10 @@ class CajaEtp2(CjG.CajaEtapa):
                     CjSE.CajaSubEtp22(símismo, apli, total=total_subcajas)]
 
         símismo.especificar_subcajas(subcajas)
-        símismo.bloquear_subcajas([2])
+        símismo.bloquear_subcajas([1, 2])
+
+    def desbloquear(símismo,):
+        símismo.desbloquear_subcajas([1])
 
 
 class CajaEtp3(CjG.CajaEtapa):

@@ -125,6 +125,8 @@ class CajaEtapa(tk.Frame):
             if n < len(símismo.SubCajas):
                 símismo.SubCajas[n].desbloquear_transición(dirección='anterior')
 
+    def desbloquear(símismo):
+        pass
 
 
 class CajaSubEtapa(tk.Frame):

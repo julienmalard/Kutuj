@@ -4,8 +4,10 @@ import datetime as ft
 
 from Interfaz import Formatos as Fm
 from Interfaz import ControlesGenéricos as CtrG
+from Interfaz import Arte as Art
 
 from BD import VariableBD
+from Variables import Variable
 
 
 # Etapa 1, subcaja 2
@@ -33,7 +35,7 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         try:
             símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
                                         nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
-                                        transformación=rec['Transformación'])
+                                        transformación=rec['Transformación'], fecha_inic_año=rec['Fecha_inic'])
         except ValueError:
             print('Error cargando datos... :(')
 
@@ -106,62 +108,31 @@ class GráfVarBD(CtrG.Gráfico):
             símismo.fig.set_title('')
             return
 
-        fecha_inic = símismo.objeto.fecha_inic
-        n_día_inic_año = símismo.controles['Fecha_inic'].val
         datos = símismo.objeto.datos
 
-        datos_por_año = []
-        if n_día_inic_año > (fecha_inic - ft.date(fecha_inic.year, 1, 1)).days:
-            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
-        else:
-            fecha_ref = ft.date(fecha_inic.year, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+        colores = Art.escalar_colores(Fm.colores_gráficos[0], Fm.colores_gráficos[1], len(datos))
 
-        fecha_inic_año_act = fecha_ref
-        while True:
-            datos_año_actual = []
-            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
-
-            inic = (fecha_inic_año_act - fecha_inic).days
-            if inic < 0:
-                datos_año_actual = [float('NaN')] * (fecha_inic-fecha_ref).days
-                inic = 0
-            fin = (fecha_inic_año_próx - fecha_inic).days
-
-            if fin > len(datos):
-                datos_año_actual = np.concatenate((datos_año_actual, datos[inic:]))
-                datos_por_año.append(datos_año_actual)
-                break
-
-            datos_año_actual = np.concatenate((datos_año_actual, datos[inic:fin]))
-            datos_por_año.append(datos_año_actual)
-            fecha_inic_año_act = fecha_inic_año_próx
-
-        def escalar(val1, val2, m):
-            escl = [val1 + (val2 - val1)*(i+1)/m for i in range(m)]
-            return escl
-        r = escalar(Fm.colores_gráficos[0][0]/256, Fm.colores_gráficos[1][0]/256, len(datos_por_año))
-        v = escalar(Fm.colores_gráficos[0][1]/256, Fm.colores_gráficos[1][1]/256, len(datos_por_año))
-        a = escalar(Fm.colores_gráficos[0][2]/256, Fm.colores_gráficos[1][2]/256, len(datos_por_año))
-
-        colores = list(zip(r, v, a))
-        for n, año in enumerate(datos_por_año):
+        for n, año in enumerate(datos):
             símismo.fig.plot(año, color=colores[n])
 
         símismo.fig.relim()
         símismo.fig.autoscale_view()
 
 
-# Etapa 2, subcaja 2
-class GrpCtrlsVarX(CtrG.GrupoControles):
-    def __init__(símismo, apli, controles, gráfico, lista, bt_guardar, bt_borrar):
-        super().__init__(controles, constructor_itema=ItemaVarBD, gráfico=gráfico, lista=lista,
-                         bt_guardar=bt_guardar, bt_borrar=bt_borrar)
+# Etapa 2, subcaja 1
+class GrpCtrlsVarY(CtrG.GrupoControles):
+    def __init__(símismo, pariente, apli, controles, gráfico, bt_guardar, bt_borrar):
+        super().__init__(controles, gráfico=gráfico, bt_guardar=bt_guardar, bt_borrar=bt_borrar)
+        símismo.pariente = pariente
         símismo.apli = apli
         símismo.datos = None
 
     def verificar_completo(símismo):
-        símismo.controles = ctrls
-        campos_necesarios = ['Nombre', 'VarBD', 'MétodoCalc', 'FiltroVal', 
+        ctrls = símismo.controles
+
+        símismo.pariente.cambió_filtro_val(ctrls['FiltroVal'].val)
+
+        campos_necesarios = ['Nombre', 'VarBD', 'MétodoCalc', 'FiltroVal',
                              'FiltroTmpInic', 'RefTmpInic', 'FiltroTmpFin', 'RefTmpFin']
         completos = [ctrls[x].val is not None and ctrls[x].val != '' for x in campos_necesarios]
         if not min(completos):
@@ -175,18 +146,92 @@ class GrpCtrlsVarX(CtrG.GrupoControles):
                 filtros = [ctrls['FiltroValEntre1'].val, ctrls['FiltroValEntre2'].val]
                 if None in filtros or '' in filtros:
                     return False
-                    
+
+            return True
+
+    def guardar(símismo, borrar=False):
+        símismo.apli.modelo.config.varY = símismo.objeto
+        print(símismo.apli.modelo.config.varY)
+        símismo.apli.modelo.config.actualizar_datos()
+        super().guardar(borrar=borrar)
+
+        símismo.pariente.verificar_completo()
+
+    def recrear_objeto(símismo):
+        for ll, control in símismo.controles.items():
+            símismo.receta[ll] = control.val
+        # try:
+        #     nombre = símismo.receta['VarBD']
+        #     símismo.objeto = Variable(símismo.receta, símismo.apli.modelo.base_central.vars[nombre])
+        # except ValueError:
+        #     print('Error generando datos... :(')
+        nombre = símismo.receta['VarBD']
+        símismo.objeto = Variable(símismo.receta, símismo.apli.modelo.base_central.vars[nombre])
+
+
+class GráfVarY(CtrG.Gráfico):
+    def __init__(símismo, pariente, ubicación, tipo_ubic):
+        super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
+
+    def dibujar(símismo):
+        if símismo.objeto is not None:
+            símismo.fig.set_title(símismo.objeto.nombre)
+        else:
+            símismo.fig.set_title('')
+            return
+
+        datos = símismo.objeto.datos
+        colores = Art.escalar_colores(Fm.colores_gráficos[0], Fm.colores_gráficos[1], len(datos))
+        for n, año in enumerate(datos):
+            símismo.fig.plot(año, color=colores[n])
+
+        símismo.fig.relim()
+        símismo.fig.autoscale_view()
+
+
+# Etapa 2, subcaja 2
+class GrpCtrlsVarX(CtrG.GrupoControles):
+    def __init__(símismo, pariente, apli, controles, gráfico, lista, bt_guardar, bt_borrar):
+        super().__init__(controles, constructor_itema=ItemaVarX, gráfico=gráfico, lista=lista,
+                         bt_guardar=bt_guardar, bt_borrar=bt_borrar)
+        símismo.pariente = pariente
+        símismo.apli = apli
+        símismo.datos = None
+
+    def verificar_completo(símismo):
+        ctrls = símismo.controles
+
+        símismo.pariente.cambió_filtro_val(ctrls['FiltroVal'].val)
+
+        campos_necesarios = ['Nombre', 'VarBD', 'MétodoCalc', 'FiltroVal',
+                             'FiltroTmpInic', 'RefTmpInic', 'FiltroTmpFin', 'RefTmpFin']
+        completos = [ctrls[x].val is not None and ctrls[x].val != '' for x in campos_necesarios]
+        if not min(completos):
+            return False
+        else:
+            if ctrls['FiltroTmpInic'].val in ['igual', 'sup', 'inf']:
+                filtro = ctrls['FiltroValÚn'].val
+                if filtro is None or filtro == '':
+                    return False
+            elif ctrls['FiltroTmpInic'].val == 'entre':
+                filtros = [ctrls['FiltroValEntre1'].val, ctrls['FiltroValEntre2'].val]
+                if None in filtros or '' in filtros:
+                    return False
+
             return True
 
     def recrear_objeto(símismo):
         for ll, control in símismo.controles.items():
             símismo.receta[ll] = control.val
-        rec = símismo.receta
         try:
-            símismo.objeto = Variable(nombre=rec['Nombre'], subyacente=rec['VarBD'],
-                                     )
+            nombre = símismo.receta['VarBD']
+            símismo.objeto = Variable(símismo.receta, símismo.apli.modelo.base_central.vars[nombre])
         except ValueError:
             print('Error generando datos... :(')
+
+    def guardar(símismo, borrar=True):
+        super().guardar()
+        símismo.apli.modelo.config.actualizar_datos()
 
 
 class ListaVarsX(CtrG.ListaEditable):
@@ -194,8 +239,8 @@ class ListaVarsX(CtrG.ListaEditable):
         super().__init__(pariente, ubicación=ubicación, tipo_ubic=tipo_ubic)
 
         símismo.pariente = pariente
-        nombres_cols = ['Nombre', 'Columna', 'Transformación', 'Interpolación']
-        anchuras = Fm.anchos_cols_listavarVB
+        nombres_cols = ['Nombre', 'Fuente', 'Calculado con', 'De valores']
+        anchuras = Fm.anchos_cols_listavarX
         símismo.gen_encbz(nombres_cols, anchuras)
 
     def añadir(símismo, itema):
@@ -213,29 +258,43 @@ class ItemaVarX(CtrG.ItemaEditable):
 
         símismo.cj_cols = cj_cols = tk.Frame(símismo, **Fm.formato_cajas)
         cj_nombre = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
-        cj_columna = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
-        cj_trans = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
-        cj_interpol = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
+        cj_fuente = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
+        cj_mét_calc = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
+        cj_fltr_val = tk.Frame(cj_cols, **Fm.formato_secciones_itemas)
 
         símismo.etiq_nombre = tk.Label(cj_nombre, **Fm.formato_texto_itemas)
-        símismo.etiq_columna = tk.Label(cj_columna, **Fm.formato_texto_itemas)
-        símismo.etiq_trans = tk.Label(cj_trans, **Fm.formato_texto_itemas)
-        símismo.etiq_interpol = tk.Label(cj_interpol, **Fm.formato_texto_itemas)
+        símismo.etiq_fuente = tk.Label(cj_fuente, **Fm.formato_texto_itemas)
+        símismo.etiq_calc = tk.Label(cj_mét_calc, **Fm.formato_texto_itemas)
+        símismo.etiq_fltr_vals = tk.Label(cj_fltr_val, **Fm.formato_texto_itemas)
 
-        símismo.etiquetas = [símismo.etiq_nombre, símismo.etiq_columna, símismo.etiq_trans, símismo.etiq_interpol]
-        símismo.columnas = [cj_nombre, cj_columna, cj_trans, cj_interpol]
+        símismo.etiquetas = [símismo.etiq_nombre, símismo.etiq_fuente, símismo.etiq_calc, símismo.etiq_fltr_vals]
+        símismo.columnas = [cj_nombre, cj_fuente, cj_mét_calc, cj_fltr_val]
         for etiq in símismo.etiquetas:
             etiq.pack(**Fm.ubic_EtiqItemas)
 
-        símismo.estab_columnas(anchuras=Fm.anchos_cols_listavarVB)
+        símismo.estab_columnas(anchuras=Fm.anchos_cols_listavarX)
 
         símismo.actualizar()
 
     def actualizar(símismo):
-        símismo.etiq_nombre.config(text=símismo.receta['Nombre'])
-        símismo.etiq_columna.config(text=símismo.receta['Columna'])
-        símismo.etiq_trans.config(text=símismo.receta['Transformación'])
-        símismo.etiq_interpol.config(text=símismo.receta['Interpol'])
+        rec = símismo.receta
+        símismo.etiq_nombre.config(text=rec['Nombre'])
+        símismo.etiq_fuente.config(text=rec['VarBD'])
+        símismo.etiq_calc.config(text=rec['MétodoCalc'])
+
+        if rec['FiltroVal'] == 'ninguno':
+            texto = 'Ningún límite'
+        elif rec['FiltroVal'] == 'igual':
+            texto = 'Igual a {0}' % [rec['FiltroValÚn']]
+        elif rec['FiltroVal'] == 'sup':
+            texto = 'Superior a {0}' % [rec['FiltroValÚn']]
+        elif rec['FiltroVal'] == 'inf':
+            texto = 'Inferior a {0}' % [rec['FiltroValÚn']]
+        elif rec['FiltroVal'] == 'entre':
+            texto = 'Entre {0} y {1}' % [rec['FiltroValEntre1'], rec['FiltroValEntre2']]
+        else:
+            raise KeyError
+        símismo.etiq_fltr_vals.config(text=texto)
 
     def resaltar(símismo):
         for etiq in símismo.etiquetas:
@@ -257,45 +316,9 @@ class GráfVarX(CtrG.Gráfico):
             símismo.fig.set_title('')
             return
 
-        fecha_inic = símismo.objeto.fecha_inic
-        n_día_inic_año = símismo.controles['Fecha_inic'].val
         datos = símismo.objeto.datos
-
-        datos_por_año = []
-        if n_día_inic_año > (fecha_inic - ft.date(fecha_inic.year, 1, 1)).days:
-            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
-        else:
-            fecha_ref = ft.date(fecha_inic.year, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
-
-        fecha_inic_año_act = fecha_ref
-        while True:
-            datos_año_actual = []
-            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
-
-            inic = (fecha_inic_año_act - fecha_inic).days
-            if inic < 0:
-                datos_año_actual = [float('NaN')] * (fecha_inic-fecha_ref).days
-                inic = 0
-            fin = (fecha_inic_año_próx - fecha_inic).days
-
-            if fin > len(datos):
-                datos_año_actual = np.concatenate((datos_año_actual, datos[inic:]))
-                datos_por_año.append(datos_año_actual)
-                break
-
-            datos_año_actual = np.concatenate((datos_año_actual, datos[inic:fin]))
-            datos_por_año.append(datos_año_actual)
-            fecha_inic_año_act = fecha_inic_año_próx
-
-        def escalar(val1, val2, m):
-            escl = [val1 + (val2 - val1)*(i+1)/m for i in range(m)]
-            return escl
-        r = escalar(Fm.colores_gráficos[0][0]/256, Fm.colores_gráficos[1][0]/256, len(datos_por_año))
-        v = escalar(Fm.colores_gráficos[0][1]/256, Fm.colores_gráficos[1][1]/256, len(datos_por_año))
-        a = escalar(Fm.colores_gráficos[0][2]/256, Fm.colores_gráficos[1][2]/256, len(datos_por_año))
-
-        colores = list(zip(r, v, a))
-        for n, año in enumerate(datos_por_año):
+        colores = Art.escalar_colores(Fm.colores_gráficos[0], Fm.colores_gráficos[1], len(datos))
+        for n, año in enumerate(datos):
             símismo.fig.plot(año, color=colores[n])
 
         símismo.fig.relim()

@@ -3,68 +3,107 @@ import datetime as ft
 
 
 class Variable(object):
-    def __init__(símismo, subyacente, fecha_inic, filtros_deriv):
-        símismo.subyacente = subyacente
-        símismo.fecha_inic = fecha_inic
-
-        símismo.mét_derivación = ''
-        símismo.filtros_deriv = filtros_deriv
-        símismo.lím_infer = ()
-        símismo.lím_super = ()
-        símismo.día_inic_año = 0
+    def __init__(símismo, receta=None, fuente=None):
+        símismo.receta = receta
+        símismo.fuente = fuente
         símismo.datos = None
+        símismo.fecha_inic = None
+        símismo.nombre = None
 
-    def recalcular(símismo):
+        if receta is not None:
+            símismo.recalcular(receta, fuente)
+
+    def recalcular(símismo, receta, fuente):
+        símismo.receta = receta
+        símismo.fecha_inic = fuente.fecha_inic
+        símismo.nombre = receta['Nombre']
+        mét_calc = receta['MétodoCalc']
+        tipo_filtro_val = receta['FiltroVal']
+
+        filtro_val_exact = filtro_val_inf = filtro_val_sup = None
+        if tipo_filtro_val == 'ninguno':
+            pass
+        elif tipo_filtro_val == 'igual':
+            filtro_val_exact = receta['FiltroValÚn']
+        elif tipo_filtro_val == 'sup':
+            filtro_val_inf = receta['FiltroValÚn']
+        elif tipo_filtro_val == 'inf':
+            filtro_val_sup = receta['FiltroValÚn']
+        elif tipo_filtro_val == 'entre':
+            filtro_val_inf = receta['FitroValEntre1']
+            filtro_val_sup = receta['FitroValEntre2']
+        else:
+            raise KeyError(tipo_filtro_val)
+
+        filtro_tmp_inic = receta['FiltroTmpInic']
+        ref_tmp_inic = receta['RefTmpInic']
+        filtro_tmp_fin = receta['FiltroTmpFin']
+        ref_tmp_fin = receta['RefTmpFin']
+
+        datos_fuente = fuente.datos
         datos = []
-        vals_año_act = []
 
-        for n, i in enumerate(símismo.subyacente):
-            fecha_act = (símismo.fecha_inic + ft.timedelta(days=n))
-            año_act = fecha_act.year
+        for n_año, año in enumerate(datos_fuente):
+            datos_año = []
+            for n_día, día in enumerate(año):
 
-            if símismo.lím_infer[1] == 'abs':
-                lím_infer = símismo.lím_infer[0]
-            elif símismo.lím_infer[1] == 'rel':
-                lím_infer = n + símismo.lím_infer[0]
+                # Filtrar por la fecha
 
-            if símismo.lím_super[1] == 'abs':
-                lím_super = símismo.lím_super[0]
-            elif símismo.lím_super[1] == 'rel':
-                lím_super = n + símismo.lím_super[0]
-
-            if lím_infer >= 0 and (lím_super + 1) < len(símismo.subyacente):
-                rango_activo = símismo.subyacente[lím_infer:lím_super+1]
-
-                for f in símismo.filtros_deriv:
-                    if f[0] == '<':
-                        rango_filtrado = [x for x in rango_activo if x < f[1]]
-                    if f[0] == '>':
-                        rango_filtrado = [x for x in rango_activo if x > f[1]]
-                    if f[0] == '<=':
-                        rango_filtrado = [x for x in rango_activo if x <= f[1]]
-                    if f[0] == '>=':
-                        rango_filtrado = [x for x in rango_activo if x >= f[1]]
-
-                if símismo.mét_derivación == 'máximo':
-                    val = np.max(rango_filtrado)
-                elif símismo.mét_derivación == 'mínimo':
-                    val = np.min(rango_filtrado)
-                elif símismo.mét_derivación == 'cumulativo':
-                    val = np.sum(rango_filtrado)
-                elif símismo.mét_derivación == 'número':
-                    val = len(rango_filtrado)
+                if ref_tmp_inic == 'abs':
+                    lím_infer = filtro_tmp_inic
+                elif ref_tmp_inic == 'rel':
+                    lím_infer = n_día + filtro_tmp_inic
                 else:
-                    raise ValueError('Método de derivación {0} para no reconocido.'.format(símismo.mét_derivación))
-            else:
-                val = float('NaN')
+                    raise KeyError
 
-            if len(datos) == 0:
-                vals_año_act += [float('NaN')] * (fecha_act-símismo.fecha_inic).days
+                if ref_tmp_fin == 'abs':
+                    lím_super = filtro_tmp_fin + 1
+                elif ref_tmp_fin == 'rel':
+                    lím_super = n_día + filtro_tmp_fin + 1
+                else:
+                    raise KeyError
 
-            vals_año_act += val
+                cabeza = []
+                cola = []
+                if lím_infer < 0:
+                    if (n_año - 1) >= 0:
+                        cabeza = datos_fuente[n_año - 1][lím_infer:]
+                    else:
+                        cabeza = [float('NaN')] * (-lím_infer)
+                    lím_infer = 0
 
-            if (ft.date(year=año_act, month=1, day=1) - fecha_act).days == símismo.día_inic_año:
-                datos.append(vals_año_act)
-                vals_año_act = []
+                if lím_super > (len(año) + 1):
+                    if (n_año + 1) < len(datos_fuente):
+                        cola = datos_fuente[n_año + 1][:lím_super - len(año)]
+                    else:
+                        cola = [float('NaN')] * (lím_super-len(año))
+                    lím_super = len(año) + 1
+
+                plazo = np.array(np.concatenate((cabeza, año[lím_infer:lím_super+1], cola)), dtype=float)
+
+                # Filtrar por el valor
+
+                if filtro_val_exact is not None:
+                    np.place(plazo, plazo != filtro_val_exact, [float('NaN')])
+                if filtro_val_inf is not None:
+                    np.place(plazo, plazo <= filtro_val_inf, [float('NaN')])
+                if filtro_val_sup is not None:
+                    np.place(plazo, plazo >= filtro_val_sup, [float('NaN')])
+
+                # Calcular el variable
+                if mét_calc == 'val_tot':
+                    valor = np.nansum(plazo)
+                elif mét_calc == 'val_prom':
+                    valor = np.nanmean(plazo)
+                elif mét_calc == 'núm_días':
+                    valor = np.count_nonzero(~np.isnan(plazo))
+                elif mét_calc == 'núm_días_consec':
+                    valor = [np.count_nonzero(~np.isnan(x)) for x in np.split(plazo, np.where(np.isnan(plazo))[0])]
+                else:
+                    raise KeyError('Método de cálculo {0} para no reconocido.'.format(mét_calc))
+
+                datos_año.append(valor)
+
+            datos.append(datos_año)
 
         símismo.datos = datos

@@ -4,9 +4,10 @@ import tkinter as tk
 # Parámetros generales
 col_fondo = 'white'  # El color de fondo del interfaz
 col_1 = '#990000'
-col_2 = '#ffbf00'
+col_2 = '#cc3300'
 col_3 = '#ffd633'
 col_4 = '#fffae5'
+col_5 = '#ffbf00'
 fuente = 'Comic Sans MS'
 formato_cajas = dict(bg=col_fondo, borderwidth=0, highlightthickness=0)
 formato_botones = dict(bd=0, borderwidth=0, highlightthickness=0)
@@ -108,7 +109,7 @@ formato_MnMn = dict(bg=col_fondo, relief='flat', bd=0, activebackground=col_4, a
                     disabledforeground='#cccccc', font=(fuente, '13'))
 formato_BtMn = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_3, highlightcolor=col_3,
                     relief='flat', activebackground=col_4, font=(fuente, '13'),
-                    width=15, anchor=tk.W)
+                    anchor=tk.W)
 formato_BtMn_bloq = dict(highlightbackground='#999999')
 
 ubic_EtiqMenú = dict(side='left', padx=20)
@@ -176,10 +177,51 @@ anchos_cols_listavarVB = [0.25, 0.25, 0.25, 0.25]
 colores_gráficos = [(156, 106, 73), (115, 199, 31)]
 
 # Caja subetapa 2.1
+ubic_CjBajoSE21 = dict(relx=0.5, rely=0, y=50,
+                       relheight=1, height=-100,
+                       relwidth=1, width=-2*formato_BtsNavSub['width'],
+                       anchor=tk.N)
+
+ubic_CtrlsVarY = dict(side='top', padx=10, pady=2, anchor=tk.W)
+
+ubic_CtrlsFltrValY = dict(side='left', padx=0, anchor=tk.W, expand=True)
+
+ubic_cj_fltr_tmpY = dict(side='top', pady=2, padx=10, anchor=tk.W)
+ubic_CtrlsFltrTmpY = dict(side='left', padx=5, anchor=tk.W)
+
+
+ubic_CjCtrlsVarsY = dict(relx=0.15, rely=0.5, x=100, y=10, relwidth=0.5, relheight=.95, height=-150,
+                         width=-20, anchor=tk.CENTER)
+
+ubic_GráficoVarsY = dict(relx=0.75, rely=0.5, relwidth=0.5, relheight=.70, width=-60, anchor=tk.CENTER)
 
 
 # Caja subetapa 2.2
-ubic_CtrlsVarX = dict(side='top', pady=10, anchor=tk.W)
+ubic_CjLstVarsX = dict(relx=0.5, rely=0, y=50, width=0.8*ancho_ventana, height=100, anchor=tk.N)
+anchos_cols_listavarX = [0.20, 0.20, 0.35, 0.25]
 
-ubic_CtrlsFltrTmp = dict(side='left', padx=5)
+ubic_CjBajoSE22 = dict(relx=0.5, rely=0, y=ubic_CjLstVarsX['y'] + ubic_CjLstVarsX['height'],
+                       relheight=1, height=-(ubic_CjLstVarsX['y']+ubic_CjLstVarsX['height']),
+                       relwidth=1, width=-2*formato_BtsNavSub['width'],
+                       anchor=tk.N)
 
+ubic_CtrlsVarX = dict(side='top', padx=10, pady=2, anchor=tk.W)
+
+ubic_CtrlsFltrValX = dict(side='left', padx=0, anchor=tk.W)
+
+ubic_cj_fltr_tmpX = dict(side='top', pady=2, padx=10, anchor=tk.W)
+ubic_CtrlsFltrTmpX = dict(side='left', padx=5, anchor=tk.W)
+
+
+ubic_CjCtrlsVarsX = dict(relx=0.25, rely=0, x=10, y=10, relwidth=0.5, relheight=.95, width=-20, anchor=tk.N)
+
+ubic_GráficoVarsX = dict(relx=0.75, rely=0, x=10, y=10, relwidth=0.5, relheight=.95, width=-20, anchor=tk.N)
+
+
+# Caja subetapa 3.1
+formato_BtCalib = dict(borderwidth=0, highlightthickness=0, activebackground='#ffdb4d',
+                       font=(fuente, 20, 'bold'), height=2, width=13,  wraplength=170)  # Formatos generales
+formato_BtCalib_norm = dict(bg='#ffe580', fg='#000000', **formato_BtCalib)
+formato_BtCalib_sel = dict(bg='#ffdb4d')
+
+ubic_BtCalib = dict(relx=0.5, rely=0, y=20, anchor=tk.N)

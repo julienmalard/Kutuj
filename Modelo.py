@@ -22,7 +22,7 @@ class ConfigModelo(object):
         símismo.varY = vary
 
         if símismo.varsX is None:
-            símismo.varsX = []
+            símismo.varsX = {}
 
         símismo.datosX = []
         símismo.datosY = []
@@ -30,7 +30,7 @@ class ConfigModelo(object):
 
     def actualizar_datos(símismo):
         símismo.datosX = []
-        for varx in símismo.varsX:
+        for ll, varx in sorted(símismo.varsX.items()):
             for año, datos in enumerate(varx.datos):
                 if año >= len(símismo.datosX):
                     símismo.datosX.append([])

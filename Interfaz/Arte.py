@@ -60,3 +60,16 @@ archivos_imgs = {'LogoInic': '%sLogoInic.png' % raíz_imgs,
                  'FlchSenc': '%sFlchSenc.png' % raíz_imgs
 
                  }
+
+
+def escalar_colores(color1, color2, n):
+
+    def escalar(val1, val2, m):
+            escl = [val1/256 + (val2/256 - val1/256)*i/(m-1) for i in range(m)]
+            return escl
+
+    r = escalar(color1[0], color2[0], n)
+    v = escalar(color1[1], color2[1], n)
+    a = escalar(color1[2], color2[2], n)
+
+    return list(zip(r, v, a))
