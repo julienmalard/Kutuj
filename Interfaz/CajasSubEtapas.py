@@ -278,7 +278,7 @@ class CajaSubEtp21(CjG.CajaSubEtapa):
                          'FiltroTmpInic': ingr_fltr_tp_inic, 'RefTmpInic': menú_fltr_tp_inic,
                          'FiltroTmpFin': ingr_fltr_tp_fin, 'RefTmpFin': menú_fltr_tp_fin}
 
-        símismo.gráfico = Ctrl.GráfVarX(símismo, ubicación=Fm.ubic_GráficoVarsY, tipo_ubic='place')
+        símismo.gráfico = Ctrl.GráfVarY(símismo, ubicación=Fm.ubic_GráficoVarsY, tipo_ubic='place')
 
         símismo.grupo_controles = Ctrl.GrpCtrlsVarY(pariente=símismo, apli=apli, controles=dic_controles,
                                                     gráfico=símismo.gráfico,
@@ -454,14 +454,19 @@ class CajaSubEtp31(CjG.CajaSubEtapa):
 
         símismo.bt = Bt.BotónTexto(símismo, texto='Calibrar modelo',
                                    formato_norm=Fm.formato_BtCalib_norm, formato_sel=Fm.formato_BtCalib_sel,
+                                   comanda=símismo.acción_bt_calibrar,
                                    ubicación=Fm.ubic_BtCalib, tipo_ubic='place')
+
+    def acción_bt_calibrar(símismo):
+        símismo.Modelo.config.calibrar()
+        símismo.verificar_completo()
 
     def acción_desbloquear(símismo):
         símismo.Modelo = símismo.apli.modelo
         símismo.verificar_completo()
 
     def verificar_completo(símismo):
-        if símismo.Modelo.pesos_vars is not None:
+        if símismo.Modelo.config.pesos_vars is not None:
             símismo.pariente.desbloquear_subcajas([2])
         else:
             símismo.pariente.bloquear_subcajas([2])
@@ -469,7 +474,7 @@ class CajaSubEtp31(CjG.CajaSubEtapa):
 
 class CajaSubEtp32(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='¡...y aún mejor validar!', núm=2, total=total)
+        super().__init__(pariente, nombre='...y aún mejor validar', núm=2, total=total)
         símismo.apli = apli
 
 

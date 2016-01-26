@@ -151,7 +151,6 @@ class GrpCtrlsVarY(CtrG.GrupoControles):
 
     def guardar(símismo, borrar=False):
         símismo.apli.modelo.config.varY = símismo.objeto
-        print(símismo.apli.modelo.config.varY)
         símismo.apli.modelo.config.actualizar_datos()
         super().guardar(borrar=borrar)
 
@@ -181,9 +180,14 @@ class GráfVarY(CtrG.Gráfico):
             return
 
         datos = símismo.objeto.datos
-        colores = Art.escalar_colores(Fm.colores_gráficos[0], Fm.colores_gráficos[1], len(datos))
-        for n, año in enumerate(datos):
-            símismo.fig.plot(año, color=colores[n])
+
+        if símismo.objeto.receta['RefTmpInic'] == 'abs' and símismo.objeto.receta['RefTmpFin'] == 'abs':
+            datos_hist = [x[0] for x in datos]
+            símismo.fig.hist(datos_hist, color=Fm.col_5)
+        else:
+            colores = Art.escalar_colores(Fm.colores_gráficos[0], Fm.colores_gráficos[1], len(datos))
+            for n, año in enumerate(datos):
+                símismo.fig.plot(año, color=colores[n])
 
         símismo.fig.relim()
         símismo.fig.autoscale_view()

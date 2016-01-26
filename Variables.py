@@ -104,6 +104,6 @@ class Variable(object):
 
                 datos_año.append(valor)
 
-            datos.append(datos_año)
+            datos.append(np.array(datos_año))
 
         símismo.datos = datos

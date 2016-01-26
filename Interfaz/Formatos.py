@@ -49,7 +49,7 @@ ubic_BtLeng = dict(relx=1, rely=0.5, x=-20, anchor=tk.E)
 # Botones izquierda
 ubic_CjIzq = dict(side='top', fill=tk.Y, expand=True, anchor=tk.W)
 ubic_CjBtsIzq = dict(side='left', fill=tk.Y, expand=True)
-formato_BtsNavIzq = dict(width=60, height=60)
+formato_BtsNavIzq = dict(width=60, height=60, borderwidth=0, highlightthickness=0)
 ubic_BtNavIzq = dict(side='top', padx=10, pady=15, expand=True)
 formato_LínIzq = dict(bd=0, highlightthickness=0, width=2, bg='black')
 ubic_LínIzq = dict(side='right', pady=(0, 20), fill=tk.Y, expand=True)
@@ -224,4 +224,4 @@ formato_BtCalib = dict(borderwidth=0, highlightthickness=0, activebackground='#f
 formato_BtCalib_norm = dict(bg='#ffe580', fg='#000000', **formato_BtCalib)
 formato_BtCalib_sel = dict(bg='#ffdb4d')
 
-ubic_BtCalib = dict(relx=0.5, rely=0, y=20, anchor=tk.N)
+ubic_BtCalib = dict(relx=0.5, rely=0.5, anchor=tk.CENTER)

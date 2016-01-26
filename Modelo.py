@@ -6,7 +6,6 @@ import math as mat
 
 from BD import BaseCentral
 
-
 class Modelo(object):
     def __init__(símismo, archivo_base_central):
         tipo_arciho = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
@@ -27,66 +26,146 @@ class ConfigModelo(object):
         símismo.datosX = []
         símismo.datosY = []
         símismo.pesos_vars = None
+        símismo.pesos_años = np.array([])
 
-    def actualizar_datos(símismo):
-        símismo.datosX = []
+    def actualizar_datos(símismo, recalc=False):
+        datosx = []
         for ll, varx in sorted(símismo.varsX.items()):
             for año, datos in enumerate(varx.datos):
-                if año >= len(símismo.datosX):
-                    símismo.datosX.append([])
-                símismo.datosX[año].append([datos])
+                if año >= len(datosx):
+                    datosx.append([])
+                datosx[año].append(datos)
+
         símismo.datosY = símismo.varY.datos
+        símismo.datosX = [np.array(x) for x in datosx]
 
-    def calibrar(símismo, datos_x, datos_y):
-        def calc_error_intervalos(pesos_var):
-            distribs = []
-            pesos = []
-            y_preds = []
-            for n_año, año in enumerate(datos_x):
-                x_conocido = datos_x.copy
-                y_conocido = datos_y.copy
-                x_pred = x_conocido.pop(n_año)
-                y_pred = y_conocido.pop(n_año)
+        if len(símismo.datosX) and len(símismo.datosY) and recalc:
+            símismo.recalcular_pesos_años()
 
-                distrib, pesos_años = símismo.predecir(x_pred, x_conocido, y_conocido, pesos_var)
+    def recalcular_pesos_años(símismo):
+        x_conoc = símismo.datosX[:-1]
+        x_ingr = símismo.datosX[-1]
+        pesos = símismo.pesos_vars
 
-                y_preds.append(y_pred)
-                distribs.append(np.array(distrib))
-                pesos.append(pesos_años)
+        for n, año in enumerate(x_conoc):
+            x_conoc[n] = año[:, :x_ingr.shape[1]]
 
-            predicciones = (np.array(distribs), np.array(pesos))
-            error = símismo.validar(predicciones, np.array(y_preds))[0]
+        símismo.pesos_años = np.array([símismo.calc_peso_año(x_año, x_ingr, pesos_vars=pesos) for x_año in x_conoc])
 
-            return error
+    def predecir(símismo, n_día):
+        if not len(símismo.pesos_años):
+            símismo.recalcular_pesos_años()
+        assert type(símismo.pesos_años) is np.ndarray
 
-        pesos_var_inic = np.repeat([1], datos_x[0].shape[0])
-        pesos_calibrados = optimizar.minimize(calc_error_intervalos, pesos_var_inic).x
+        y_conoc = símismo.datosY[:-1]
+        pesos_pred = símismo.pesos_años[:, n_día-1]
 
-        return pesos_calibrados
+        return pesos_pred, y_conoc
 
-    def calibrar_todos_días(símismo, datos_x, datos_y):
-        pesos_vars_diarios = np.zeros((365, datos_x[0].shape[0]))
-        for i in range(365):
-            pesos_vars_diarios[i] = símismo.calibrar(datos_x[:i+1], datos_y[:i+1])
+    def calibrar(símismo):
+        n_vars = símismo.datosX[0].shape[0]
+        print('datosX: ', símismo.datosX)
+        print(símismo.datosX[0].shape)
+        símismo.pesos_vars = np.zeros((n_vars, 365), dtype=float)
+        print('símismo.pesos_vars', símismo.pesos_vars)
 
-        símismo.pesos_vars = pesos_vars_diarios
+        for i in range(1, 366):
+            print('i: ', i)
+            paráms = (símismo.datosX, símismo.datosY, i)
+            print('símismo.datosY: ', símismo.datosY)
+            inic = np.zeros(n_vars)
+            print('inic.shape: ', inic.shape)
+            calibrados = optimizar.minimize(símismo.calc_ajust_modelo, inic, args=paráms).x
+
+            símismo.pesos_vars[:, i] = calibrados
+
+    def calc_ajust_modelo(símismo, pesos, datos_x, datos_y, n_día):
+        print('n_día', n_día)
+
+        def calc_densidad(simil_años, y_años, y_observ):
+            print('calculando densidad...')
+            print('simil_años: ', simil_años)
+            print('y_años: ', y_años)
+            print('y_observ: ', y_observ)
+            peso_años_norm = simil_años / np.sum(simil_años)
+            dist_y = (y_años - y_observ) / (y_años.max() - y_años.min())
+            densidad = np.sum(peso_años_norm * (1 - dist_y))
+
+            return densidad
+
+        densidades = np.empty(len(datos_x))
+        print('dim densidades: ', len(datos_x))
+        for n in range(len(datos_x)):
+            print('n: ', n)
+            x_ant = datos_x.copy()
+            x_pred = x_ant.pop(n)
+            y_ant = datos_y.copy()
+            y_obs = y_ant.pop(n)
+
+            x_ant = np.array(x_ant)
+            print('x_ant 2: ', x_ant)
+            print(x_ant.shape)
+            x_pred = np.array(x_pred)
+            y_ant = np.array(y_ant)
+            y_obs = np.array(y_obs)
+
+            if n_día is not None:
+                x_ant = x_ant[:, :, :n_día]
+                x_pred = x_pred[:, :n_día]
+                y_ant = y_ant[:, :n_día]
+                y_obs = y_obs[:n_día]
+
+            print('x_ant 3: ', x_ant)
+
+            print('x_pred', x_pred)
+            print('y_ant', y_ant)
+            print('y_obs', y_obs)
+
+            print('x_ant', x_ant.shape)
+            print('x_pred', x_pred.shape)
+            print('y_ant', y_ant.shape)
+            print('y_obs', y_obs.shape)
+
+            matr_simil = np.empty(len(x_ant))
+
+            for x in x_ant:
+                print('x.shape', x.shape)
+                matr_simil = símismo.calc_peso_año(x_pred, x, pesos_vars=pesos, día_único=True)
+
+            densidades[n] = calc_densidad(matr_simil, y_ant, y_obs)
+            print('densidades: ', densidades)
+
+        return np.sum(densidades)
 
     @staticmethod
-    def predecir(datos_x_actuales, datos_x, datos_y, pesos_vars):
+    def calc_peso_año(x1, x2, pesos_vars, día_único=False):
+        print(x1.shape, x2.shape)
+        assert x1.shape == x2.shape
 
-        def calc_dist(datos1, datos2, pesos=pesos_vars):
-            peso_año = 0
-            for n_var, dato in enumerate(datos1):
-                simil = (1-estad.wilcoxon(dato, datos2[n_var]).pvalue)
-                peso_año += simil ** pesos[n_var]
-            return peso_año
+        def wilcoxon(x_1, x_2):
+            if np.array_equal(x_1, x_2):
+                p = 1
+            else:
+                p = estad.wilcoxon(x_1, x_2).pvalue
+            return p
 
-        pesos_años = np.empty(shape=len(datos_x))
-        for n, año in enumerate(datos_x):
-            pesos_años[n] = (calc_dist(datos_x_actuales[año], datos_x))
+        if día_único:
+            simil = np.empty((x1.shape[0],1), dtype=float)
+            for n, var in enumerate(x1):
+                simil[n] = wilcoxon(x1[n], x2[n])
 
-        predicciones = [datos_y, pesos_años]
-        return predicciones
+        else:
+            simil = np.empty(x1.shape, dtype=float)
+            for n, var in enumerate(x1):
+                simil[n] = [wilcoxon(x1[n, :día], x2[n, :día]).pvalue for día in range(x1.shape[1])]
+
+        print('simil', simil)
+        print(simil.shape)
+        print('pesos_vars', pesos_vars)
+        print(pesos_vars.shape)
+        peso_año = simil * pesos_vars.reshape((len(pesos_vars), 1))
+
+        return peso_año
 
     @staticmethod
     def validar(predicciones, obs):

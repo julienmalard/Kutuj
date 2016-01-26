@@ -139,7 +139,7 @@ class CajaEtp2(CjG.CajaEtapa):
         símismo.especificar_subcajas(subcajas)
         símismo.bloquear_subcajas([1, 2])
 
-    def desbloquear(símismo,):
+    def desbloquear(símismo):
         símismo.desbloquear_subcajas([1])
 
 
@@ -152,6 +152,9 @@ class CajaEtp3(CjG.CajaEtapa):
                     CjSE.CajaSubEtp32(símismo, apli, total=total_subcajas)]
 
         símismo.especificar_subcajas(subcajas)
+
+    def desbloquear(símismo):
+        símismo.desbloquear_subcajas([1])
 
 
 class CajaEtp4(CjG.CajaEtapa):
