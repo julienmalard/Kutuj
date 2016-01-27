@@ -200,6 +200,7 @@ class GrupoControles(object):
             símismo.bt_borrar.bloquear()
 
     def editar(símismo, itema):
+        símismo.borrar()
         símismo.itema = itema
         símismo.objeto = itema.objeto
         for i in itema.receta:

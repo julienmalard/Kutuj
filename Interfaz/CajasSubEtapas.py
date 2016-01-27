@@ -12,7 +12,7 @@ from Modelo import Modelo
 
 class CajaSubEtp11(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Cargar datos', núm=1, total=total)
+        super().__init__(pariente, nombre=apli.trads['Cargardatos'], núm=1, total=total)
         símismo.apli = apli
         símismo.Modelo = None
 

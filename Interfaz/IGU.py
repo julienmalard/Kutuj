@@ -2,6 +2,7 @@ import tkinter as tk
 
 from Interfaz import Formatos as Fm
 from Interfaz import Cajas as Cj
+from Interfaz import Traducciones as Trad
 
 
 class Apli(tk.Frame):
@@ -14,7 +15,10 @@ class Apli(tk.Frame):
 
         símismo.modelo = None
 
-        símismo.CajaInic = Cj.CajaInic()
+        símismo.DicLeng = Trad.Diccionario()
+        símismo.Trads = símismo.DicLeng.trads_act
+
+        símismo.CajaInic = Cj.CajaInic(símismo)
         símismo.CajaCentral = Cj.CajaCentral(símismo)
         símismo.CajaLenguas = Cj.CajaLeng(símismo)
         símismo.CajaCentral.lift()

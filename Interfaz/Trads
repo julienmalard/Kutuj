@@ -1,0 +1,32 @@
+{
+  "Actual": "Español",
+  "Lenguas": {
+    "Español": {
+      "IzqaDerech": true,
+      "Estado": 1,
+      "Trads": {
+        "Empezar": "Empezar",
+        "OpsLengs": "Opciones de lenguas",
+        "BasedeDatos": "Base de Datos",
+        "Variables": "Variables",
+        "Verificar": "Verificar",
+        "Predecir": "Predecir",
+        "Optimizar": "Optimizar",
+        "Cargardatos": "Cargar datos"
+      }
+    },
+    "हिंदी": {
+      "IzqaDerech": true,
+      "Estado": 0.875,
+      "Trads": {
+        "Empezar": "शुरु करना",
+        "OpsLengs": "भाषा की विकल्पें",
+        "BasedeDatos": "आंकड़ासंचय",
+        "Variables": "परिवर्ती राशि",
+        "Verificar": "जांच करना",
+        "Predecir": "भविष्यनाणी करना",
+        "Optimizar": "आशावादी करना"
+      }
+    }
+  }
+}

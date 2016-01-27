@@ -34,6 +34,20 @@ ubic_BtRegrCent = dict(x=20, y=20)
 ubic_CbzLeng = dict(relx=0.5, y=20, anchor=tk.N)
 formato_CbzLeng = dict(font=(fuente, 40, 'bold'), fg=col_1, **formato_etiq)
 
+ubic_CjCentLeng = dict(relx=0.5, rely=0, x=0, y=100, relheight=1, height=-150, relwidth=1, anchor=tk.N)
+formato_LínVert = dict(bd=0, highlightthickness=0, bg=col_5)
+ubic_LínVert1 = dict(relx=1/3, rely=0.05, y=20, width=1, relheight=1, anchor=tk.N)
+ubic_LínVert2 = dict(relx=2/3, rely=0.05, y=20, width=1, relheight=1, anchor=tk.N)
+
+ubic_CjIzqLeng = dict(relx=(1/3)/2, rely=0.05, y=20, relwidth=1/3, width=-10, relheight=1, anchor=tk.N)
+ubic_CjMedLeng = dict(relx=1/3 + (1/3)/2, rely=0.05, y=20, relwidth=1/3, width=-10, relheight=1, anchor=tk.N)
+ubic_CjDerchLeng = dict(relx=2/3 + (1/3)/2, rely=0.05, y=20, relwidth=1/3, width=-10, relheight=1, anchor=tk.N)
+
+formato_EtiqLengCentro = dict(font=(fuente, 30, 'bold'), fg=col_5, **formato_etiq)
+formato_EtiqLengLados = dict(font=(fuente, 20, 'bold'), fg=col_3, **formato_etiq)
+ubic_EtiqCbzColsLeng = dict(relx=0.5, rely=0, y=50, anchor=tk.S)
+
+
 # Caja central
 formato_CjCent = dict(bg='green')
 ubic_CjCent = dict(x=0, y=0, relwidth=1, relheight=1)

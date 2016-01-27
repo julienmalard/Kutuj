@@ -3,17 +3,19 @@ import tkinter as tk
 from Interfaz import CajasGenéricas as CjG
 from Interfaz import Formatos as Fm, Botones as Bt, Arte as Art, Animaciones as Anim
 from Interfaz import CajasSubEtapas as CjSE
+from Interfaz import Controles as Ctrl
 
 
 class CajaInic(tk.Frame):
-    def __init__(símismo):
+    def __init__(símismo, apli):
         super().__init__(**Fm.formato_CjInic)
+        trads = apli.Trads
         símismo.logo = Art.imagen('LogoInic')
         logo = tk.Label(símismo, image=símismo.logo, **Fm.formato_LogoInic)
         logo.pack(Fm.ubic_LogoInic)
 
         cj_bts_inic = tk.Frame(símismo, **Fm.formato_cajas)
-        bt_empezar = Bt.BotónTexto(cj_bts_inic, comanda=símismo.acción_bt_empezar, texto='Empezar',
+        bt_empezar = Bt.BotónTexto(cj_bts_inic, comanda=símismo.acción_bt_empezar, texto=trads['Empezar'],
                                    formato_norm=Fm.formato_BtsInic_norm,
                                    formato_sel=Fm.formato_BtsInic_sel,
                                    ubicación=Fm.ubic_BtsInic, tipo_ubic='pack')
@@ -28,20 +30,64 @@ class CajaInic(tk.Frame):
 
 
 class CajaLeng(tk.Frame):
-    def __init__(símismo, pariente):
+    def __init__(símismo, apli):
         super().__init__(**Fm.formato_cajas)
-        símismo.apli = pariente
-        símismo. bt_regreso = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_regreso,
-                                             img_norm=Art.imagen('BtRegrCent_norm'),
-                                             img_sel=Art.imagen('BtRegrCent_sel'),
-                                             formato=Fm.formato_botones,
-                                             ubicación=Fm.ubic_BtRegrCent, tipo_ubic='place')
-        etiq = tk.Label(símismo, text='Opciones de lenguas', **Fm.formato_CbzLeng)
+        símismo.apli = apli
+
+        símismo.bt_regreso = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_regreso,
+                                            img_norm=Art.imagen('BtRegrCent_norm'),
+                                            img_sel=Art.imagen('BtRegrCent_sel'),
+                                            formato=Fm.formato_botones,
+                                            ubicación=Fm.ubic_BtRegrCent, tipo_ubic='place')
+        etiq = tk.Label(símismo, text=apli.Trads['OpsLengs'], **Fm.formato_CbzLeng)
         etiq.place(**Fm.ubic_CbzLeng)
+
+        cj_central = tk.Frame(símismo, **Fm.formato_cajas)
+
+        cj_izq = tk.Frame(cj_central, **Fm.formato_cajas)
+        etiq_izq = tk.Label(cj_izq, text='En trabajo', **Fm.formato_EtiqLengLados)
+        etiq_izq.place(**Fm.ubic_EtiqCbzColsLeng)
+        símismo.lista_izq =
+
+
+        lín_vert_1 = tk.Frame(cj_central, **Fm.formato_LínVert)
+
+        cj_med = tk.Frame(cj_central, **Fm.formato_cajas)
+        etiq_med = tk.Label(cj_med, text='Listas', **Fm.formato_EtiqLengCentro)
+        etiq_med.place(**Fm.ubic_EtiqCbzColsLeng)
+        símismo.lista_med =
+
+        lín_vert_2 = tk.Frame(cj_central, **Fm.formato_LínVert)
+
+        cj_derech = tk.Frame(cj_central, **Fm.formato_cajas)
+        etiq_derech = tk.Label(cj_derech, text='Para hacer', **Fm.formato_EtiqLengLados)
+        etiq_derech.place(**Fm.ubic_EtiqCbzColsLeng)
+        símismo.lista_derech =
+
+        símismo.establecer_cols()
+
+        cj_izq.place(**Fm.ubic_CjIzqLeng)
+        lín_vert_1.place(**Fm.ubic_LínVert1)
+        cj_med.place(**Fm.ubic_CjMedLeng)
+        lín_vert_2.place(**Fm.ubic_LínVert2)
+        cj_derech.place(**Fm.ubic_CjDerchLeng)
+        cj_central.place(**Fm.ubic_CjCentLeng)
         símismo.place(**Fm.ubic_CjLeng)
 
     def acción_bt_regreso(símismo):
         Anim.quitar(símismo, 'derecha')
+
+    def establecer_cols(símismo):
+        for nombre, leng in símismo.apli.DicLeng.lenguas.items():
+            if 0 < leng['Estado'] < 1:
+                lista = símismo.lista_izq
+            elif leng['Estado'] == 1:
+                lista = símismo.lista_med
+            elif leng['Estado'] == 0:
+                lista = símismo.lista_derech
+            else:
+                raise ValueError
+            Ctrl.ItemaLeng(lista=lista, lengua=leng)
 
 
 class CajaCentral(tk.Frame):
@@ -119,7 +165,7 @@ class CajaIzq(tk.Frame):
 
 class CajaEtp1(CjG.CajaEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Base de Datos', núm=1, total=total)
+        super().__init__(pariente, nombre=apli.Trads['BasedeDatos'], núm=1, total=total)
 
         total_subcajas = 2
         subcajas = [CjSE.CajaSubEtp11(símismo, apli, total=total_subcajas),
@@ -131,7 +177,7 @@ class CajaEtp1(CjG.CajaEtapa):
 
 class CajaEtp2(CjG.CajaEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Variables', núm=2, total=total)
+        super().__init__(pariente, nombre=apli.Trads['Variables'], núm=2, total=total)
         total_subcajas = 2
         subcajas = [CjSE.CajaSubEtp21(símismo, apli, total=total_subcajas),
                     CjSE.CajaSubEtp22(símismo, apli, total=total_subcajas)]
@@ -145,7 +191,7 @@ class CajaEtp2(CjG.CajaEtapa):
 
 class CajaEtp3(CjG.CajaEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Verificar', núm=3, total=total)
+        super().__init__(pariente, nombre=apli.Trads['Verificar'], núm=3, total=total)
         
         total_subcajas = 2
         subcajas = [CjSE.CajaSubEtp31(símismo, apli, total=total_subcajas),
@@ -159,7 +205,7 @@ class CajaEtp3(CjG.CajaEtapa):
 
 class CajaEtp4(CjG.CajaEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Predecir', núm=4, total=total)
+        super().__init__(pariente, nombre=apli.Trads['Predecir'], núm=4, total=total)
         total_subcajas = 1
         subcajas = [CjSE.CajaSubEtp41(símismo, apli, total=total_subcajas)]
         símismo.especificar_subcajas(subcajas)
@@ -167,7 +213,7 @@ class CajaEtp4(CjG.CajaEtapa):
 
 class CajaEtp5(CjG.CajaEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre='Optimizar', núm=5, total=total)
+        super().__init__(pariente, nombre=apli.Trads['Optimizar'], núm=5, total=total)
         total_subcajas = 1
         subcajas = [CjSE.CajaSubEtp51(símismo, apli, total=total_subcajas)]
 

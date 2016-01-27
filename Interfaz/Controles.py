@@ -10,6 +10,12 @@ from BD import VariableBD
 from Variables import Variable
 
 
+# Caja lenguas
+class ItemaLeng(CtrG.Itema):
+    def __init__(símismo, lista, lengua):
+        super().__init__(lista, objeto=lengua)
+
+
 # Etapa 1, subcaja 2
 class GrpCtrlsVarBD(CtrG.GrupoControles):
     def __init__(símismo, apli, controles, gráfico, lista, bt_guardar, bt_borrar):
