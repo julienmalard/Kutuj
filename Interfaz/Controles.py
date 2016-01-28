@@ -1,9 +1,8 @@
 import tkinter as tk
-import numpy as np
-import datetime as ft
 
 from Interfaz import Formatos as Fm
 from Interfaz import ControlesGenéricos as CtrG
+from Interfaz import Botones as Bt
 from Interfaz import Arte as Art
 
 from BD import VariableBD
@@ -12,8 +11,178 @@ from Variables import Variable
 
 # Caja lenguas
 class ItemaLeng(CtrG.Itema):
-    def __init__(símismo, lista, lengua):
-        super().__init__(lista, objeto=lengua)
+    def __init__(símismo, pariente, lista, nombre, lengua, utilizable=True, borrable=True):
+        super().__init__(lista_itemas=lista)
+        símismo.nombre = nombre
+        símismo.lengua = lengua
+
+        cj_bt_utilizar = tk.Frame(símismo, **Fm.formato_secciones_itemas)
+        cj_central = tk.Frame(símismo, **Fm.formato_secciones_itemas)
+        cj_bts = tk.Frame(símismo, **Fm.formato_secciones_itemas)
+
+        símismo.bt_utilizar = Bt.BotónImagen(cj_bt_utilizar, comanda=lambda x=nombre: pariente.utilizar(x),
+                                             formato=Fm.formato_botones,
+                                             img_norm=Art.imagen('BtCasilla_norm'),
+                                             img_sel=Art.imagen('BtCasilla_sel'),
+                                             img_bloq=Art.imagen('BtCasilla_bloq'),
+                                             ubicación=Fm.ubic_IzqLstLeng, tipo_ubic='pack')
+        if not utilizable:
+            símismo.bt_utilizar.bloquear()
+
+        símismo.etiq_nombre = tk.Label(cj_central, text=símismo.nombre,
+                                       font=Fm.fuente_etiq_itema_norm, **Fm.formato_etiq)
+        símismo.etiq_nombre.pack()
+
+        símismo.bt_editar = Bt.BotónImagen(cj_bts, comanda=lambda x=nombre: pariente.editar(x),
+                                           formato=Fm.formato_botones,
+                                           img_norm=Art.imagen('BtEditarItema_norm'),
+                                           img_sel=Art.imagen('BtEditarItema_sel'),
+                                           ubicación=Fm.ubic_IzqLstLeng, tipo_ubic='pack')
+        símismo.bt_borrar = Bt.BotónImagen(cj_bts, comanda=lambda x=nombre: pariente.confirmar_borrar(x),
+                                           formato=Fm.formato_botones,
+                                           img_norm=Art.imagen('BtBorrarItema_norm'),
+                                           img_sel=Art.imagen('BtBorrarItema_sel'),
+                                           img_bloq=Art.imagen('BtBorrarItema_bloq'),
+                                           ubicación=Fm.ubic_IzqLstLeng, tipo_ubic='pack')
+        if not borrable:
+            símismo.bt_borrar.bloquear()
+
+        cj_bt_utilizar.pack(**Fm.ubic_IzqLstLeng)
+        cj_central.pack(**Fm.ubic_IzqLstLeng)
+        cj_bts.pack(**Fm.ubic_DerechLstLeng)
+
+
+class CajaEditLeng(tk.Frame):
+    def __init__(símismo, pariente, leng_base, dic_leng_base, leng_edit, dic_leng_edit):
+        super().__init__(pariente, **Fm.formato_CjEditLeng)
+        símismo.pariente = pariente
+        símismo.dic_leng_edit = dic_leng_edit
+
+        cj_cbz = tk.Frame(símismo, **Fm.formato_cajas)
+
+        etiq_cbz = tk.Label(cj_cbz, text='Traducciones', **Fm.formato_EtiqCbzEditLeng)
+
+        cj_nombres_lengs = tk.Frame(cj_cbz, **Fm.formato_cajas)
+        etiq_base = tk.Label(cj_nombres_lengs, text=leng_base, **Fm.formato_EtiqLengBase)
+        etiq_edit = tk.Label(cj_nombres_lengs, text=leng_edit, **Fm.formato_EtiqLengEdit)
+
+        etiq_base.pack(**Fm.ubic_EtiqLengs)
+        etiq_edit.pack(**Fm.ubic_EtiqLengs)
+
+        lín_hor_1 = tk.Frame(símismo, **Fm.formato_LínHor)
+
+        etiq_cbz.pack(**Fm.ubic_CjNomEditLeng)
+        cj_nombres_lengs.pack(**Fm.ubic_CjNomEditLeng)
+
+        cj_lista = tk.Frame(símismo, **Fm.formato_cajas)
+        lista = CtrG.ListaItemas(cj_lista, formato_cj=Fm.formato_LstEditLeng,
+                                 ubicación=Fm.ubic_LstEditLeng, tipo_ubic='place')
+        símismo.itemas = []
+        for ll, texto in sorted(dic_leng_base['Trads'].items()):
+            if ll in dic_leng_edit['Trads'].keys():
+                texto_trad = dic_leng_edit['Trads'][ll]
+            else:
+                texto_trad = ''
+            nuevo_itema = ItemaEditTrad(lista=lista, llave=ll, texto_origin=texto, texto_trad=texto_trad)
+            símismo.itemas.append(nuevo_itema)
+
+        lín_hor_2 = tk.Frame(símismo, **Fm.formato_LínHor)
+
+        cj_bts = tk.Frame(símismo, **Fm.formato_cajas)
+        símismo.bt_guardar = Bt.BotónTexto(cj_bts, texto='Guardar',
+                                           formato_norm=Fm.formato_BtGuardar_norm,
+                                           formato_sel=Fm.formato_BtGuardar_sel,
+                                           ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                           comanda=símismo.guardar)
+
+        símismo.bt_no_guardar = Bt.BotónTexto(cj_bts, texto='No guardar',
+                                              formato_norm=Fm.formato_BtBorrar_norm,
+                                              formato_sel=Fm.formato_BtBorrar_sel,
+                                              ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                              comanda=símismo.cerrar)
+
+        cj_cbz.pack(**Fm.ubic_CjCbzCjEditLeng)
+        lín_hor_1.pack(**Fm.ubic_LínHorCjEditLeng)
+        cj_lista.pack(**Fm.ubic_CjCentrCjEditLeng)
+        lín_hor_2.pack(**Fm.ubic_LínHorCjEditLeng)
+        cj_bts.pack(**Fm.ubic_CjBtsCjEditLeng)
+        símismo.place(**Fm.ubic_CjEditLeng)
+
+    def guardar(símismo):
+        for itema in símismo.itemas:
+            símismo.dic_leng_edit['Trads'][itema.llave] = itema.sacar_trad()
+        símismo.pariente.DicLeng.guardar()
+        símismo.cerrar()
+
+    def cerrar(símismo):
+        símismo.destroy()
+
+
+class ItemaEditTrad(CtrG.Itema):
+    def __init__(símismo, lista, llave, texto_origin, texto_trad):
+        super().__init__(lista_itemas=lista)
+        símismo.llave = llave
+        cj_tx_orig = tk.Frame(símismo, **Fm.formato_CjLengTxOrig)
+        etiq_tx_orig = tk.Label(cj_tx_orig, text=texto_origin, **Fm.formato_EtiqLengTxOrig)
+        cj_trad = tk.Frame(símismo, **Fm.formato_cajas)
+
+        símismo.campo_texto = tk.Text(cj_trad, **Fm.formato_CampoTexto)
+        símismo.campo_texto.insert('end', texto_trad)
+
+        etiq_tx_orig.pack(side='top')
+        símismo.campo_texto.pack()
+        cj_tx_orig.pack(side='left', padx=5, pady=5, fill=tk.Y, expand=True)
+        cj_trad.pack(**Fm.ubic_EtiqLengs)
+
+    def sacar_trad(símismo):
+        return símismo.campo_texto.get('1.0', 'end').replace('\n', '')
+
+
+class CajaAvisoReinic(tk.Frame):
+    def __init__(símismo, texto):
+        super().__init__(**Fm.formato_CajaAvisoReinic)
+
+        etiq = tk.Label(símismo, text=texto, **Fm.formato_EtiqLengReinic)
+        etiq.pack(**Fm.ubic_etiq_aviso_inic_leng)
+
+        símismo.bt = Bt.BotónTexto(símismo, texto='Entendido',
+                                   formato_norm=Fm.formato_BtAvisoInic_norm,
+                                   formato_sel=Fm.formato_BtAvisoInic_sel,
+                                   ubicación=Fm.ubic_bt_aviso_inic_leng, tipo_ubic='pack',
+                                   comanda=símismo.destroy)
+
+        símismo.place(**Fm.ubic_CjAvisoReinic)
+
+
+class CajaAvisoBorrar(tk.Frame):
+    def __init__(símismo, nombre, acción):
+        super().__init__(**Fm.formato_CajaAvisoReinic)
+        símismo.acción = acción
+        símismo.nombre = nombre
+
+        etiq = tk.Label(símismo, text="¿Realmente quieres borrar la lengua %s?" % nombre, **Fm.formato_EtiqLengBorrar)
+        etiq.pack(**Fm.ubic_etiq_aviso_borrar_leng)
+
+        cj_bts = tk.Frame(símismo, **Fm.formato_cajas)
+        símismo.bt_no = Bt.BotónTexto(cj_bts, texto='No',
+                                      formato_norm=Fm.formato_BtGuardar_norm,
+                                      formato_sel=Fm.formato_BtGuardar_sel,
+                                      ubicación=Fm.ubic_bts_aviso_borrar_leng, tipo_ubic='pack',
+                                      comanda=símismo.destroy)
+
+        símismo.bt_sí = Bt.BotónTexto(cj_bts, texto='Sí',
+                                      formato_norm=Fm.formato_BtBorrar_norm,
+                                      formato_sel=Fm.formato_BtBorrar_sel,
+                                      ubicación=Fm.ubic_bts_aviso_borrar_leng, tipo_ubic='pack',
+                                      comanda=símismo.acción_borrar)
+
+        cj_bts.pack(**Fm.ubic_cj_bts_aviso_borrar_leng)
+
+        símismo.place(**Fm.ubic_CjAvisoReinic)
+
+    def acción_borrar(símismo):
+        símismo.acción(símismo.nombre)
+        símismo.destroy()
 
 
 # Etapa 1, subcaja 2

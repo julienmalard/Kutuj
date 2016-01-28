@@ -12,15 +12,17 @@ from Modelo import Modelo
 
 class CajaSubEtp11(CjG.CajaSubEtapa):
     def __init__(símismo, pariente, apli, total):
-        super().__init__(pariente, nombre=apli.trads['Cargardatos'], núm=1, total=total)
+        super().__init__(pariente, nombre=apli.Trads['Cargardatos'], núm=1, total=total)
         símismo.apli = apli
         símismo.Modelo = None
 
         cj_bts = tk.Frame(símismo, **Fm.formato_cajas)
-        símismo.bt_cargar_bd = Bt.BotónTexto(cj_bts, texto='Base de datos', comanda=símismo.acción_bt_cargar_bd,
+        símismo.bt_cargar_bd = Bt.BotónTexto(cj_bts, texto=apli.Trads['BasedeDatos'],
+                                             comanda=símismo.acción_bt_cargar_bd,
                                              formato_norm=Fm.formato_BtsCarg_norm, formato_sel=Fm.formato_BtsCarg_sel,
                                              ubicación=Fm.ubic_BtsCarg, tipo_ubic='pack')
-        símismo.bt_cargar_pr = Bt.BotónTexto(cj_bts, texto='Proyecto existente', comanda=símismo.acción_bt_cargar_pr,
+        símismo.bt_cargar_pr = Bt.BotónTexto(cj_bts, texto=apli.Trads['ProyectoExistente'],
+                                             comanda=símismo.acción_bt_cargar_pr,
                                              formato_norm=Fm.formato_BtsCarg_norm, formato_sel=Fm.formato_BtsCarg_sel,
                                              ubicación=Fm.ubic_BtsCarg, tipo_ubic='pack')
         cj_bts.place(**Fm.ubic_CjBtsCarg)
@@ -30,13 +32,13 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
         símismo.CjAct = CjG.CajaActivable(símismo, ubicación=Fm.ubic_CjFechaHora, tipo_ubic='place')
 
         cj_mn_col_fecha = tk.Frame(símismo.CjAct, **Fm.formato_cajas)
-        símismo.MnColFecha = CtrG.Menú(cj_mn_col_fecha, nombre='Columna Fecha:', opciones='',
+        símismo.MnColFecha = CtrG.Menú(cj_mn_col_fecha, nombre=apli.Trads['ColumnaFecha'], opciones='',
                                        comanda=símismo.acción_mn_col_fecha,
                                        ubicación=Fm.ubic_MnCol, tipo_ubic='pack')
         cj_mn_col_fecha.pack(**Fm.ubic_CjMnCol)
 
         cj_mn_col_hora = tk.Frame(símismo.CjAct, **Fm.formato_cajas)
-        símismo.MnColHora = CtrG.Menú(cj_mn_col_hora, nombre='Columna Hora:', opciones='',
+        símismo.MnColHora = CtrG.Menú(cj_mn_col_hora, nombre=apli.Trads['ColumnaHora'], opciones='',
                                       comanda=símismo.acción_mn_col_hora,
                                       ubicación=Fm.ubic_MnCol, tipo_ubic='pack')
         cj_mn_col_hora.pack(**Fm.ubic_CjMnCol)
@@ -44,22 +46,21 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
         símismo.CjAct.especificar_objetos([símismo.MnColHora, símismo.MnColFecha])
 
         símismo.EtiqErrColFecha = tk.Label(cj_mn_col_fecha,
-                                           text='No su pudo leer los datos de fechas. ¿Mejor le echas un vistaso a tu '
-                                                'base de datos?',
+                                           text=apli.Trads['ErrorCargarFecha'],
                                            **Fm.formato_etiq_error)
 
         símismo.EtiqErrColHora = tk.Label(cj_mn_col_hora,
-                                          text='No se pudo leer los datos de tiempo. ¿Mejor le echas un vistaso a tu '
-                                               'base de datos?',
+                                          text=apli.Trads['ErrorCargarHora'],
                                           **Fm.formato_etiq_error)
 
         símismo.MnColFecha.estab_exclusivo(símismo.MnColHora)
         símismo.CjAct.bloquear()
 
     def acción_bt_cargar_bd(símismo):
-        archivo_bd = diálogo.askopenfilename(filetypes=[('Formato comas', '*.csv'),
-                                                        ('Formato texto', '*.txt')],
-                                             title='Cargar base de datos')
+        apli = símismo.apli
+        archivo_bd = diálogo.askopenfilename(filetypes=[(apli.Trads['FormatoComas'], '*.csv'),
+                                                        (apli.Trads['FormatoTexto'], '*.txt')],
+                                             title=apli.Trads['CargarBaseDatos'])
         try:
             símismo.Modelo = Modelo(archivo_bd)
             símismo.apli.modelo = símismo.Modelo
@@ -74,8 +75,9 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
         símismo.MnColHora.refrescar(opciones=cols_bd, texto_opciones=cols_bd)
 
     def acción_bt_cargar_pr(símismo):
-        archivo_bd = diálogo.askopenfilename(filetypes=[('Proyecto Kutuj', '*.kut')],
-                                             title='Cargar proyecto existente')
+        apli = símismo.apli
+        archivo_bd = diálogo.askopenfilename(filetypes=[(apli.Trads['ProyectoKutuj'], '*.kut')],
+                                             title=apli.Trads['CargarProyecto'])
         # para hacer: hacer más cosas aquí
 
     def acción_mn_col_fecha(símismo, col):
@@ -140,16 +142,16 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         cj_bts = tk.Frame(cj_ctrls, **Fm.formato_cajas)
 
         bt_guardar = Bt.BotónTexto(cj_bts, texto='Guardar',
-                                   ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
-                                   formato_norm=Fm.formato_BtGuardarGrupoCtrl_norm,
-                                   formato_sel=Fm.formato_BtGuardarGrupoCtrl_sel,
-                                   formato_bloq=Fm.formato_BtGuardarsGrupoCtrl_bloq,
+                                   ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                   formato_norm=Fm.formato_BtGuardar_norm,
+                                   formato_sel=Fm.formato_BtGuardar_sel,
+                                   formato_bloq=Fm.formato_BtGuardars_bloq,
                                    )
         bt_borrar = Bt.BotónTexto(cj_bts, texto='Borrar',
-                                  ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
-                                  formato_norm=Fm.formato_BtBorrarGrupoCtrl_norm,
-                                  formato_sel=Fm.formato_BtBorrarGrupoCtrl_sel,
-                                  formato_bloq=Fm.formato_BtBorrarsGrupoCtrl_bloq,
+                                  ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                  formato_norm=Fm.formato_BtBorrar_norm,
+                                  formato_sel=Fm.formato_BtBorrar_sel,
+                                  formato_bloq=Fm.formato_BtBorrars_bloq,
                                   )
         cj_bts.pack(**Fm.ubic_CjBtsGrupoCtrl)
 
@@ -260,16 +262,16 @@ class CajaSubEtp21(CjG.CajaSubEtapa):
         cj_bts = tk.Frame(cj_ctrls, **Fm.formato_cajas)
 
         bt_guardar = Bt.BotónTexto(cj_bts, texto='Guardar',
-                                   ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
-                                   formato_norm=Fm.formato_BtGuardarGrupoCtrl_norm,
-                                   formato_sel=Fm.formato_BtGuardarGrupoCtrl_sel,
-                                   formato_bloq=Fm.formato_BtGuardarsGrupoCtrl_bloq,
+                                   ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                   formato_norm=Fm.formato_BtGuardar_norm,
+                                   formato_sel=Fm.formato_BtGuardar_sel,
+                                   formato_bloq=Fm.formato_BtGuardars_bloq,
                                    )
         bt_borrar = Bt.BotónTexto(cj_bts, texto='Borrar',
-                                  ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
-                                  formato_norm=Fm.formato_BtBorrarGrupoCtrl_norm,
-                                  formato_sel=Fm.formato_BtBorrarGrupoCtrl_sel,
-                                  formato_bloq=Fm.formato_BtBorrarsGrupoCtrl_bloq,
+                                  ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                  formato_norm=Fm.formato_BtBorrar_norm,
+                                  formato_sel=Fm.formato_BtBorrar_sel,
+                                  formato_bloq=Fm.formato_BtBorrars_bloq,
                                   )
 
         dic_controles = {'Nombre': ingr_nombre, 'VarBD': símismo.MnVarBD, 'MétodoCalc': menú_calc,
@@ -389,16 +391,16 @@ class CajaSubEtp22(CjG.CajaSubEtapa):
         cj_bts = tk.Frame(cj_ctrls, **Fm.formato_cajas)
 
         bt_guardar = Bt.BotónTexto(cj_bts, texto='Guardar',
-                                   ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
-                                   formato_norm=Fm.formato_BtGuardarGrupoCtrl_norm,
-                                   formato_sel=Fm.formato_BtGuardarGrupoCtrl_sel,
-                                   formato_bloq=Fm.formato_BtGuardarsGrupoCtrl_bloq,
+                                   ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                   formato_norm=Fm.formato_BtGuardar_norm,
+                                   formato_sel=Fm.formato_BtGuardar_sel,
+                                   formato_bloq=Fm.formato_BtGuardars_bloq,
                                    )
         bt_borrar = Bt.BotónTexto(cj_bts, texto='Borrar',
-                                  ubicación=Fm.ubic_BtsGrupoCtrl, tipo_ubic='pack',
-                                  formato_norm=Fm.formato_BtBorrarGrupoCtrl_norm,
-                                  formato_sel=Fm.formato_BtBorrarGrupoCtrl_sel,
-                                  formato_bloq=Fm.formato_BtBorrarsGrupoCtrl_bloq,
+                                  ubicación=Fm.ubic_BtsGrupo, tipo_ubic='pack',
+                                  formato_norm=Fm.formato_BtBorrar_norm,
+                                  formato_sel=Fm.formato_BtBorrar_sel,
+                                  formato_bloq=Fm.formato_BtBorrars_bloq,
                                   )
 
         dic_controles = {'Nombre': ingr_nombre, 'VarBD': símismo.MnVarBD, 'MétodoCalc': menú_calc,

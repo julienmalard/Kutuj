@@ -3,6 +3,7 @@ import tkinter as tk
 from Interfaz import CajasGenéricas as CjG
 from Interfaz import Formatos as Fm, Botones as Bt, Arte as Art, Animaciones as Anim
 from Interfaz import CajasSubEtapas as CjSE
+from Interfaz import ControlesGenéricos as CtrG
 from Interfaz import Controles as Ctrl
 
 
@@ -33,6 +34,7 @@ class CajaLeng(tk.Frame):
     def __init__(símismo, apli):
         super().__init__(**Fm.formato_cajas)
         símismo.apli = apli
+        símismo.DicLeng = símismo.apli.DicLeng
 
         símismo.bt_regreso = Bt.BotónImagen(símismo, comanda=símismo.acción_bt_regreso,
                                             img_norm=Art.imagen('BtRegrCent_norm'),
@@ -45,24 +47,26 @@ class CajaLeng(tk.Frame):
         cj_central = tk.Frame(símismo, **Fm.formato_cajas)
 
         cj_izq = tk.Frame(cj_central, **Fm.formato_cajas)
-        etiq_izq = tk.Label(cj_izq, text='En trabajo', **Fm.formato_EtiqLengLados)
+        etiq_izq = tk.Label(cj_izq, text=apli.Trads['EnTrabajo'], **Fm.formato_EtiqLengLados)
         etiq_izq.place(**Fm.ubic_EtiqCbzColsLeng)
-        símismo.lista_izq =
-
+        símismo.lista_izq = CtrG.ListaItemas(cj_izq, formato_cj=Fm.formato_CjLstLengLados,
+                                             ubicación=Fm.ubic_LstsLeng, tipo_ubic='place')
 
         lín_vert_1 = tk.Frame(cj_central, **Fm.formato_LínVert)
 
         cj_med = tk.Frame(cj_central, **Fm.formato_cajas)
-        etiq_med = tk.Label(cj_med, text='Listas', **Fm.formato_EtiqLengCentro)
+        etiq_med = tk.Label(cj_med, text=apli.Trads['Listas'], **Fm.formato_EtiqLengCentro)
         etiq_med.place(**Fm.ubic_EtiqCbzColsLeng)
-        símismo.lista_med =
+        símismo.lista_med = CtrG.ListaItemas(cj_med, formato_cj=Fm.formato_CjLstLengCentro,
+                                             ubicación=Fm.ubic_LstsLeng, tipo_ubic='place')
 
         lín_vert_2 = tk.Frame(cj_central, **Fm.formato_LínVert)
 
         cj_derech = tk.Frame(cj_central, **Fm.formato_cajas)
-        etiq_derech = tk.Label(cj_derech, text='Para hacer', **Fm.formato_EtiqLengLados)
+        etiq_derech = tk.Label(cj_derech, text=apli.Trads['ParaHacer'], **Fm.formato_EtiqLengLados)
         etiq_derech.place(**Fm.ubic_EtiqCbzColsLeng)
-        símismo.lista_derech =
+        símismo.lista_derech = CtrG.ListaItemas(cj_derech, formato_cj=Fm.formato_CjLstLengLados,
+                                                ubicación=Fm.ubic_LstsLeng, tipo_ubic='place')
 
         símismo.establecer_cols()
 
@@ -78,16 +82,50 @@ class CajaLeng(tk.Frame):
         Anim.quitar(símismo, 'derecha')
 
     def establecer_cols(símismo):
-        for nombre, leng in símismo.apli.DicLeng.lenguas.items():
+        for nombre, leng in símismo.DicLeng.lenguas.items():
             if 0 < leng['Estado'] < 1:
                 lista = símismo.lista_izq
+                util = True
             elif leng['Estado'] == 1:
                 lista = símismo.lista_med
+                util = True
             elif leng['Estado'] == 0:
                 lista = símismo.lista_derech
+                util = False
             else:
                 raise ValueError
-            Ctrl.ItemaLeng(lista=lista, lengua=leng)
+            borr = True
+            if nombre == símismo.DicLeng.estándar :
+                borr = False
+            Ctrl.ItemaLeng(símismo, lista=lista, nombre=nombre, lengua=leng, utilizable=util, borrable=borr)
+
+    def utilizar(símismo, nombre):
+        if 'AvisoReinic' in símismo.DicLeng.lenguas[nombre]['Trads'].keys():
+            texto = símismo.DicLeng.lenguas[nombre]['Trads']['AvisoReinic']
+        else:
+            texto = símismo.DicLeng.lenguas[símismo.DicLeng.estándar]['Trads']['AvisoReinic']
+        Ctrl.CajaAvisoReinic(texto)
+        símismo.DicLeng.dic['Actual'] = nombre
+        símismo.DicLeng.guardar()
+
+    def editar(símismo, nombre):
+        leng_base = símismo.DicLeng.dic['Actual']
+        dic_leng_base = símismo.DicLeng.lenguas[leng_base]
+
+        dic_leng_edit = símismo.DicLeng.lenguas[nombre]
+        Ctrl.CajaEditLeng(símismo, leng_base=leng_base, dic_leng_base=dic_leng_base,
+                          leng_edit=nombre, dic_leng_edit=dic_leng_edit)
+
+    def confirmar_borrar(símismo, nombre):
+        Ctrl.CajaAvisoBorrar(nombre, símismo.borrar)
+
+        símismo.DicLeng.guardar()
+
+    def borrar(símismo, nombre):
+        símismo.DicLeng.lenguas.pop(nombre)
+        if símismo.DicLeng.dic['Actual'] == nombre:
+            símismo.DicLeng.dic['Actual'] = símismo.DicLeng.estándar
+        símismo.DicLeng.guardar()
 
 
 class CajaCentral(tk.Frame):

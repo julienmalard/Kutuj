@@ -53,11 +53,16 @@ archivos_imgs = {'LogoInic': '%sLogoInic.png' % raíz_imgs,
 
                  'BtBorrarItema_norm': '%sBtBorrarItema_norm.png' % raíz_imgs,
                  'BtBorrarItema_sel': '%sBtBorrarItema_sel.png' % raíz_imgs,
+                 'BtBorrarItema_bloq': '%sBtBorrarItema_bloq.png' % raíz_imgs,
                  'BtEditarItema_norm': '%sBtEditarItema_norm.png' % raíz_imgs,
                  'BtEditarItema_sel': '%sBtEditarItema_sel.png' % raíz_imgs,
 
                  'FlchAvzd': '%sFlchAvzd.png' % raíz_imgs,
-                 'FlchSenc': '%sFlchSenc.png' % raíz_imgs
+                 'FlchSenc': '%sFlchSenc.png' % raíz_imgs,
+
+                 'BtCasilla_norm': '%sBtCasilla_norm.png' % raíz_imgs,
+                 'BtCasilla_sel': '%sBtCasilla_sel.png' % raíz_imgs,
+                 'BtCasilla_bloq': '%sBtCasilla_bloq.png' % raíz_imgs
 
                  }
 

@@ -9,12 +9,12 @@ from Interfaz import Botones as Bt
 
 
 class ListaItemas(tk.Frame):
-    def __init__(símismo, pariente, ubicación, tipo_ubic, encabezado=False):
-        super().__init__(pariente, **Fm.formato_CjLstItemas)
+    def __init__(símismo, pariente, ubicación, tipo_ubic, encabezado=False, formato_cj=Fm.formato_CjLstItemas):
+        super().__init__(pariente, **formato_cj)
         símismo.ancho = ubicación['width']
         símismo.objetos = {}
 
-        ubic_tela = Fm.ubic_TlLstItemas
+        ubic_tela = Fm.ubic_TlLstItemas.copy()
         if encabezado:
             ubic_tela['y'] = Fm.ubic_EncbzLstItemas['height']
             ubic_tela['height'] = -Fm.ubic_EncbzLstItemas['height']
@@ -38,6 +38,9 @@ class ListaItemas(tk.Frame):
 
     def ajust_auto(símismo, evento):
         símismo.Tela.configure(scrollregion=símismo.Tela.bbox("all"))
+
+    def añadir(símismo, itema):
+        itema.pack(**Fm.ubic_CjItemas)
 
 
 class ListaEditable(ListaItemas):
@@ -65,7 +68,7 @@ class ListaEditable(ListaItemas):
 
     def añadir(símismo, itema):
         símismo.objetos[itema.objeto.nombre] = itema.objeto
-        itema.pack(**Fm.ubic_CjItemas)
+        super().añadir(itema)
 
     def quitar(símismo, itema):
         símismo.controles.borrar()
@@ -74,7 +77,7 @@ class ListaEditable(ListaItemas):
 
 
 class Itema(tk.Frame):
-    def __init__(símismo, lista_itemas, objeto):
+    def __init__(símismo, lista_itemas, objeto=None):
         super().__init__(lista_itemas.Caja, **Fm.formato_cajas)
         símismo.objeto = objeto
         símismo.lista = lista_itemas
@@ -189,10 +192,10 @@ class GrupoControles(object):
         símismo.objeto = None
         símismo.receta = {}
         for ll, control in símismo.controles.items():
-            control.borrar()
+            control.confirmar_borrar()
 
         if símismo.gráfico is not None:
-            símismo.gráfico.borrar()
+            símismo.gráfico.confirmar_borrar()
 
         if símismo.bt_guardar is not None:
             símismo.bt_guardar.bloquear()

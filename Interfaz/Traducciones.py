@@ -9,9 +9,10 @@ class Diccionario(object):
         with open(símismo.direc, encoding='utf8') as d:
             símismo.dic = json.load(d)
 
-        símismo.verificar_estados()
-
         símismo.lenguas = símismo.dic['Lenguas']
+        símismo.estándar = 'Español'
+
+        símismo.verificar_estados()
 
         símismo.leng = símismo.lenguas[símismo.dic['Actual']]
         símismo.trads_act = símismo.leng['Trads']
@@ -19,17 +20,17 @@ class Diccionario(object):
 
     def guardar(símismo):
         with io.open(símismo.direc, 'w', encoding='utf8') as d:
-            json.dump(símismo.dic, d, ensure_ascii=False)
+            json.dump(símismo.dic, d, ensure_ascii=False, sort_keys=True, indent=4)
 
     def verificar_estados(símismo):
-        dic_lenguas = símismo.dic['Lenguas']
-        estándar = dic_lenguas['Español']['Trads']
+        estándar = símismo.lenguas[símismo.estándar]
 
-        for nombre, leng in dic_lenguas.items():
+        for nombre, leng in símismo.lenguas.items():
             llenos = []
-            for frase in estándar:
+            for frase in estándar['Trads']:
                 if frase in leng['Trads'].keys() and leng['Trads'][frase] != '':
                     llenos.append(1)
                 else:
+                    leng['Trads'][frase] = ''
                     llenos.append(0)
             símismo.lenguas[nombre]['Estado'] = sum(llenos)/len(llenos)

@@ -1,4 +1,37 @@
 import tkinter as tk
+import os
+import json
+
+
+# Una función para modificar los formatos según la dirección del texto de la lengua
+direc = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Trads')
+with open(direc, encoding='utf8') as d:
+    dic = json.load(d)
+leng = dic['Actual']
+IzqaDerech = dic['Lenguas'][leng]['IzqaDerech']
+
+
+def gen_formato(formato):
+    if IzqaDerech:
+        return formato
+    else:
+        invers = [('e','w'), ('ne','nw'), ('se','sw'), ('right','left')]
+        for ll, v in formato.items():
+            if ll == 'x':
+                formato[ll] = -v
+                break
+            if ll == 'relx':
+                formato[ll] = (1 - v)
+                break
+            for inver in invers:
+                if v == inver[0]:
+                    formato[ll] = inver[1]
+                    break
+                elif v == inver[1]:
+                    formato[ll] = inver[0]
+                    break
+
+        return formato
 
 
 # Parámetros generales
@@ -47,6 +80,54 @@ formato_EtiqLengCentro = dict(font=(fuente, 30, 'bold'), fg=col_5, **formato_eti
 formato_EtiqLengLados = dict(font=(fuente, 20, 'bold'), fg=col_3, **formato_etiq)
 ubic_EtiqCbzColsLeng = dict(relx=0.5, rely=0, y=50, anchor=tk.S)
 
+formato_CjLstLengCentro = dict(highlightthickness=1, highlightbackground=col_5, bg=col_fondo)
+formato_CjLstLengLados = dict(highlightthickness=1, highlightbackground=col_3, bg=col_fondo)
+ubic_LstsLeng = dict(relx=0.5, rely=0, y=75, width=300, relheight=1, height=-150, anchor=tk.N)
+ubic_IzqLstLeng = dict(side='left', padx=5)
+ubic_DerechLstLeng = dict(side='right')
+ubic_CentralItemaLstLeng = dict(side='left')
+
+formato_CjEditLeng = dict(highlightthickness=1, highlightbackground=col_5, bg=col_fondo)
+ubic_CjEditLeng = dict(relx=0.5, rely=0, y=10, relheight=1, width=600, height=-20, anchor=tk.N)
+formato_EtiqCbzEditLeng = dict(font=(fuente, 40, 'bold'), fg=col_2, **formato_etiq)
+ubic_CjCbzCjEditLeng = dict(side='top', pady=0, fill=tk.X)
+ubic_CjNomEditLeng = dict(side='top', pady=0, fill=tk.X)
+formato_EtiqLengBase = dict(font=(fuente, 20, 'bold'), fg=col_5, **formato_etiq)
+formato_EtiqLengEdit = dict(font=(fuente, 20, 'bold'), fg=col_3, **formato_etiq)
+ubic_EtiqLengs = dict(side='left', padx=5, pady=5, fill=tk.BOTH, expand=True)
+
+formato_LínHor = dict(bd=0, highlightthickness=0, bg=col_3, height=1)
+ubic_LínHorCjEditLeng = dict(side='top', fill=tk.X)
+ubic_CjCentrCjEditLeng = dict(side='top', fill=tk.BOTH, expand=True)
+
+formato_LstEditLeng = dict(highlightthickness=0, highlightbackground=col_3, bg=col_fondo)
+ubic_LstEditLeng = dict(relx=0, rely=0, relheight=1, width=ubic_CjEditLeng['width'], anchor=tk.NW)
+
+ubic_CjBtsCjEditLeng = dict(side='top', pady=20, fill=tk.X)
+formato_CjLengTxOrig = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_5)
+formato_EtiqLengTxOrig = dict(font=(fuente, '14', 'bold'), fg=col_5, bg=col_fondo,
+                              width=20, wraplength=300, anchor=tk.W)
+formato_CampoTexto = dict(font=(fuente, '14', 'bold'), bg=col_fondo,
+                          highlightthickness=1, highlightbackground=col_3, highlightcolor=col_5,
+                          width=25, height=3, wrap=tk.WORD, relief=tk.FLAT)
+ubic_CamposLeng = dict(side='left', padx=25, pady=25, expand=True)
+
+
+formato_CajaAvisoReinic = dict(highlightthickness=3, highlightbackground=col_2, bg=col_fondo)
+ubic_CjAvisoReinic = dict(relx=0.5, rely=0.5, width=350, height=200, anchor=tk.CENTER)
+formato_EtiqLengReinic = dict(font=(fuente, 14), fg=col_2, wraplength=275, **formato_etiq)
+ubic_etiq_aviso_inic_leng = dict(side='top', pady=(20, 0))
+formato_BtAvisoInic = dict(borderwidth=0, highlightthickness=0, activebackground='#ffdb4d',
+                           font=(fuente, 20, 'bold'), height=1, width=9,  wraplength=170)  # Formatos generales
+formato_BtAvisoInic_norm = dict(bg='#ffe580', fg='#000000', **formato_BtAvisoInic)
+formato_BtAvisoInic_sel = dict(bg='#ffdb4d')
+ubic_bt_aviso_inic_leng = dict(side='bottom', pady=(0, 20))
+
+formato_EtiqLengBorrar = dict(font=(fuente, 14), fg=col_2, wraplength=275, **formato_etiq)
+ubic_etiq_aviso_borrar_leng = dict(side='top', pady=(20, 0))
+
+ubic_bts_aviso_borrar_leng = dict(side='left', padx=25)
+ubic_cj_bts_aviso_borrar_leng = dict(side='bottom', pady=(0, 20))
 
 # Caja central
 formato_CjCent = dict(bg='green')
@@ -79,6 +160,7 @@ ubic_BtNavEtp_atrs = dict(rely=0, relx=0.5, anchor=tk.N)
 formato_BtsNavEtapa = dict(width=270, height=35, bg=col_fondo, borderwidth=0, highlightthickness=0)
 formato_EncbzCjEtp = dict(font=(fuente, 35, 'bold'), fg=col_1, **formato_etiq)
 ubic_EncbzCjEtp = dict(relx=0, rely=0, x=20)
+
 
 # Cajas sub etapas
 ubic_CjSubEtp = dict(relx=0, rely=0, y=2*formato_BtsNavEtapa['height'],
@@ -115,6 +197,7 @@ fuente_etiq_itema_norm = (fuente, 14)
 formato_texto_itemas = dict(font=(fuente, 14), fg='#000000', **formato_etiq)
 ubic_ColsItemasEdit = dict(y=0, relheight=1, anchor=tk.NW)
 
+
 # Controles
 formato_EtiqCtrl = dict(bg=col_fondo, fg=col_3, font=(fuente, 20, 'bold'))
 formato_EtiqCtrl_bloq = dict(fg='#999999')
@@ -144,17 +227,17 @@ formato_CampoIngr = dict(bg=col_fondo, highlightthickness=1, highlightbackground
                          relief='flat', highlightcolor=col_3, font=(fuente, '13'))
 formato_CampoIngr_error = dict(highlightthickness=2, highlightbackground='#ff0000')
 
-formato_BtGuardarGrupoCtrl_norm = dict(bg='#6ac86a', fg='#ffffff', borderwidth=0, highlightthickness=0,
-                                       activebackground='#3ea73e', activeforeground='#ffffff',
-                                       font=(fuente, 15, 'bold'), width=7)
-formato_BtGuardarGrupoCtrl_sel = dict(bg='#3ea73e', fg='#ffffff')
-formato_BtGuardarsGrupoCtrl_bloq = dict(bg='#ecf8ec', disabledforeground='#ffffff')
-formato_BtBorrarGrupoCtrl_norm = dict(bg='#ff6233', fg='#ffffff', borderwidth=0, highlightthickness=0,
-                                      activebackground='#e63500', activeforeground='#ffffff',
-                                      font=(fuente, 15, 'bold'), width=7)
-formato_BtBorrarGrupoCtrl_sel = dict(bg='#e63500', fg='#ffffff')
-formato_BtBorrarsGrupoCtrl_bloq = dict(bg='#ffebe5', disabledforeground='#ffffff')
-ubic_BtsGrupoCtrl = dict(side='left', expand=True)
+formato_BtGuardar_norm = dict(bg='#6ac86a', fg='#ffffff', borderwidth=0, highlightthickness=0,
+                              activebackground='#3ea73e', activeforeground='#ffffff',
+                              font=(fuente, 15, 'bold'), width=10)
+formato_BtGuardar_sel = dict(bg='#3ea73e', fg='#ffffff')
+formato_BtGuardars_bloq = dict(bg='#ecf8ec', disabledforeground='#ffffff')
+formato_BtBorrar_norm = dict(bg='#ff6233', fg='#ffffff', borderwidth=0, highlightthickness=0,
+                             activebackground='#e63500', activeforeground='#ffffff',
+                             font=(fuente, 15, 'bold'), width=10)
+formato_BtBorrar_sel = dict(bg='#e63500', fg='#ffffff')
+formato_BtBorrars_bloq = dict(bg='#ffebe5', disabledforeground='#ffffff')
+ubic_BtsGrupo = dict(side='left', expand=True)
 ubic_CjBtsGrupoCtrl = dict(side='top', padx=20, fill=tk.X, expand=True)
 
 #

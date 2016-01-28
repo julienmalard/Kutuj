@@ -1,32 +1,72 @@
 {
-  "Actual": "Español",
-  "Lenguas": {
-    "Español": {
-      "IzqaDerech": true,
-      "Estado": 1,
-      "Trads": {
-        "Empezar": "Empezar",
-        "OpsLengs": "Opciones de lenguas",
-        "BasedeDatos": "Base de Datos",
-        "Variables": "Variables",
-        "Verificar": "Verificar",
-        "Predecir": "Predecir",
-        "Optimizar": "Optimizar",
-        "Cargardatos": "Cargar datos"
-      }
-    },
-    "हिंदी": {
-      "IzqaDerech": true,
-      "Estado": 0.875,
-      "Trads": {
-        "Empezar": "शुरु करना",
-        "OpsLengs": "भाषा की विकल्पें",
-        "BasedeDatos": "आंकड़ासंचय",
-        "Variables": "परिवर्ती राशि",
-        "Verificar": "जांच करना",
-        "Predecir": "भविष्यनाणी करना",
-        "Optimizar": "आशावादी करना"
-      }
+    "Actual": "Español",
+    "Lenguas": {
+        "Español": {
+            "Estado": 1.0,
+            "IzqaDerech": true,
+            "Trads": {
+                "AvisoReinic": "Hay que reiniciar Kutuj para aplicar el cambio de idioma.",
+                "BasedeDatos": "Base de Datos",
+                "CargarBaseDatos": "Cargar base de datos",
+                "CargarProyecto": "Cargar proyecto existente",
+                "Cargardatos": "Cargar datos",
+                "ColumnaFecha": "Columna Fecha:",
+                "ColumnaHora": "Columna Hora:",
+                "Empezar": "Empezar",
+                "EnTrabajo": "En trabajo",
+                "ErrorCargarFecha": "No su pudo leer los datos de fechas. ¿Mejor le echas un vistaso a tu base de datos?",
+                "ErrorCargarHora": "No se pudo leer los datos de tiempo. ¿Mejor le echas un vistaso a tu base de datos?",
+                "FormatoComas": "Formato comas",
+                "FormatoTexto": "Formato texto",
+                "Listas": "¡Listas!",
+                "OpsLengs": "Opciones de lenguas",
+                "Optimizar": "Optimizar",
+                "ParaHacer": "Para hacer",
+                "Predecir": "Predecir",
+                "ProyectoExistente": "Proyecto existente",
+                "ProyectoKutuj": "Proyecto Kutuj",
+                "Variables": "Variables",
+                "Verificar": "Verificar"
+            }
+        },
+        "Français": {
+            "Estado": 0.4090909090909091,
+            "IzqaDerech": true,
+            "Trads": {
+                "AvisoReinic": "Vous devez réinicialiser Kutuj pour terminer le changement de langue.",
+                "BasedeDatos": "Base de données",
+                "Cargardatos": "Charger les données",
+                "Empezar": "Commencer",
+                "OpsLengs": "Options de langue",
+                "Optimizar": "Optimizer",
+                "Predecir": "Prédire",
+                "Variables": "Variables",
+                "Verificar": "Vérifier"
+            }
+        },
+        "हिंदी": {
+            "Estado": 0.36363636363636365,
+            "IzqaDerech": true,
+            "Trads": {
+                "BasedeDatos": "आंकड़ासंचय",
+                "Cargardatos": "आँकड़ों ढूँढना",
+                "Empezar": "शुरु करना",
+                "OpsLengs": "भाषा की विकल्पें",
+                "Optimizar": "आशावादी करना",
+                "Predecir": "भविष्यनाणी करना",
+                "Variables": "परिवर्ती राशि",
+                "Verificar": "जांच करना"
+            }
+        },
+        "日本語": {
+            "Estado": 0.0,
+            "IzqaDerech": true,
+            "Trads": {}
+        },
+        "汉语": {
+            "Estado": 0.0,
+            "IzqaDerech": true,
+            "Trads": {}
+        }
     }
-  }
 }
