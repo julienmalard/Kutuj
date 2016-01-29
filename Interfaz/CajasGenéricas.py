@@ -1,10 +1,10 @@
 import tkinter as tk
 
-from Interfaz import Formatos as Fm
+from Interfaz import Animaciones as Anim
+from Interfaz import Arte as Ic
 from Interfaz import Botones as Bt
 from Interfaz import ControlesGenéricos as Ctrl
-from Interfaz import Arte as Ic
-from Interfaz import Animaciones as Anim
+from Interfaz import Formatos as Fm
 
 
 class ContCajaEtps(tk.Frame):

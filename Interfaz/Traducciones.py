@@ -14,13 +14,13 @@ class Diccionario(object):
 
         símismo.verificar_estados()
 
-        símismo.leng = símismo.lenguas[símismo.dic['Actual']]
-        símismo.trads_act = símismo.leng['Trads']
-        símismo.izq_a_derech = símismo.leng['IzqaDerech']
+        símismo.leng_act = símismo.lenguas[símismo.dic['Actual']]
+        símismo.trads_act = símismo.leng_act['Trads']
+        símismo.izq_a_derech = símismo.leng_act['IzqaDerech']
 
     def guardar(símismo):
         with io.open(símismo.direc, 'w', encoding='utf8') as d:
-            json.dump(símismo.dic, d, ensure_ascii=False, sort_keys=True, indent=4)
+            json.dump(símismo.dic, d, ensure_ascii=False, sort_keys=True, indent=2)
 
     def verificar_estados(símismo):
         estándar = símismo.lenguas[símismo.estándar]

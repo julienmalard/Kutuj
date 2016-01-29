@@ -83,8 +83,18 @@ ubic_EtiqCbzColsLeng = dict(relx=0.5, rely=0, y=50, anchor=tk.S)
 formato_CjLstLengCentro = dict(highlightthickness=1, highlightbackground=col_5, bg=col_fondo)
 formato_CjLstLengLados = dict(highlightthickness=1, highlightbackground=col_3, bg=col_fondo)
 ubic_LstsLeng = dict(relx=0.5, rely=0, y=75, width=300, relheight=1, height=-150, anchor=tk.N)
+ubic_LstsLeng_bajo = dict(relx=0.5, rely=0, y=75+20, width=300, relheight=1, height=-150-20, anchor=tk.N)
+ubic_CjAñadirLeng = dict(relx=0, rely=0, x=20, y=60, height=20, anchor=tk.NW)
+ubic_CjCamposAñLeng = dict(side='left', padx=2)
+formato_cj_etiq_nombre_leng = dict(height=25, **formato_cajas)
+formato_etiq_nombre_leng = dict(anchor=tk.W, **formato_etiq)
+ubic_etiq_nombre_leng = dict(side='left')
 ubic_IzqLstLeng = dict(side='left', padx=5)
-ubic_DerechLstLeng = dict(side='right')
+ubic_DerLstLeng = dict(side='right', padx=5)
+ubic_CjCentLstLeng = dict(side='left', padx=5)
+colores_prog_leng = [(152, 103, 52), (255, 204, 0)]
+dim_barra_prog_leng = (20, 50)
+ubic_BtsAñadirLeng = dict(side='right', padx=2)
 ubic_CentralItemaLstLeng = dict(side='left')
 
 formato_CjEditLeng = dict(highlightthickness=1, highlightbackground=col_5, bg=col_fondo)
@@ -106,7 +116,7 @@ ubic_LstEditLeng = dict(relx=0, rely=0, relheight=1, width=ubic_CjEditLeng['widt
 ubic_CjBtsCjEditLeng = dict(side='top', pady=20, fill=tk.X)
 formato_CjLengTxOrig = dict(bg=col_fondo, highlightthickness=1, highlightbackground=col_5)
 formato_EtiqLengTxOrig = dict(font=(fuente, '14', 'bold'), fg=col_5, bg=col_fondo,
-                              width=20, wraplength=300, anchor=tk.W)
+                              width=20, wraplength=240, anchor=tk.W, justify=tk.LEFT)
 formato_CampoTexto = dict(font=(fuente, '14', 'bold'), bg=col_fondo,
                           highlightthickness=1, highlightbackground=col_3, highlightcolor=col_5,
                           width=25, height=3, wrap=tk.WORD, relief=tk.FLAT)

@@ -157,3 +157,29 @@ class BotónNavSub(BotónImagen):
         super().__init__(pariente=pariente, comanda=comanda, img_norm=img_norm, img_bloq=img_bloq,
                          img_sel=img_sel, ubicación=ubicación, tipo_ubic='place',
                          formato=Fm.formato_BtsNavSub)
+
+
+class BotónAltern(BotónImagen):
+    def __init__(símismo, pariente, formato, img_1, img_2, img_bloq=None, comanda=None,
+                 ubicación=None, tipo_ubic=None):
+        super().__init__(pariente, comanda=símismo.acción, formato=formato, img_norm=img_1,
+                         img_sel=img_2, img_bloq=img_bloq,
+                         ubicación=ubicación, tipo_ubic=tipo_ubic)
+        símismo.img_1 = img_1
+        símismo.img_2 = img_2
+        símismo.comanda = comanda
+
+        símismo.val = True
+
+    def acción(símismo):
+        símismo.val = not símismo.val
+
+        if símismo.val:
+            símismo.formato_sel['image'] = símismo.img_2
+            símismo.formato_norm['image'] = símismo.img_1
+        else:
+            símismo.formato_sel['image'] = símismo.img_1
+            símismo.formato_norm['image'] = símismo.img_2
+
+        if símismo.comanda is not None:
+            símismo.comanda()
