@@ -6,6 +6,7 @@ import math as mat
 
 from BD import BaseCentral
 
+
 class Modelo(object):
     def __init__(símismo, archivo_base_central):
         tipo_arciho = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
