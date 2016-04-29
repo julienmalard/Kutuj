@@ -16,11 +16,10 @@ class CajaInic(tk.Frame):
         logo.pack(Fm.ubic_LogoInic)
 
         cj_bts_inic = tk.Frame(símismo, **Fm.formato_cajas)
-        bt_empezar = Bt.BotónTexto(cj_bts_inic, comanda=símismo.acción_bt_empezar, texto=trads['Empezar'],
-                                   formato_norm=Fm.formato_BtsInic_norm,
-                                   formato_sel=Fm.formato_BtsInic_sel,
-                                   ubicación=Fm.ubic_BtsInic, tipo_ubic='pack')
-        bt_empezar.bt.pack(**Fm.ubic_BtsInic)
+        Bt.BotónTexto(cj_bts_inic, comanda=símismo.acción_bt_empezar, texto=trads['Empezar'],
+                      formato_norm=Fm.formato_BtsInic_norm,
+                      formato_sel=Fm.formato_BtsInic_sel,
+                      ubicación=Fm.ubic_BtsInic, tipo_ubic='pack')
         cj_bts_inic.pack()
 
         símismo.place(**Fm.ubic_CjInic)

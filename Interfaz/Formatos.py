@@ -140,7 +140,7 @@ ubic_bts_aviso_borrar_leng = dict(side='left', padx=25)
 ubic_cj_bts_aviso_borrar_leng = dict(side='bottom', pady=(0, 20))
 
 # Caja central
-formato_CjCent = dict(bg='green')
+formato_CjCent = dict(bg=col_fondo)
 ubic_CjCent = dict(x=0, y=0, relwidth=1, relheight=1)
 
 # Caja cabeza

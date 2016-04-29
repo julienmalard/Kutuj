@@ -49,6 +49,7 @@ class ListaItemas(tk.Frame):
         símismo.itemas.remove(itema)
         if itema.objeto is not None:
             símismo.objetos.pop(itema.objeto.nombre)
+        itema.destroy()
 
     def borrar(símismo):
         for i in símismo.itemas:
@@ -206,10 +207,10 @@ class GrupoControles(object):
         símismo.objeto = None
         símismo.receta = {}
         for ll, control in símismo.controles.items():
-            control.confirmar_borrar()
+            control.borrar()
 
         if símismo.gráfico is not None:
-            símismo.gráfico.confirmar_borrar()
+            símismo.gráfico.borrar()
 
         if símismo.bt_guardar is not None:
             símismo.bt_guardar.bloquear()

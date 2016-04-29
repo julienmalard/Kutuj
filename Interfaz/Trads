@@ -1,8 +1,8 @@
 {
-  "Actual": "Français",
+  "Actual": "Español",
   "Lenguas": {
     "Bahasa Indonesia": {
-      "Estado": 0.0,
+      "Estado": 0.045454545454545456,
       "IzqaDerech": "Normal",
       "Trads": {
         "AvisoReinic": "",
@@ -12,7 +12,7 @@
         "Cargardatos": "",
         "ColumnaFecha": "",
         "ColumnaHora": "",
-        "Empezar": "",
+        "Empezar": "Mulai",
         "EnTrabajo": "",
         "ErrorCargarFecha": "",
         "ErrorCargarHora": "",
@@ -85,6 +85,34 @@
         "Verificar": "Vérifier"
       }
     },
+    "K'iche'": {
+      "Estado": 0.0,
+      "IzqaDerech": "Normal",
+      "Trads": {
+        "AvisoReinic": "",
+        "BasedeDatos": "",
+        "CargarBaseDatos": "",
+        "CargarProyecto": "",
+        "Cargardatos": "",
+        "ColumnaFecha": "",
+        "ColumnaHora": "",
+        "Empezar": "",
+        "EnTrabajo": "",
+        "ErrorCargarFecha": "",
+        "ErrorCargarHora": "",
+        "FormatoComas": "",
+        "FormatoTexto": "",
+        "Listas": "",
+        "OpsLengs": "",
+        "Optimizar": "",
+        "ParaHacer": "",
+        "Predecir": "",
+        "ProyectoExistente": "",
+        "ProyectoKutuj": "",
+        "Variables": "",
+        "Verificar": ""
+      }
+    },
     "Kaqchikel": {
       "Estado": 0.0,
       "IzqaDerech": "Normal",
@@ -142,6 +170,62 @@
       }
     },
     "اردو": {
+      "Estado": 0.045454545454545456,
+      "IzqaDerech": "Normal",
+      "Trads": {
+        "AvisoReinic": "",
+        "BasedeDatos": "",
+        "CargarBaseDatos": "",
+        "CargarProyecto": "",
+        "Cargardatos": "",
+        "ColumnaFecha": "",
+        "ColumnaHora": "",
+        "Empezar": "‏‎شورو",
+        "EnTrabajo": "",
+        "ErrorCargarFecha": "",
+        "ErrorCargarHora": "",
+        "FormatoComas": "",
+        "FormatoTexto": "",
+        "Listas": "",
+        "OpsLengs": "",
+        "Optimizar": "",
+        "ParaHacer": "",
+        "Predecir": "",
+        "ProyectoExistente": "",
+        "ProyectoKutuj": "",
+        "Variables": "",
+        "Verificar": ""
+      }
+    },
+    "हिंदी": {
+      "Estado": 0.45454545454545453,
+      "IzqaDerech": true,
+      "Trads": {
+        "AvisoReinic": "भाषा बदलने के लिये कुतूह को पुनर्प्रारंभ करना है।",
+        "BasedeDatos": "आंकड़ासंचय",
+        "CargarBaseDatos": "",
+        "CargarProyecto": "",
+        "Cargardatos": "आँकड़ों ढूँढना",
+        "ColumnaFecha": "",
+        "ColumnaHora": "",
+        "Empezar": "शुरु करना",
+        "EnTrabajo": "",
+        "ErrorCargarFecha": "",
+        "ErrorCargarHora": "",
+        "FormatoComas": "",
+        "FormatoTexto": "",
+        "Listas": "तैयार",
+        "OpsLengs": "भाषा की विकल्पें",
+        "Optimizar": "आशावादी करना",
+        "ParaHacer": "",
+        "Predecir": "भविष्यनाणी करना",
+        "ProyectoExistente": "",
+        "ProyectoKutuj": "",
+        "Variables": "परिवर्ती राशि",
+        "Verificar": "जांच करना"
+      }
+    },
+    "தமிழ்": {
       "Estado": 0.0,
       "IzqaDerech": "Normal",
       "Trads": {
@@ -167,34 +251,6 @@
         "ProyectoKutuj": "",
         "Variables": "",
         "Verificar": ""
-      }
-    },
-    "हिंदी": {
-      "Estado": 0.36363636363636365,
-      "IzqaDerech": true,
-      "Trads": {
-        "AvisoReinic": "",
-        "BasedeDatos": "आंकड़ासंचय",
-        "CargarBaseDatos": "",
-        "CargarProyecto": "",
-        "Cargardatos": "आँकड़ों ढूँढना",
-        "ColumnaFecha": "",
-        "ColumnaHora": "",
-        "Empezar": "शुरु करना",
-        "EnTrabajo": "",
-        "ErrorCargarFecha": "",
-        "ErrorCargarHora": "",
-        "FormatoComas": "",
-        "FormatoTexto": "",
-        "Listas": "",
-        "OpsLengs": "भाषा की विकल्पें",
-        "Optimizar": "आशावादी करना",
-        "ParaHacer": "",
-        "Predecir": "भविष्यनाणी करना",
-        "ProyectoExistente": "",
-        "ProyectoKutuj": "",
-        "Variables": "परिवर्ती राशि",
-        "Verificar": "जांच करना"
       }
     },
     "日本語": {
