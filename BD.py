@@ -170,6 +170,7 @@ class VariableBD(object):
 
 
 def leer_columnas(sistema, archivo):
+
     if sistema == 'csv':
         columnas = []
         try:
