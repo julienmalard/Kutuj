@@ -170,8 +170,9 @@ class VariableBD(object):
 
 
 def leer_columnas(sistema, archivo):
-    columnas = None
+
     if sistema == 'csv':
+        columnas = []
         try:
             with open(archivo, 'r') as d:
                 l = csv.reader(d)
@@ -184,11 +185,11 @@ def leer_columnas(sistema, archivo):
             print('¡Error!')
             raise FileNotFoundError
 
-        return columnas
-
     else:
         raise NotImplementedError('Falta código para comunicar con el formato de datos: '
                                   '{0}'.format(sistema))
+
+    return columnas
 
 
 def cargar_columna(columna, sistema, archivo):
