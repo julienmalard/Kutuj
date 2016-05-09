@@ -170,22 +170,25 @@ class VariableBD(object):
 
 
 def leer_columnas(sistema, archivo):
-    columnas = None
     if sistema == 'csv':
+        columnas = []
         try:
             with open(archivo, 'r') as d:
-                for lín in d:
-                    if len(lín) > 0:
-                        columnas = lín.replace('\n', '').split(',')
-                        break
+                l = csv.reader(d)
+
+                for n, f in enumerate(l):
+                    if n == 0:  # Si es la primera fila, guardarla como nombres de columnas
+                        columnas = f
+
         except FileNotFoundError:
             print('¡Error!')
             raise FileNotFoundError
 
-        return columnas
     else:
         raise NotImplementedError('Falta código para comunicar con el formato de datos: '
                                   '{0}'.format(sistema))
+
+    return columnas
 
 
 def cargar_columna(columna, sistema, archivo):
