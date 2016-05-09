@@ -22,6 +22,14 @@ class BaseCentral(object):
         símismo.vars = {}
 
     def estab_col_fecha(símismo, col=None):
+        """
+        Esta funcion establece la columna de la base de datos con los datos de fechas de observaciones.
+
+        :param col: El nombre de la columna
+        :type col: str
+
+        """
+
         if col is None:
             col = símismo.id_cols['fecha']
         lista_fechas = cargar_columna(col, símismo.sistema, símismo.archivo)
@@ -39,7 +47,7 @@ class BaseCentral(object):
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
         if símismo.fechas_únicas is None or símismo.tiempos is None:
-            return 'Hay que especificar los datos de fechas y horas primero.'
+            raise ValueError('Hay que especificar los datos de fechas y horas primero.')
 
         if mét_combin_tiempo is None:
             try:
@@ -113,7 +121,7 @@ class VariableBD(object):
 
                 if interpol == 'ninguno':
                     pesos = [1]*len(vals_var_día)
-                elif interpol == 'ninguno':
+                elif interpol == 'trap':
                     pesos = np.divide(pesos, np.sum(pesos))
 
                 if transformación == 'sumar':
@@ -172,14 +180,13 @@ class VariableBD(object):
 def leer_columnas(sistema, archivo):
 
     if sistema == 'csv':
-        columnas = []
+
         try:
             with open(archivo, 'r') as d:
                 l = csv.reader(d)
 
-                for n, f in enumerate(l):
-                    if n == 0:  # Si es la primera fila, guardarla como nombres de columnas
-                        columnas = f
+                # Tomar la primera fila, guardarla como nombres de columnas
+                columnas = next(l)
 
         except FileNotFoundError:
             print('¡Error!')
@@ -210,9 +217,9 @@ def cargar_columna(columna, sistema, archivo):
                 datos = [f[n_col] for f in l]
 
                 # Convertir los datos a formato de matriz numpy numérica, con np.nan para datos que faltan
-                datos = np.array(datos)
-                datos[datos == ''] = np.nan
-                datos = datos.astype(np.float)
+                # datos = np.array(datos)
+                # datos[datos == ''] = np.nan
+                # datos = datos.astype(np.float)
 
         except FileNotFoundError:
             print('¡Error!')

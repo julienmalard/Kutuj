@@ -1,5 +1,5 @@
 {
-  "Actual": "Español",
+  "Actual": "English",
   "Lenguas": {
     "Bahasa Indonesia": {
       "Estado": 0.045454545454545456,
@@ -27,6 +27,34 @@
         "ProyectoKutuj": "",
         "Variables": "",
         "Verificar": ""
+      }
+    },
+    "English": {
+      "Estado": 1.0,
+      "IzqaDerech": "Normal",
+      "Trads": {
+        "AvisoReinic": "You have to restart Tinamit to finish changing the language.",
+        "BasedeDatos": "Database",
+        "CargarBaseDatos": "Load database",
+        "CargarProyecto": "Load existing project",
+        "Cargardatos": "Load data",
+        "ColumnaFecha": "Date column",
+        "ColumnaHora": "Hour column",
+        "Empezar": "Start",
+        "EnTrabajo": "In progress",
+        "ErrorCargarFecha": "The date data couldn't be read. Perhaps you should check your data?",
+        "ErrorCargarHora": "The time data couldn't be read. Perhaps you should check your data?",
+        "FormatoComas": "CSV",
+        "FormatoTexto": "Text format",
+        "Listas": "Ready!",
+        "OpsLengs": "Language options",
+        "Optimizar": "Optimise",
+        "ParaHacer": "To do",
+        "Predecir": "Predict",
+        "ProyectoExistente": "Existing project",
+        "ProyectoKutuj": "Kutuj project",
+        "Variables": "Variables",
+        "Verificar": "Verify"
       }
     },
     "Español": {

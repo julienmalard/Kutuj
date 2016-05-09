@@ -2,7 +2,7 @@ from Modelo import Modelo
 from BD import VariableBD
 from Variables import Variable
 
-md = Modelo("C:/Users/jmalar1/Documents/PycharmProjects/Kutuj/Interfaz/Ejemplo.csv")
+md = Modelo("E:/Javad/Python-Julien/Kutuj/Interfaz/Ejemplo.csv")
 md.base_central.estab_col_fecha('Fecha')
 md.base_central.estab_col_hora('Hora')
 
@@ -26,3 +26,5 @@ md.config.varY = varY
 
 md.config.actualizar_datos()
 md.config.calibrar()
+
+# md.config.predecir(n_día=10)
