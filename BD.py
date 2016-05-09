@@ -193,16 +193,30 @@ def leer_columnas(sistema, archivo):
 
 
 def cargar_columna(columna, sistema, archivo):
-    if sistema == 'csv':
+
+    if sistema == 'csv':  # Para documentos de tipo .csv
+
         try:
             with open(archivo, 'r') as d:
-                doc = d.readlines()
+                l = csv.reader(d)  # Leer el csv
+
+                # Buscar el nombre de la columna en la base de datos
+                try:
+                    n_col = next(l).index(columna)
+                except ValueError:
+                    raise ValueError('El nombre de columna no existe en la base de datos.')
+
+                # Sacar el valor de esta columna en cada fila
+                datos = [f[n_col] for f in l]
+
+                # Convertir los datos a formato de matriz numpy numérica, con np.nan para datos que faltan
+                datos = np.array(datos)
+                datos[datos == ''] = np.nan
+                datos = datos.astype(np.float)
+
         except FileNotFoundError:
             print('¡Error!')
             raise FileNotFoundError
-
-        n_col = doc[0].split(',').index(columna)
-        datos = [l.split(',')[n_col] for l in doc[1:]]
 
     else:
         raise NotImplementedError('Falta código para comunicar con el formato de datos'
