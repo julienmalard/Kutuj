@@ -173,7 +173,7 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         símismo.Modelo = símismo.apli.modelo
         bd = símismo.Modelo.base_central
         cols_potenciales = bd.nombres_cols.copy()
-        cols_potenciales.remove(bd.id_cols['fecha'])
+        cols_potenciales.remove(bd.receta['id_cols']['fecha'])
         cols_potenciales.remove(bd.id_cols['tiempo'])
         símismo.MnCol.refrescar(opciones=cols_potenciales, texto_opciones=cols_potenciales)
         símismo.lista.objetos = símismo.apli.modelo.base_central.vars

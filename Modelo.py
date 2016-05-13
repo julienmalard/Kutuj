@@ -9,8 +9,8 @@ from BD import BaseCentral
 
 class Modelo(object):
     def __init__(símismo, archivo_base_central):
-        tipo_arciho = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
-        símismo.base_central = BaseCentral(archivo_base_central, tipo_arciho)
+        tipo_archivo = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
+        símismo.base_central = BaseCentral(archivo_base_central, tipo_archivo)
         símismo.base_derivados = None
 
         símismo.config = ConfigModelo()
