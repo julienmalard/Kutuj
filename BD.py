@@ -10,14 +10,15 @@ class BaseCentral(object):
 
         símismo.nombres_cols = leer_columnas(sistema, archivo)
 
-        símismo.receta = {'id_cols': {'fecha': '', 'tiempo': '', 'vars': {}},
+        símismo.receta = {'sistema': 'csv',
+                          'id_cols': {'fecha': '', 'tiempo': '', 'vars': {}},
                           'mét_combin_tiempo': {},
                           'mét_interpol': {}
                           }
 
         símismo.fecha_inic_datos = None
+        símismo.día_inic_año = 1
         símismo.fechas = []
-        símismo.fechas_únicas = []
         símismo.tiempos = []
         símismo.datos = {}
 
@@ -35,26 +36,39 @@ class BaseCentral(object):
         if col is None:
             col = símismo.receta['id_cols']['fecha']
 
-        lista_fechas = cargar_columna(columna=col, sistema=símismo.sistema, archivo=símismo.archivo)
+        try:
+            lista_fechas = cargar_columna(columna=col, sistema=símismo.sistema, archivo=símismo.archivo)
+        except ValueError:
+            raise ValueError('Columna de datos de fechas errada o no especificada.')
 
+        # Guardar la fecha inicial del base de datos, tanto como un vector de la posición de cada dís en comparación
+        # a esta.
         símismo.fecha_inic_datos, símismo.fechas = leer_fechas(lista_fechas)
-        símismo.fechas_únicas = list(set(símismo.fechas))
 
-        símismo.fechas_únicas.sort()
-
+        # Acordarse de cuál era la columna de fechas
         símismo.receta['id_cols']['fecha'] = col
 
     def estab_col_hora(símismo, col=None):
+
+        # Si no se especificó la columna de horas, usar la guardada
         if col is None:
             col = símismo.receta['id_cols']['tiempo']
 
-        lista_horas = cargar_columna(col, símismo.sistema, símismo.archivo)
+        try:
+            lista_horas = cargar_columna(col, símismo.sistema, símismo.archivo)
+        except ValueError:
+            raise ValueError('Columna de datos de fechas errada o no especificada.')
+
+        # Guardar un vector del tiempo del día, en segundos, para cada observación en el base de datos
         símismo.tiempos = leer_tiempo(lista_horas)
 
+        # Acordarse de cuál era la columna de horas
         símismo.receta['id_cols']['tiempo'] = col
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
-        if símismo.fechas_únicas is None or símismo.tiempos is None:
+
+        # Si no especificamos ya la columna de datos o de horas, quejarse.
+        if símismo.fecha_inic_datos is None or símismo.tiempos is None:
             raise ValueError('Hay que especificar los datos de fechas y horas primero.')
 
         if mét_combin_tiempo is not None:
@@ -63,7 +77,7 @@ class BaseCentral(object):
             try:
                 mét_combin_tiempo = símismo.receta['mét_combin_tiempo'][nombre]
             except KeyError:
-                pass
+                raise ValueError('Hay que especificar el método para combinar datos horarios en datos diarios.')
 
         if mét_interpol is not None:
             símismo.receta['mét_interpol'][nombre] = mét_interpol
@@ -71,36 +85,59 @@ class BaseCentral(object):
             try:
                 mét_interpol = símismo.receta['mét_interpol'][nombre]
             except KeyError:
-                pass
+                raise ValueError('Hay que especificar el método para interpolar datos horarios.')
 
-        if col_datos is None:
-            col_datos = símismo.receta['vars'][nombre]
+        if col_datos is not None:
+            símismo.receta['id_cols']['vars'][nombre] = col_datos
+        else:
+            try:
+                col_datos = símismo.receta['id_cols']['vars'][nombre]
+            except KeyError:
+                col_datos = nombre
 
-        símismo.datos[nombre] = VariableBD(símismo, nombre, columna=col_datos,
-                                           transformación=mét_combin_tiempo, interpol=mét_interpol,
-                                           fecha_inic_año=símismo.fecha_inic_datos)
+        símismo.datos[nombre] = VariableBD(nombre=nombre, base=símismo, columna=col_datos,
+                                           transformación=mét_combin_tiempo, interpol=mét_interpol
+                                           )
 
     def olvidar_var(símismo, nombre):
         símismo.datos.pop(nombre)
         símismo.receta['mét_combin_tiempo'].pop(nombre)
         símismo.receta['mét_interpol'].pop(nombre)
+        símismo.receta['id_cols']['vars'].pop(nombre)
+
+    def guardar(símismo, archivo):
+        pass
+
+    def cargar(símismo, archivo=None):
+        pass
 
 
 class VariableBD(object):
-    def __init__(símismo, base_de_datos, nombre, columna, interpol, transformación, fecha_inic_año):
+    def __init__(símismo, nombre, base, columna, interpol, transformación):
+
+        assert type(base) is BaseCentral
+
+        # El nombre del variable
         símismo.nombre = nombre
-        símismo.base_de_datos = base_de_datos
-        símismo.fecha_inic = símismo.base_de_datos.fecha_inic_año
 
-        datos_crudos_tx = cargar_columna(columna, base_de_datos.sistema, base_de_datos.archivo)
-        datos_crudos = [float(x) for x in datos_crudos_tx]
-        símismo.lista_fechas = base_de_datos.fechas
-        lista_tiempos = base_de_datos.tiempos
+        # La base de datos central
+        símismo.base = base
 
-        if transformación is None:
-            transformación = 'prom'
-        if interpol is None:
-            interpol = 'trap'
+        # Leer datos y convertir a números
+        datos_crudos = cargar_columna(columna=columna, sistema=base.sistema,
+                                      archivo=base.archivo)
+        datos_crudos[datos_crudos == ''] = 'NaN'
+        datos_crudos = np.array(datos_crudos, dtype=float)
+
+        # La fecha inicial de los datos crudos, y el día del inicio del año del modelo
+        símismo.fecha_inic = fecha_inic = base.fecha_inic_datos
+        día_inic_año = base.día_inic_año
+
+        # El vector de las fechas, relativas a la fecha inicial de los datos
+        lista_fechas = base.fechas
+
+        # El vector de los tiempos de cada observación
+        lista_tiempos = base.tiempos
 
         datos = []
         vals_var_día = []
@@ -114,17 +151,17 @@ class VariableBD(object):
         else:
             raise ValueError
 
-        for n, f in enumerate(símismo.lista_fechas[:fin]):
+        for n, f in enumerate(lista_fechas[:fin]):
             if interpol == 'trap':
                 vals_var_día.append((datos_crudos[n] + datos_crudos[n+1])/2)
-                ajust_día = símismo.lista_fechas[n + 1] - f
+                ajust_día = lista_fechas[n + 1] - f
                 pesos.append((lista_tiempos[n+1]-lista_tiempos[n] + ajust_día*24*60*60)/(60*60))
 
-                if n+1 == len(símismo.lista_fechas) or f != símismo.lista_fechas[n + 1]:
+                if n+1 == len(lista_fechas) or f != lista_fechas[n + 1]:
                     terminado = True
             elif interpol == 'ninguno':
                 vals_var_día.append(datos_crudos[n])
-                if n == len(símismo.lista_fechas) or f != símismo.lista_fechas[n + 1]:
+                if n == len(lista_fechas) or f != lista_fechas[n + 1]:
                     terminado = True
             else:
                 raise ValueError('Metodo de interpolación {0} no reconocido.'.format(interpol))
@@ -149,7 +186,7 @@ class VariableBD(object):
                     raise ValueError('Metodo de generación de datos diarios "{0}" '
                                      'no reconocido.'.format(transformación))
 
-                datos += [var] + [float('NaN')] * (símismo.lista_fechas[n+1] - f - 1)
+                datos += [var] + [float('NaN')] * (lista_fechas[n+1] - f - 1)
                 vals_var_día = []
                 pesos = []
 
@@ -157,20 +194,20 @@ class VariableBD(object):
 
         símismo.datos = np.array(datos)
 
-        fecha_inic = símismo.fecha_inic
-        n_día_inic_año = fecha_inic_año
+        fecha_inic = fecha_inic
+
         datos = símismo.datos
 
         datos_por_año = []
-        if n_día_inic_año > (fecha_inic - ft.date(fecha_inic.year, 1, 1)).days:
-            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+        if día_inic_año > (fecha_inic - ft.date(fecha_inic.year, 1, 1)).days:
+            fecha_ref = ft.date(fecha_inic.year-1, 1, 1) + ft.timedelta(days=día_inic_año-1)
         else:
-            fecha_ref = ft.date(fecha_inic.year, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+            fecha_ref = ft.date(fecha_inic.year, 1, 1) + ft.timedelta(days=día_inic_año-1)
 
         fecha_inic_año_act = fecha_ref
         while True:
             datos_año_actual = []
-            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=n_día_inic_año-1)
+            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=día_inic_año-1)
 
             inic = (fecha_inic_año_act - fecha_inic).days
             if inic < 0:
@@ -187,10 +224,20 @@ class VariableBD(object):
             datos_por_año.append(datos_año_actual)
             fecha_inic_año_act = fecha_inic_año_próx
 
+        # Una lista de matrices numpy de los datos de cada año
         símismo.datos = datos_por_año
 
 
 def leer_columnas(sistema, archivo):
+    """
+    Esta función lee los nombres de las columnas de una base de datos.
+
+    :param sistema:
+    :param archivo:
+
+    :return: La lista de los nombres de las columnas
+    :rtype: list
+    """
 
     if sistema == 'csv':
 

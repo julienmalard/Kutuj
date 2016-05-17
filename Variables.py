@@ -1,9 +1,18 @@
 import numpy as np
 import datetime as ft
 
+from BD import VariableBD
+
 
 class Variable(object):
     def __init__(símismo, receta=None, fuente=None):
+        """
+
+        :param receta:
+        :param fuente:
+        :type fuente: VariableBD
+        """
+
         símismo.receta = receta
         símismo.fuente = fuente
         símismo.datos = None
@@ -14,6 +23,8 @@ class Variable(object):
             símismo.recalcular(receta, fuente)
 
     def recalcular(símismo, receta, fuente):
+        assert type(fuente) is VariableBD
+
         símismo.receta = receta
         símismo.fecha_inic = fuente.fecha_inic
         símismo.nombre = receta['Nombre']

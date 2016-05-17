@@ -336,6 +336,34 @@
         "Variables": "",
         "Verificar": ""
       }
+    },
+    "한국어": {
+      "Estado": 0.0,
+      "IzqaDerech": "Normal",
+      "Trads": {
+        "AvisoReinic": "",
+        "BasedeDatos": "",
+        "CargarBaseDatos": "",
+        "CargarProyecto": "",
+        "Cargardatos": "",
+        "ColumnaFecha": "",
+        "ColumnaHora": "",
+        "Empezar": "",
+        "EnTrabajo": "",
+        "ErrorCargarFecha": "",
+        "ErrorCargarHora": "",
+        "FormatoComas": "",
+        "FormatoTexto": "",
+        "Listas": "",
+        "OpsLengs": "",
+        "Optimizar": "",
+        "ParaHacer": "",
+        "Predecir": "",
+        "ProyectoExistente": "",
+        "ProyectoKutuj": "",
+        "Variables": "",
+        "Verificar": ""
+      }
     }
   }
 }

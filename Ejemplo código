@@ -8,7 +8,7 @@ md.base_central.estab_col_fecha('Fecha')
 md.base_central.estab_col_hora('Hora')
 
 varBD = VariableBD(md.base_central, 'Lluvia diaria', 'Lluvia [Acu] [mm]', interpol='trap',
-                   transformación='sumar', fecha_inic_año=1)
+                   transformación='sumar', día_inic_año=1)
 
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                         'FiltroTmpInic': 100, 'RefTmpInic': 'abs', 'FiltroTmpFin': 200, 'RefTmpFin': 'abs'},

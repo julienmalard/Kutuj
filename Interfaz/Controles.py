@@ -265,9 +265,10 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         rec = símismo.receta
 
         try:
-            símismo.objeto = VariableBD(base_de_datos=símismo.apli.modelo.base_central,
+            símismo.apli.modelo.base_central.día_inic_año = rec['Fecha_inic']
+            símismo.objeto = VariableBD(base=símismo.apli.modelo.base_central,
                                         nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
-                                        transformación=rec['Transformación'], fecha_inic_año=rec['Fecha_inic'])
+                                        transformación=rec['Transformación'])
         except ValueError:
             print('Error cargando datos... :(')
 
