@@ -7,7 +7,7 @@ from Interfaz import Formatos as Fm
 from Interfaz import ControlesGenéricos as CtrG
 from Interfaz import Controles as Ctrl
 
-from Modelo import Modelo
+from Modelo import ControladorModelo
 
 
 class CajaSubEtp11(CjG.CajaSubEtapa):
@@ -62,7 +62,7 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
                                                         (apli.Trads['FormatoTexto'], '*.txt')],
                                              title=apli.Trads['CargarBaseDatos'])
         try:
-            símismo.Modelo = Modelo(archivo_bd)
+            símismo.Modelo = ControladorModelo(archivo_bd)
             símismo.apli.modelo = símismo.Modelo
             cols_bd = símismo.Modelo.base_central.nombres_cols
             símismo.EtiqErrCargarBD.pack_forget()

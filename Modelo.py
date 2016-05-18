@@ -1,57 +1,103 @@
 import os.path
+import warnings as aviso
 import numpy as np
 import scipy.stats as estad
 import scipy.optimize as optimizar
 import math as mat
 
 from BD import BaseCentral
+from Variables import Variable
 
 
-class Modelo(object):
+class ControladorModelo(object):
     def __init__(símismo, archivo_base_central):
         tipo_archivo = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
         símismo.base_central = BaseCentral(archivo_base_central, tipo_archivo)
         símismo.base_derivados = None
 
-        símismo.config = ConfigModelo()
+        símismo.config = Modelo()
 
 
-class ConfigModelo(object):
+class Modelo(object):
     def __init__(símismo, varsx=None, vary=None):
+        """
+        Un modelo de predicción de datos climáticos.
+
+        :param varsx: Variables con cuales vamos a predecir lo que queremos predecir.
+        :type varsx: dict
+
+        :param vary: El variable que queremos predecir.
+        :type vary: Variable
+        """
+
+        # Guardar los variables predictores y para predecir
         símismo.varsX = varsx
         símismo.varY = vary
 
+        # Si varsX no se especificó, crear un diccionario vacío
         if símismo.varsX is None:
             símismo.varsX = {}
 
+        # Dos listas para guardar referencias a los datos de los variables.
+        # datosY es simplemente una lista de matrices numpy con datos del variable.
+        # datosX es una lista de matrices numpy, cada una con eje 0 = variable X y eje 1 = día del año.
         símismo.datosX = []
         símismo.datosY = []
-        símismo.pesos_vars = None
+
+        # El peso de cada variable X en las predicciones, en general
+        símismo.pesos_vars = np.array([])
+
+        # El peso de cada año en la predicción de un año en particular
         símismo.pesos_años = np.array([])
 
     def actualizar_datos(símismo, recalc=False):
+        """
+        Esta función actualiza las
+        :param recalc: Determina si vamos a recalcular los pesos de los años basado en los nuevos datos o no.
+        :type recalc: bool
+
+        """
+
         datosx = []
-        for ll, varx in sorted(símismo.varsX.items()):
+
+        # Para cada variable X, en orden...
+        for nombre, varx in sorted(símismo.varsX.items()):
+
+            # Para cada año en los datos del variable...
             for año, datos in enumerate(varx.datos):
+
+                # Si el año no existe ya en datosx, añadirlo
                 if año >= len(datosx):
                     datosx.append([])
+
+                # Guardar los datos de este variable
                 datosx[año].append(datos)
 
+        # Guardar los datos de los variables en el Modelo
         símismo.datosY = símismo.varY.datos
         símismo.datosX = [np.array(x) for x in datosx]
 
-        if len(símismo.datosX) and len(símismo.datosY) and recalc:
-            símismo.recalcular_pesos_años()
+        # Si existen datos X e Y y queremos recalcular los pesos de los años, hacerlo ahora.
+        if recalc:
+            if len(símismo.datosX) and len(símismo.datosY):
+                símismo.recalcular_pesos_años()
+            else:
+                aviso.warn('No se pudo recalcular los pesos anuales por falta de variable dependiente o independiente.')
 
     def recalcular_pesos_años(símismo):
+        """
+        Esta función recalcula los pesos de los años en comparación al año actual.
+        """
+
+        #
         x_conoc = símismo.datosX[:-1]
-        x_ingr = símismo.datosX[-1]
+        x_actual = símismo.datosX[-1]
         pesos = símismo.pesos_vars
 
         for n, año in enumerate(x_conoc):
-            x_conoc[n] = año[:, :x_ingr.shape[1]]
+            x_conoc[n] = año[:, :x_actual.shape[1]]
 
-        símismo.pesos_años = np.array([símismo.calc_peso_año(x_año, x_ingr, pesos_vars=pesos) for x_año in x_conoc])
+        símismo.pesos_años = np.array([símismo.calc_peso_año(x_año, x_actual, pesos_vars=pesos) for x_año in x_conoc])
 
     def predecir(símismo, n_día):
         if not len(símismo.pesos_años):
