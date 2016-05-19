@@ -104,8 +104,7 @@ class Modelo(object):
             x_anterior[n] = año[:, :x_actual.shape[1]]
 
         # Calculamos los pesos de los años anteriores (conocidos) por su semejanza al año actual
-        símismo.pesos_años = np.array([símismo.calc_peso_año(x_año, x_actual, pesos_vars=símismo.pesos_vars)
-                                       for x_año in x_anterior])
+        símismo.pesos_años = símismo.calc_pesos_años(x_actual=x_actual, x_anteriores=x_anterior)
 
     def predecir(símismo, n_día=None):
         """
@@ -145,79 +144,157 @@ class Modelo(object):
 
         """
 
+        # El número de variables X (predictores) que tenemos
         n_vars = símismo.datosX[0].shape[0]
-        print('datosX: ', símismo.datosX)
-        print(símismo.datosX[0].shape)
-        símismo.pesos_vars = np.zeros((n_vars, 365), dtype=float)
-        print('símismo.pesos_vars', símismo.pesos_vars)
 
+        # Crear una matriz para los pesos de los variables. Eje 0 = variable, eje 1 = día del año
+        símismo.pesos_vars = np.zeros((n_vars, 365), dtype=float)
+
+        # Calibrar los pesos individualmente para cada día del año entre 1 y 365...
         for i in range(1, 366):
-            print('i: ', i)
+
+            # Los parámetros necesarios para la optimización (calibración)
             paráms = (símismo.datosX, símismo.datosY, i)
-            print('símismo.datosY: ', símismo.datosY)
+
+            # Los valores iniciales para los pesos de los variables (0)
             inic = np.zeros(n_vars)
-            print('inic.shape: ', inic.shape)
+
+            # Calibrar los pesos de los variables
             calibrados = optimizar.minimize(símismo.calc_ajust_modelo, inic, args=paráms).x
 
+            print(i)
+
+            # Guardar los pesos de los variables calibrados para este día del año
             símismo.pesos_vars[:, i] = calibrados
 
-    def calc_ajust_modelo(símismo, pesos, datos_x, datos_y, n_día):
-        print('n_día', n_día)
+    def calc_ajust_modelo(símismo, pesos_vars, datos_x, datos_y, n_día):
+        """
+        Esta función calcula el ajuste del modelo. Sirve para la optimización de los parámetros.
 
-        def calc_densidad(simil_años, y_años, y_observ):
-            print('calculando densidad...')
-            print('simil_años: ', simil_años)
-            print('y_años: ', y_años)
-            print('y_observ: ', y_observ)
-            peso_años_norm = simil_años / np.sum(simil_años)
+        :param pesos_vars: Los pesos de los variables. Tiene que ser el primer parámetro para permitir la
+          calibración del modelo.
+        :type pesos_vars: np.ndarray
+
+        :param datos_x: Los datos x, en forma de lista de matrices de datos de distintos años.
+        :type datos_x: list
+
+        :param datos_y: Los datos y, en forma de lista de matrices de datos de distintos años.
+        :type datos_y: list
+
+        :param n_día: El número del día del año para cual queremos calibrar el modelo. 1 indica el primer día del año.
+        :type n_día: int
+
+        :return: Un índice del ajuste del modelo.
+        :rtype: float
+
+        """
+
+        def calc_densidad(pesos_años, y_años, y_observ):
+            """
+            Esta función calcula un índice de cuanto lejos la observación fue de la distribución de probabilidad
+              generada predicha. Da importancia y a la exactitud (si la distribución está centrada en la observación)
+              y a la precisión (si la distribución es estrecha, en otras palabras, si tiene un intervalo de confianza
+              estrecho).
+
+            :param pesos_años: Los pesos para dar a cada año anterior en la creación de la distribución de
+              predicciones.
+            :type pesos_años: np.ndarray
+
+            :param y_años: Las observaciones de años anteriores (para hacer la distribución de predicciones).
+            :type y_años: np.ndarray
+
+            :param y_observ: La observación del año que querremos predecir
+            :type y_observ: float
+
+            :return: El índice de la performancia de la predicción.
+            :rtype: float
+
+            """
+
+            # Calculamos la distancia relativa entre el valor del año actual y los valores en años anteriores.
             dist_y = (y_años - y_observ) / (y_años.max() - y_años.min())
-            densidad = np.sum(peso_años_norm * (1 - dist_y))
+
+            # Calcular un índice de dónde cae la observación en la densidad de las predicciones. 1 indica que la
+            # predicción predijo 100% de probabilidad donde observamos la observación; 0 indica que la predicción
+            # predijo 100% de probabilidad a la observación de años anteriores más lejos posible del año que querríamos
+            # predecir.
+            densidad = np.sum(np.multiply(pesos_años, (1 - dist_y)))
 
             return densidad
 
-        densidades = np.empty(len(datos_x))
-        print('dim densidades: ', len(datos_x))
-        for n in range(len(datos_x)):
-            print('n: ', n)
-            x_ant = datos_x.copy()
-            x_pred = x_ant.pop(n)
-            y_ant = datos_y.copy()
-            y_obs = y_ant.pop(n)
+        # El número de años de datos disponibles para calcular el ajuste del modelo.
+        n_años = len(datos_x)
 
-            x_ant = np.array(x_ant)
-            print('x_ant 2: ', x_ant)
-            print(x_ant.shape)
-            x_pred = np.array(x_pred)
-            y_ant = np.array(y_ant)
-            y_obs = np.array(y_obs)
+        # Una matriz numpy para contener el ajuste del modelo para cada año
+        densidades = np.empty(n_años)
 
-            if n_día is not None:
-                x_ant = x_ant[:, :, :n_día]
-                x_pred = x_pred[:, :n_día]
-                y_ant = y_ant[:, :n_día]
-                y_obs = y_obs[:n_día]
+        # Cortar los datos de cada año hasta la fecha de interés
+        datos_x_n = [x[:, :n_día] for x in datos_x]
+        datos_y_n = [y[n_día-1] for y in datos_y]  # Únicamente guardamos el día de la fecha de interés
 
-            print('x_ant 3: ', x_ant)
+        # Para cada año en los datos disponibles, vamos a quitarlo de los datos e intentar predecirlo.
+        for n in range(n_años):
 
-            print('x_pred', x_pred)
-            print('y_ant', y_ant)
-            print('y_obs', y_obs)
+            # Los datos x conocidos.
+            x_conoc = datos_x_n.copy()
 
-            print('x_ant', x_ant.shape)
-            print('x_pred', x_pred.shape)
-            print('y_ant', y_ant.shape)
-            print('y_obs', y_obs.shape)
+            # Quitar los datos x del año que queremos predecir
+            x_pred = x_conoc.pop(n)
 
-            matr_simil = np.empty(len(x_ant))
+            # Los datos y correspondiendo a los datos x de los años conocidos. Tomamos todos los años, en el día de
+            # interés.
+            y_conoc = datos_y_n.copy()
 
-            for x in x_ant:
-                print('x.shape', x.shape)
-                matr_simil = símismo.calc_peso_año(x_pred, x, pesos_vars=pesos, día_único=True)
+            # La obseravación del dato y para el año que queremos predecir. Lo quitamos de la lista de datos y
+            # conocidos.
+            y_obs = y_conoc.pop(n)
 
-            densidades[n] = calc_densidad(matr_simil, y_ant, y_obs)
-            print('densidades: ', densidades)
+            # Convertir la listas de datos y a una matriz numpy
+            y_conoc = np.array(y_conoc)
 
-        return np.sum(densidades)
+            símismo.calc_pesos_años(x_actual=x_pred, x_anteriores=x_conoc)
+
+            # Una matriz para guardar los pesos de cada año, únicamente para el último día de interés
+            matr_simil = símismo.calc_pesos_años(x_actual=x_pred, x_anteriores=x_conoc,
+                                                 pesos_vars=pesos_vars, día_único=True)
+
+            densidades[n] = calc_densidad(matr_simil, y_conoc, y_obs)
+
+        # Devolver la suma de las densidades de cada año. Más densidad indica un mejor modelo, pero con SciPy
+        # solamente podemos minimizar una función. Así que tenemos que devolver el negativo de la densidad.
+        return -np.sum(densidades)
+
+    def calc_pesos_años(símismo, x_actual, x_anteriores, día_único=False, pesos_vars=None):
+        """
+        Esta función devuelve los pesos de años
+        :param x_actual: Matriz numpy de datos del año de interés
+        :type x_actual: np.ndarray
+
+        :param x_anteriores: Lista de datos x (matrices numpy) de años anteriores
+        :type x_anteriores: list
+
+        :param día_único: Una opción para determinar si únicamente estamos comparando los años hasta el último día
+          de datos disponibles, o si queremos comparalos hasta cada día para cual hay datos disponibles.
+        :type día_único: bool
+
+        :param pesos_vars: Los pesos de los variables
+        :type pesos_vars: np.ndarray
+
+        :return: Los pesos de los años anteriores con referencia al año actual
+        :rtype: np.ndarray
+        """
+
+        # Si no se especificaro los pesos de los variables, usar los pesos del modelo.
+        if pesos_vars is None:
+            pesos_vars = símismo.pesos_vars
+
+        pesos = np.array([símismo.calc_peso_año(x_año, x_actual, pesos_vars=pesos_vars, día_único=día_único)
+                          for x_año in x_anteriores])
+
+        # Normalizar los pesos a 1
+        pesos_norm = pesos / sum(pesos)
+
+        return pesos_norm
 
     @staticmethod
     def calc_peso_año(x1, x2, pesos_vars, día_único=False):
@@ -236,9 +313,10 @@ class Modelo(object):
 
         :param día_único: Una opción para determinar si únicamente estamos comparando los años hasta el último día
           de datos disponibles, o si queremos comparalos hasta cada día para cual hay datos disponibles.
+        :type día_único: bool
         
         :return: el peso del año, determinado por el grado de semejanza entre los dos años.
-        :rtype: np.ndarray
+        :rtype: np.ndarray | float
         """
 
         # Los dos años tienen que tener el mismo tamaño de matriz. Si no, hay un error en otro lugar.
