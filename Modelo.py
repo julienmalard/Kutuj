@@ -148,6 +148,7 @@ class Modelo(object):
             dib.show()
 
         print(y_conoc)
+        print(pesos_pred)
 
         return pesos_pred, y_conoc
 
@@ -326,7 +327,7 @@ class Modelo(object):
         # Normalizar los pesos a 1
         if np.sum(pesos) == 0:  # Evitar dividir por 0 en la normalización
             pesos[:] = 1
-        pesos_norm = pesos / np.sum(pesos)
+        pesos_norm = pesos / np.sum(pesos, axis=0)
 
         return pesos_norm
 
