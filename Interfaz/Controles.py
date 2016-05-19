@@ -265,7 +265,7 @@ class GrpCtrlsVarBD(CtrG.GrupoControles):
         rec = símismo.receta
 
         try:
-            símismo.apli.modelo.base_central.día_inic_año = rec['Fecha_inic']
+            símismo.apli.modelo.base_central.especificar_inic_año(n_día=rec['Fecha_inic'])
             símismo.objeto = VariableBD(base=símismo.apli.modelo.base_central,
                                         nombre=rec['Nombre'], columna=rec['Columna'], interpol=rec['Interpol'],
                                         transformación=rec['Transformación'])

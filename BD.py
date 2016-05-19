@@ -65,6 +65,22 @@ class BaseCentral(object):
         # Acordarse de cuál era la columna de horas
         símismo.receta['id_cols']['tiempo'] = col
 
+    def especificar_inic_año(símismo, n_día):
+        """
+        Esta función establece el día inicial del año para la base de datos.
+
+        :param n_día: El día del año en cual empezamos el año para este modelo. Empezamos a contar en 1. Por ejemplo,
+          n_día = 1 quiere decir que empezamos el año el 1 de enero. n_día = 15 quiere decir que el año empieza el
+          15 de enero.
+        :type n_día: int
+
+        """
+
+        if int(n_día) != n_día or not 1 <= n_día <= 365:
+            raise ValueError('n_día tiene que ser un número entero entre 1 y 365, inclusivo.')
+
+        símismo.día_inic_año = n_día
+
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
 
         # Si no especificamos ya la columna de datos o de horas, quejarse.

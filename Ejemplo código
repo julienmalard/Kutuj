@@ -3,12 +3,12 @@ from BD import VariableBD
 from Variables import Variable
 
 # md = Modelo("E:/Javad/Python-Julien/Kutuj/Interfaz/Ejemplo.csv")
-md = ControladorModelo('C:/Users/jmalar1/Documents/PycharmProjects/Kutuj/Interfaz/Ejemplo.csv')
-md.base_central.estab_col_fecha('Fecha')
-md.base_central.estab_col_hora('Hora')
+ctrl = ControladorModelo('C:/Users/iarna/PycharmProjects/Kutuj/Interfaz/Ejemplo.csv')
+ctrl.base_central.estab_col_fecha('Fecha')
+ctrl.base_central.estab_col_hora('Hora')
 
-varBD = VariableBD(md.base_central, 'Lluvia diaria', 'Lluvia [Acu] [mm]', interpol='trap',
-                   transformación='sumar', día_inic_año=1)
+varBD = VariableBD(nombre='Lluvia diaria', base=ctrl.base_central, columna='Lluvia [Acu] [mm]', interpol='trap',
+                   transformación='sumar')
 
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                         'FiltroTmpInic': 100, 'RefTmpInic': 'abs', 'FiltroTmpFin': 200, 'RefTmpFin': 'abs'},
@@ -22,10 +22,15 @@ varX2 = Variable(receta={'Nombre': 'Lluvia -10', 'MétodoCalc': 'val_tot', 'Filt
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': -10, 'RefTmpFin': 'rel'},
                  fuente=varBD)
 
-md.config.varsX = {'Lluvia a fecha': varX1, 'Lluvia -10': varX2}
-md.config.varY = varY
+ctrl.Modelo.varsX = {'Lluvia a fecha': varX1, 'Lluvia -10': varX2}
+ctrl.Modelo.varY = varY
 
-md.config.actualizar_datos()
-md.config.calibrar()
+ctrl.Modelo.actualizar_datos()
 
-# md.config.predecir(n_día=10)
+# ctrl.Modelo.calibrar()
+
+# ctrl.Modelo.guardar_calib(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
+
+ctrl.Modelo.cargar_calib('C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
+
+ctrl.Modelo.predecir(n_día=10)
