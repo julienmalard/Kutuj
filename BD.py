@@ -155,29 +155,61 @@ class VariableBD(object):
         # El vector de los tiempos de cada observación
         lista_tiempos = base.tiempos
 
+        # Una lista para poner los datos para cada año. Tendrá el formato general de:
+        #   [
+        #     [datos año 1...],
+        #     [datos año 2...],
+        #     ...
+        #   ]
         datos = []
+
+        # Una lista temporaria para guardar los valores de los datos horarios de 1 día
         vals_var_día = []
-        pesos = []
+
+        # Un indicador de si terminamos de leer los datos de un día (antes de pasar al próximo día)
         terminado = False
 
+        # Pesos para implementar interpolación
+        pesos = []
+
         if interpol == 'trap':
+            # Si usamos interpolación trapezoidal, hay que parar el cálculo al penúltimo valor
             fin = -2
         elif interpol == 'ninguno':
+            # Si no usamos interpolación, hay que terminar el cálculo al último valor
             fin = -1
         else:
+            # Si no reconocemos el tipo de interpolación, hay un error.
             raise ValueError
 
+        # Iteramos para cada punto de dato el la lista de datos. Datos del mismo dia tendrán la misma fecha (f)
         for n, f in enumerate(lista_fechas[:fin]):
+
             if interpol == 'trap':
+                # Para interpolación trapezoidal, añadimos el promedio del valor y del siguiente
                 vals_var_día.append((datos_crudos[n] + datos_crudos[n+1])/2)
+
+                # Calcular un ajusto de día para la interpolación trapezoidal si el tiempo siguiente era del próximo
+                # día.
                 ajust_día = lista_fechas[n + 1] - f
+
+                # Dar un peso a este dato según
                 pesos.append((lista_tiempos[n+1]-lista_tiempos[n] + ajust_día*24*60*60)/(60*60))
 
+                # Si llegamos al fin del los datos o al fin del día...
                 if n+1 == len(lista_fechas) or f != lista_fechas[n + 1]:
+                    # Indicar que terminamos.
                     terminado = True
+
             elif interpol == 'ninguno':
+                # Si no usamos interpolación...
+
+                # Añadimos el dato a la lista de datos para este día.
                 vals_var_día.append(datos_crudos[n])
+
+                # Si llegamos al fin de la lista, o si el punto siguiente en la lista no es de la misma fecha...
                 if n == len(lista_fechas) or f != lista_fechas[n + 1]:
+                    # Indicar que terminamos de leer los datos de este día
                     terminado = True
             else:
                 raise ValueError('Metodo de interpolación {0} no reconocido.'.format(interpol))

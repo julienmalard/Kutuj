@@ -304,7 +304,7 @@ class CajaSubEtp21(CjG.CajaSubEtapa):
         símismo.verificar_completo()
 
     def verificar_completo(símismo):
-        if símismo.apli.modelo.config.varY is not None:
+        if símismo.apli.modelo.Modelo.varY is not None:
             símismo.pariente.desbloquear_subcajas([2])
         else:
             símismo.pariente.bloquear_subcajas([2])

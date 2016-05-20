@@ -54,7 +54,8 @@ class Modelo(object):
 
     def actualizar_datos(símismo, recalc=False):
         """
-        Esta función actualiza las
+        Esta función actualiza las listas de los datos del Modelo.
+
         :param recalc: Determina si vamos a recalcular los pesos de los años basado en los nuevos datos o no.
         :type recalc: bool
 

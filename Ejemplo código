@@ -10,6 +10,8 @@ ctrl.base_central.estab_col_hora('Hora')
 varBD = VariableBD(nombre='Lluvia diaria', base=ctrl.base_central, columna='Lluvia [Acu] [mm]', interpol='trap',
                    transformación='sumar')
 
+print(varBD.datos)
+
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                         'FiltroTmpInic': 100, 'RefTmpInic': 'abs', 'FiltroTmpFin': 200, 'RefTmpFin': 'abs'},
                 fuente=varBD)
@@ -17,6 +19,8 @@ varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', '
 varX1 = Variable(receta={'Nombre': 'Lluvia a fecha', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': 0, 'RefTmpFin': 'rel'},
                  fuente=varBD)
+
+print(varX1.datos)
 
 varX2 = Variable(receta={'Nombre': 'Lluvia -10', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': -10, 'RefTmpFin': 'rel'},

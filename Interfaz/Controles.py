@@ -383,8 +383,8 @@ class GrpCtrlsVarY(CtrG.GrupoControles):
             return True
 
     def guardar(símismo, borrar=False):
-        símismo.apli.modelo.config.varY = símismo.objeto
-        símismo.apli.modelo.config.actualizar_datos()
+        símismo.apli.modelo.Modelo.varY = símismo.objeto
+        símismo.apli.modelo.Modelo.actualizar_datos()
         super().guardar(borrar=borrar)
 
         símismo.pariente.verificar_completo()

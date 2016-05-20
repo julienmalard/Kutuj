@@ -23,35 +23,76 @@ class Variable(object):
             símismo.recalcular(receta, fuente)
 
     def recalcular(símismo, receta, fuente):
+        """
+
+        :param receta:
+        :param fuente:
+
+        """
+
         assert type(fuente) is VariableBD
 
+        # Poner los atributos del Variable a fecha
         símismo.receta = receta
         símismo.fecha_inic = fuente.fecha_inic
         símismo.nombre = receta['Nombre']
+
+        # El método de cálculo del variable
         mét_calc = receta['MétodoCalc']
+
+        # El tipo de filtro para valores del variable fuente
         tipo_filtro_val = receta['FiltroVal']
 
+        # Variables para contener los límites del filtro de valores
         filtro_val_exact = filtro_val_inf = filtro_val_sup = None
+
         if tipo_filtro_val == 'ninguno':
+
+            # Si no hay filtro, no hacer nada.
             pass
+
         elif tipo_filtro_val == 'igual':
+
+            # Si el filtro es de valores igual a un valor particular, guardar este valor
             filtro_val_exact = receta['FiltroValÚn']
+
         elif tipo_filtro_val == 'sup':
+
+            # Si el filtro es de valores superiores a un valor particular, guardar este valor
             filtro_val_inf = receta['FiltroValÚn']
+
         elif tipo_filtro_val == 'inf':
+
+            # Si el filtro es de valores inferiores a un valor particular, guardar este valor
             filtro_val_sup = receta['FiltroValÚn']
+
         elif tipo_filtro_val == 'entre':
+
+            # Si el filtro es de valores entre dos valores particulares, guardar los dos valores
             filtro_val_inf = receta['FitroValEntre1']
             filtro_val_sup = receta['FitroValEntre2']
+
         else:
+
+            # Si tipo_filtro_val no era una de las
             raise KeyError(tipo_filtro_val)
 
+        # El tiempo inicial para calcular el variable
         filtro_tmp_inic = receta['FiltroTmpInic']
+
+        # La referencia para el tiempo inicial (abs = día del año, rel = relativo a hoy)
         ref_tmp_inic = receta['RefTmpInic']
+
+        # El tiempo final para el variable
         filtro_tmp_fin = receta['FiltroTmpFin']
+
+        # La referencia para el tiempo final
         ref_tmp_fin = receta['RefTmpFin']
 
+        # para simplificar el código
         datos_fuente = fuente.datos
+
+        # La lista en cual pondremos los datos calculados
         datos = []
 
         for n_año, año in enumerate(datos_fuente):
