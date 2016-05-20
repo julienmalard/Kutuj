@@ -34,7 +34,7 @@ class Variable(object):
 
         # Poner los atributos del Variable a fecha
         símismo.receta = receta
-        símismo.fecha_inic = fuente.fecha_inic
+        símismo.fecha_inic = fuente.fecha_inic_datos
         símismo.nombre = receta['Nombre']
 
         # El método de cálculo del variable

@@ -11,6 +11,8 @@ varBD = VariableBD(nombre='Lluvia diaria', base=ctrl.base_central, columna='Lluv
                    transformación='sumar')
 
 print(varBD.datos)
+for i in varBD.datos:
+    print(i.shape)
 
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                         'FiltroTmpInic': 100, 'RefTmpInic': 'abs', 'FiltroTmpFin': 200, 'RefTmpFin': 'abs'},
