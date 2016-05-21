@@ -84,8 +84,8 @@ class BaseCentral(object):
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
 
         # Si no especificamos ya la columna de datos o de horas, quejarse.
-        if símismo.fecha_inic_datos is None or símismo.tiempos is None:
-            raise ValueError('Hay que especificar los datos de fechas y horas primero.')
+        if len(símismo.fecha_inic_datos) == 0:
+            raise ValueError('Hay que especificar los datos de fechas primero.')
 
         if mét_combin_tiempo is not None:
             símismo.receta['mét_combin_tiempo'][nombre] = mét_combin_tiempo
@@ -168,15 +168,6 @@ class VariableBD(object):
         # Para simplificar el código
         base = símismo.base
         columna = símismo.columna
-        fecha_inic_datos = símismo.fecha_inic_datos
-        interpol = símismo.interpol
-        transformación = símismo.transformación
-
-        # El vector de las fechas, relativas a la fecha inicial de los datos
-        lista_fechas = base.fechas
-
-        # El vector de los tiempos de cada observación
-        lista_tiempos = base.tiempos
 
         # Leer datos y convertir a números
         datos_crudos = cargar_columna(columna=columna, sistema=base.sistema,
@@ -185,9 +176,23 @@ class VariableBD(object):
         datos_crudos[datos_crudos == ''] = 'NaN'
         datos_crudos = datos_crudos.astype(float)
 
-        # La fecha inicial de los datos crudos, y el día del inicio del año del modelo
-        día_inic_año = base.día_inic_año
+        if len(base.tiempos) == 0:
+            if len(base.fechas) != len(set(base.fechas)):
+                raise ValueError('Hay que especificar la columna para los datos de hora.')
+        else:
+            # Convertir datos temporales a datos diarios
+            datos = símismo.gen_datos_diarios(datos_crudos=datos_crudos,
+                                              lista_fechas=base.fechas, lista_tiempos=base.tiempos,
+                                              transformación=símismo.transformación, interpol=símismo.interpol)
 
+        # Ahora que tenemos un vector unidimensional de TODOS los datos diarios, tenemos que dividirlo en una lista
+        # de datos anuales.
+
+        símismo.datos = símismo.gen_datos_anuales(datos=datos, día_inic_año=base.día_inic_año,
+                                                  fecha_inic_datos=símismo.fecha_inic_datos)
+
+    @staticmethod
+    def gen_datos_diarios(datos_crudos, lista_fechas, lista_tiempos, transformación, interpol):
         # Una lista temporaria para guardar los valores de los datos horarios de 1 día
         vals_var_día = []
 
@@ -198,11 +203,11 @@ class VariableBD(object):
         pesos = []
 
         if interpol == 'trap':
-            # Si usamos interpolación trapezoidal, hay que parar el cálculo al pen-penúltimo valor
-            fin = -2
-        elif interpol == 'ninguno':
-            # Si no usamos interpolación, hay que terminar el cálculo al penúltimo valor
+            # Si usamos interpolación trapezoidal, hay que parar el cálculo al penúltimo valor
             fin = -1
+        elif interpol == 'ninguno':
+            # Si no usamos interpolación, hay que terminar el cálculo al último valor
+            fin = len(lista_fechas) - 1
         else:
             # Si no reconocemos el tipo de interpolación, hay un error.
             raise ValueError
@@ -217,18 +222,17 @@ class VariableBD(object):
             if interpol == 'trap':
 
                 # Para interpolación trapezoidal, añadimos el promedio del valor y del siguiente
-                vals_var_día.append((datos_crudos[n] + datos_crudos[n+1])/2)
+                vals_var_día.append((datos_crudos[n] + datos_crudos[n + 1]) / 2)
 
                 # Calcular un ajusto de día para la interpolación trapezoidal si el tiempo siguiente era del próximo
                 # día.
                 ajust_día = lista_fechas[n + 1] - f
 
                 # Dar un peso a este dato según el plazo de tiempo entre este dato y el próximo.
-                pesos.append((lista_tiempos[n+1]-lista_tiempos[n] + ajust_día*24*60*60)/(60*60))
+                pesos.append((lista_tiempos[n + 1] - lista_tiempos[n] + ajust_día * 24 * 60 * 60) / (60 * 60))
 
                 # Si llegamos al fin del los datos o al fin del día...
-                if n+1 == len(lista_fechas) or f != lista_fechas[n + 1]:
-
+                if n + 2 == len(lista_fechas) or f != lista_fechas[n + 1]:
                     # Indicar que terminamos.
                     terminado = True
 
@@ -239,8 +243,7 @@ class VariableBD(object):
                 vals_var_día.append(datos_crudos[n])
 
                 # Si llegamos al fin de la lista, o si el punto siguiente en la lista no es de la misma fecha...
-                if n == len(lista_fechas) or f != lista_fechas[n + 1]:
-
+                if n + 1 == len(lista_fechas) or f != lista_fechas[n + 1]:
                     # Indicar que terminamos de leer los datos de este día
                     terminado = True
 
@@ -300,69 +303,56 @@ class VariableBD(object):
 
                 terminado = False
 
-        # Ahora que tenemos un vector unidimensional de TODOS los datos diarios, tenemos que dividirlo en una lista
-        # de datos anuales.
+        return datos
 
-        # Para simplificar el código
-        datos_por_año = símismo.datos
+    @staticmethod
+    def gen_datos_anuales(datos, día_inic_año, fecha_inic_datos):
+
+        # Para guardar los resultados
+        datos_por_año = []
 
         # La fecha de referencia es la fecha del primer día del año agrícola, en el año agrícola en cual empiezan
         # nuestros datos.
-        if (día_inic_año-1) > (fecha_inic_datos - ft.date(fecha_inic_datos.year, 1, 1)).days:
+        if (día_inic_año - 1) > (fecha_inic_datos - ft.date(fecha_inic_datos.year, 1, 1)).days:
             # Si el día en cual empezamos el año es superior al día del año calendario en cual nuestros datos
             # empiezan...
 
             # Poner la fecha de referencia al día en cual empieza el año agrícola, un año calendario antes del año
             # en cual empiezan nuestros datos.
-            fecha_ref = ft.date(fecha_inic_datos.year-1, 1, 1) + ft.timedelta(days=día_inic_año-1)
+            fecha_ref = ft.date(fecha_inic_datos.year - 1, 1, 1) + ft.timedelta(days=día_inic_año - 1)
 
         else:
             # Sino...
 
             # Poner la fecha de referencia al día en cual empieza el año agrícola, del mismo año calendario en cual
             # empiezan nuestros datos.
-            fecha_ref = ft.date(fecha_inic_datos.year, 1, 1) + ft.timedelta(days=día_inic_año-1)
+            fecha_ref = ft.date(fecha_inic_datos.year, 1, 1) + ft.timedelta(days=día_inic_año - 1)
 
         # El año agrícola actual empieza en la fecha de referencia
         fecha_inic_año_act = fecha_ref
-
-        print(datos)
-        print(datos.shape)
 
         # Corremos este "bucle mientras" para siempre (hasta que encontremos la condición para parar)
         terminado_anual = False
         while not terminado_anual:
 
-            print('fecha_inic_año_act', fecha_inic_año_act)
-            print('día_inic_año', día_inic_año)
-
             # La fecha en la cual empieza el próximo año agrícola.
-            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=día_inic_año-1)
-
-            print('fecha_inic_año_próx', fecha_inic_año_próx)
+            fecha_inic_año_próx = ft.date(fecha_inic_año_act.year + 1, 1, 1) + ft.timedelta(days=día_inic_año - 1)
 
             # El primer día de datos que nos interese es el número de días entre el primer día de este año y el día
             # en cual empiezan nuestros datos
 
-            print('fecha_inic_datos', fecha_inic_datos)
-
             inic = (fecha_inic_año_act - fecha_inic_datos).days
-            print('inic', inic)
 
             if inic < 0:
-                print('inic < 0')
                 # Si el día de interés se ubica antes del inicio de los datos...
 
                 # Llenar los datos que faltan con valores nan
-                nans_inic = [float('NaN')] * (fecha_inic_datos-fecha_ref).days
-
-                print('No. nans: ', len(nans_inic))
+                nans_inic = [float('NaN')] * (fecha_inic_datos - fecha_ref).days
 
                 # Y empezar a leer los datos en el día 0
                 inic = 0
 
             else:
-                print('No hay nans iniciales.')
                 # Sino, no hay que añadir valores nan
                 nans_inic = []
 
@@ -370,14 +360,10 @@ class VariableBD(object):
             # de nuestros datos.
             fin = (fecha_inic_año_próx - fecha_inic_datos).days
 
-            print('fin ', fin)
-
             # Si el último día es superior al número de datos que tenemos...
             if fin >= len(datos):
-
                 # Limitarlo a los datos disponibles
                 fin = len(datos)
-                print('Fin ajustado a %i' % fin)
 
                 # Y marcar que ya terminamos de leer los datos.
                 terminado_anual = True
@@ -390,6 +376,8 @@ class VariableBD(object):
 
             # Avanzamos de un año
             fecha_inic_año_act = fecha_inic_año_próx
+
+        return datos_por_año
 
 
 def leer_columnas(sistema, archivo):
@@ -413,8 +401,7 @@ def leer_columnas(sistema, archivo):
                 columnas = next(l)
 
         except FileNotFoundError:
-            print('¡Error abriendo el archivo de datos!')
-            raise FileNotFoundError
+            raise FileNotFoundError('¡Error abriendo el archivo de datos!')
 
     else:
         raise NotImplementedError('Falta código para comunicar con el formato de datos: '
@@ -446,8 +433,7 @@ def cargar_columna(columna, sistema, archivo):
             raise ValueError('El nombre de columna no existe en la base de datos.')
 
         except FileNotFoundError:
-            print('¡Error!')
-            raise FileNotFoundError
+            raise FileNotFoundError('No se pudo abrir la base de datos.')
 
     else:
         raise NotImplementedError('Falta código para comunicar con el formato de datos'
@@ -537,7 +523,6 @@ def leer_tiempo(tiempos_crudos):
     elif len(lista_tiempos[0]) == 2:
         tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 for x in lista_tiempos]
     else:
-        print('No se pudieron leer los datos de hora de la base de datos.')
         raise ValueError('No se pudieron leer los datos de hora de la base de datos.')
 
     return np.array(tiempos_finales)

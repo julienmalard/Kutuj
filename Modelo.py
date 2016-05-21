@@ -322,8 +322,12 @@ class Modelo(object):
         if pesos_vars is None:
             pesos_vars = símismo.pesos_vars
 
-        pesos = np.array([símismo.calc_peso_año(x_año, x_actual, pesos_vars=pesos_vars, día_único=día_único)
-                          for x_año in x_anteriores])
+        # Hay que asegurarse de que los datos x para todos los años tengan el mismo número de días
+        lím = min(x_actual.shape[1], 365)
+
+        pesos = np.array([símismo.calc_peso_año(x_ant[:, :lím], x_actual[:, :lím],
+                                                pesos_vars=pesos_vars, día_único=día_único)
+                          for x_ant in x_anteriores])
 
         # Normalizar los pesos a 1
         if np.sum(pesos) == 0:  # Evitar dividir por 0 en la normalización

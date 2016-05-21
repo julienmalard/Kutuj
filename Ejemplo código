@@ -7,12 +7,8 @@ ctrl = ControladorModelo('C:/Users/iarna/PycharmProjects/Kutuj/Interfaz/Ejemplo.
 ctrl.base_central.estab_col_fecha('Fecha')
 ctrl.base_central.estab_col_hora('Hora')
 
-varBD = VariableBD(nombre='Lluvia diaria', base=ctrl.base_central, columna='Lluvia [Acu] [mm]', interpol='trap',
+varBD = VariableBD(nombre='Lluvia diaria', base=ctrl.base_central, columna='Lluvia [Acu] [mm]', interpol='ninguno',
                    transformación='sumar')
-
-print(varBD.datos)
-for i in varBD.datos:
-    print(i.shape)
 
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                         'FiltroTmpInic': 100, 'RefTmpInic': 'abs', 'FiltroTmpFin': 200, 'RefTmpFin': 'abs'},
@@ -21,8 +17,6 @@ varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', '
 varX1 = Variable(receta={'Nombre': 'Lluvia a fecha', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': 0, 'RefTmpFin': 'rel'},
                  fuente=varBD)
-
-print(varX1.datos)
 
 varX2 = Variable(receta={'Nombre': 'Lluvia -10', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': -10, 'RefTmpFin': 'rel'},
