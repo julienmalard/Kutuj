@@ -1,13 +1,14 @@
-from Modelo import ControladorModelo
-from BD import VariableBD
+from Modelo import Modelo
+from BD import BaseCentral, VariableBD
 from Variables import Variable
 
-# md = Modelo("E:/Javad/Python-Julien/Kutuj/Interfaz/Ejemplo.csv")
-ctrl = ControladorModelo('C:/Users/iarna/PycharmProjects/Kutuj/Interfaz/Ejemplo.csv')
-ctrl.base_central.estab_col_fecha('Fecha')
-ctrl.base_central.estab_col_hora('Hora')
 
-varBD = VariableBD(nombre='Lluvia diaria', base=ctrl.base_central, columna='Lluvia [Acu] [mm]', interpol='ninguno',
+BD = BaseCentral(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Huehuetenango 1970-2011.csv',
+                 cód_nd=-99.9)
+BD.estab_col_fecha('fecha')
+# BD.estab_col_hora('Hora')
+
+varBD = VariableBD(nombre='Lluvia diaria', base=BD, columna='lluvia media', interpol='ninguno',
                    transformación='sumar')
 
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
@@ -18,19 +19,28 @@ varX1 = Variable(receta={'Nombre': 'Lluvia a fecha', 'MétodoCalc': 'val_tot', '
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': 0, 'RefTmpFin': 'rel'},
                  fuente=varBD)
 
+print(varX1.datos)
+
 varX2 = Variable(receta={'Nombre': 'Lluvia -10', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': -10, 'RefTmpFin': 'rel'},
                  fuente=varBD)
 
-ctrl.Modelo.varsX = {'Lluvia a fecha': varX1, 'Lluvia -10': varX2}
-ctrl.Modelo.varY = varY
+Modelo = Modelo()
+Modelo.varsX = {'Lluvia a fecha': varX1, 'Lluvia -10': varX2}
+Modelo.varY = varY
 
-ctrl.Modelo.actualizar_datos()
+Modelo.actualizar_datos(recalc=True)
 
-# ctrl.Modelo.calibrar()
+print(Modelo.pesos_años.shape)
+print(Modelo.pesos_años)
 
-# ctrl.Modelo.guardar_calib(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
 
-ctrl.Modelo.cargar_calib('C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
+Modelo.calibrar()
 
-ctrl.Modelo.predecir(n_día=10)
+Modelo.guardar_calib(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib_Huehue.txt')
+
+"""
+Modelo.cargar_calib('C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
+
+Modelo.predecir(n_día=10)
+"""

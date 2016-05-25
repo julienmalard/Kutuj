@@ -265,6 +265,7 @@ ubic_EtiqErrCargarBD = dict()
 
 ubic_CjFechaHora = dict(relx=0.5, rely=0.5, anchor=tk.N)
 ubic_CjMnCol = dict(side='left', padx=20, anchor=tk.N)
+ubic_IngrValND = dict(side='top', anchor=tk.N)
 ubic_MnCol = dict(side='top')
 ubic_EtiqErrCol = dict(side='top')
 ubic_CjsCol = dict(side='left', padx=10)

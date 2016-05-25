@@ -43,7 +43,13 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
                                       ubicación=Fm.ubic_MnCol, tipo_ubic='pack')
         cj_mn_col_hora.pack(**Fm.ubic_CjMnCol)
 
-        símismo.CjAct.especificar_objetos([símismo.MnColHora, símismo.MnColFecha])
+        símismo.IngrValND = CtrG.IngrNúm(símismo.CjAct, nombre=apli.Trads['ValorND'], límites=None,
+                                         prec='dec', comanda=símismo.acción_ingr_val_nd,
+                                         ubicación=Fm.ubic_MnCol, tipo_ubic='pack')
+
+        cj_mn_col_hora.pack(**Fm.ubic_IngrValND)
+
+        símismo.CjAct.especificar_objetos([símismo.MnColHora, símismo.MnColFecha, símismo.IngrValND])
 
         símismo.EtiqErrColFecha = tk.Label(cj_mn_col_fecha,
                                            text=apli.Trads['ErrorCargarFecha'],
@@ -104,8 +110,12 @@ class CajaSubEtp11(CjG.CajaSubEtapa):
         else:
             símismo.pariente.bloquear_subcajas([2])
 
+    def acción_ingr_val_nd(símismo, val):
+        símismo.Modelo.base_central.cód_nd = val
+
     def verificar_completo(símismo):
-        if len(símismo.Modelo.base_central.fechas) and len(símismo.Modelo.base_central.tiempos):
+        fechas = símismo.Modelo.base_central.fechas
+        if len(fechas) and (len(símismo.Modelo.base_central.tiempos) or len(fechas) == len(set(fechas))):
             return True
         else:
             return False
@@ -174,7 +184,8 @@ class CajaSubEtp12(CjG.CajaSubEtapa):
         bd = símismo.Modelo.base_central
         cols_potenciales = bd.nombres_cols.copy()
         cols_potenciales.remove(bd.receta['id_cols']['fecha'])
-        cols_potenciales.remove(bd.receta['id_cols']['tiempo'])
+        if len(bd.receta['id_cols']['tiempo']):
+            cols_potenciales.remove(bd.receta['id_cols']['tiempo'])
         símismo.MnCol.refrescar(opciones=cols_potenciales, texto_opciones=cols_potenciales)
         símismo.lista.objetos = símismo.apli.modelo.base_central.vars
 
@@ -428,7 +439,7 @@ class CajaSubEtp22(CjG.CajaSubEtapa):
         cj_bajo.place(**Fm.ubic_CjBajoSE22)
 
     def acción_desbloquear(símismo):
-        símismo.lista.objetos = símismo.apli.modelo.config.varsX
+        símismo.lista.objetos = símismo.apli.modelo.Modelo.varsX
         símismo.Modelo = símismo.apli.modelo
         cols = [v.nombre for ll, v in símismo.Modelo.base_central.vars.items()]
         símismo.MnVarBD.refrescar(opciones=cols)
@@ -436,7 +447,7 @@ class CajaSubEtp22(CjG.CajaSubEtapa):
         símismo.verificar_completo()
 
     def verificar_completo(símismo):
-        if len(símismo.apli.modelo.config.varsX) > 0:
+        if len(símismo.apli.modelo.Modelo.varsX) > 0:
             símismo.pariente.desbloquear_cajas([3])
         else:
             símismo.pariente.bloquear_cajas([3])

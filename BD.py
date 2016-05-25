@@ -4,9 +4,10 @@ import datetime as ft
 
 
 class BaseCentral(object):
-    def __init__(símismo, archivo, sistema='csv'):
+    def __init__(símismo, archivo, sistema='csv', cód_nd=''):
         símismo.sistema = sistema.lower()
         símismo.archivo = archivo
+        símismo.cód_nd = cód_nd
 
         símismo.nombres_cols = leer_columnas(sistema, archivo)
 
@@ -157,9 +158,9 @@ class VariableBD(object):
         símismo.fecha_inic_datos = base.fecha_inic_datos
 
         # Calcular los datos
-        símismo.calc_datos()
+        símismo.calc_datos(cód_nd=base.cód_nd)
 
-    def calc_datos(símismo):
+    def calc_datos(símismo, cód_nd=''):
         """
         Esta función calcula los datos del variable
 
@@ -173,14 +174,24 @@ class VariableBD(object):
         datos_crudos = cargar_columna(columna=columna, sistema=base.sistema,
                                       archivo=base.archivo)
         datos_crudos = np.array(datos_crudos)
-        datos_crudos[datos_crudos == ''] = 'NaN'
+        datos_crudos[datos_crudos == str(cód_nd)] = 'NaN'
         datos_crudos = datos_crudos.astype(float)
 
         if len(base.tiempos) == 0:
+            # Si no se especificó una columna con datos de tiempo...
+
             if len(base.fechas) != len(set(base.fechas)):
+                # Si hay fechas repetidas en los datos...
+
+                # Entonces hay que especificar la hora a cual se tomó cada día en la misma fecha.
                 raise ValueError('Hay que especificar la columna para los datos de hora.')
+
+            else:
+
+                # Pero si solamente hay un dato por fecha, entonces usamos estos como datos diarios
+                datos = datos_crudos
         else:
-            # Convertir datos temporales a datos diarios
+            # Si tenemos datos de tiempo, los convertimos a datos diarios
             datos = símismo.gen_datos_diarios(datos_crudos=datos_crudos,
                                               lista_fechas=base.fechas, lista_tiempos=base.tiempos,
                                               transformación=símismo.transformación, interpol=símismo.interpol)
@@ -267,15 +278,10 @@ class VariableBD(object):
                     # Si no estamos interpolando, dar el mismo peso (1) a cada dato temporal
                     matr_pesos = np.array([1] * len(matr_vals_var_día))
 
-                elif interpol == 'trap':
-                    # Si usamos interpolación trapezoidal, normalizar los pesos para que sumen a 1.
-                    np.divide(matr_pesos, np.sum(matr_pesos), out=matr_pesos)
-
                 # Hacer la transformación necesaria para pasar de datos de hora a datos diarios
                 if transformación == 'sumar':
                     # Si estamos sumando los valores,
                     val = np.sum(np.multiply(matr_vals_var_día, matr_pesos))
-                    # para hacer
 
                 elif transformación == 'máx':
                     # Si estamos tomando el máximo valor diario, los pesos no importan
@@ -483,6 +489,9 @@ def leer_fechas(lista_cruda):
 
         # Intentar con cada formato en la lista de formatos posibles
         for formato in formatos_posibles:
+
+            for x in lista_cruda:
+                ft.datetime.strptime(x, '%d/%m/%Y')
 
             try:
                 # Intentar de convertir todas las fechas a objetos ft.datetime

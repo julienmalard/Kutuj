@@ -69,6 +69,7 @@
         "ColumnaFecha": "Columna Fecha:",
         "ColumnaHora": "Columna Hora:",
         "Empezar": "Empezar",
+        "ValorND": "Valor ND",
         "EnTrabajo": "En trabajo",
         "ErrorCargarFecha": "No su pudo leer los datos de fechas. ¿Mejor le echas un vistaso a tu base de datos?",
         "ErrorCargarHora": "No se pudo leer los datos de tiempo. ¿Mejor le echas un vistaso a tu base de datos?",

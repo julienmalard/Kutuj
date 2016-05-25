@@ -1,5 +1,4 @@
 import numpy as np
-import datetime as ft
 
 from BD import VariableBD
 
