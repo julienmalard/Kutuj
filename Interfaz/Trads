@@ -1,8 +1,8 @@
 {
-  "Actual": "Español",
+  "Actual": "Tz'utujil",
   "Lenguas": {
     "Bahasa Indonesia": {
-      "Estado": 0.045454545454545456,
+      "Estado": 0.043478260869565216,
       "IzqaDerech": "Normal",
       "Trads": {
         "AvisoReinic": "",
@@ -25,12 +25,13 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
     },
     "English": {
-      "Estado": 1.0,
+      "Estado": 0.9565217391304348,
       "IzqaDerech": "Normal",
       "Trads": {
         "AvisoReinic": "You have to restart Tinamit to finish changing the language.",
@@ -53,6 +54,7 @@
         "Predecir": "Predict",
         "ProyectoExistente": "Existing project",
         "ProyectoKutuj": "Kutuj project",
+        "ValorND": "",
         "Variables": "Variables",
         "Verificar": "Verify"
       }
@@ -69,7 +71,6 @@
         "ColumnaFecha": "Columna Fecha:",
         "ColumnaHora": "Columna Hora:",
         "Empezar": "Empezar",
-        "ValorND": "Valor ND",
         "EnTrabajo": "En trabajo",
         "ErrorCargarFecha": "No su pudo leer los datos de fechas. ¿Mejor le echas un vistaso a tu base de datos?",
         "ErrorCargarHora": "No se pudo leer los datos de tiempo. ¿Mejor le echas un vistaso a tu base de datos?",
@@ -82,12 +83,13 @@
         "Predecir": "Predecir",
         "ProyectoExistente": "Proyecto existente",
         "ProyectoKutuj": "Proyecto Kutuj",
+        "ValorND": "Valor ND",
         "Variables": "Variables",
         "Verificar": "Verificar"
       }
     },
     "Français": {
-      "Estado": 1.0,
+      "Estado": 0.9565217391304348,
       "IzqaDerech": true,
       "Trads": {
         "AvisoReinic": "Vous devez réinicialiser Kutuj pour terminer le changement de langue.",
@@ -110,6 +112,7 @@
         "Predecir": "Prédire",
         "ProyectoExistente": "Projet existant",
         "ProyectoKutuj": "Projet Kutuj",
+        "ValorND": "",
         "Variables": "Variables",
         "Verificar": "Vérifier"
       }
@@ -138,6 +141,7 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
@@ -166,40 +170,42 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
     },
     "Tz'utujil": {
-      "Estado": 0.0,
+      "Estado": 1.0,
       "IzqaDerech": "Normal",
       "Trads": {
-        "AvisoReinic": "",
-        "BasedeDatos": "",
-        "CargarBaseDatos": "",
-        "CargarProyecto": "",
-        "Cargardatos": "",
-        "ColumnaFecha": "",
-        "ColumnaHora": "",
-        "Empezar": "",
-        "EnTrabajo": "",
-        "ErrorCargarFecha": "",
-        "ErrorCargarHora": "",
-        "FormatoComas": "",
-        "FormatoTexto": "",
-        "Listas": "",
-        "OpsLengs": "",
-        "Optimizar": "",
-        "ParaHacer": "",
-        "Predecir": "",
-        "ProyectoExistente": "",
-        "ProyectoKutuj": "",
-        "Variables": "",
-        "Verificar": ""
+        "AvisoReinic": "Tmeloja' Kutuj rxin nak'ax tzij",
+        "BasedeDatos": "Rk'olibal wuj rkin ",
+        "CargarBaseDatos": "Tzjaa' ",
+        "CargarProyecto": "Tktu' samaj k'olchik",
+        "Cargardatos": "Tzjaa'",
+        "ColumnaFecha": "Cholq'ij",
+        "ColumnaHora": "Ramaaj",
+        "Empezar": "Namaj rij",
+        "EnTrabajo": "Ntajin nsmaja",
+        "ErrorCargarFecha": "Nxacuinta xasik'ij wuj rchin  cholq'ij. ¿Tz'taa' ri rkamal njelal wuj? ",
+        "ErrorCargarHora": "Nxacuinta xasik'ij wuj rchin ramaaj. ¿Tz'taa' ri rkamal njelal wuj?",
+        "FormatoComas": "Wuj rxin q'atbal tzij",
+        "FormatoTexto": "Wuj tz'iban",
+        "Listas": "Utz chik",
+        "OpsLengs": "Njelal tzojbal ",
+        "Optimizar": "Nachomsaj ",
+        "ParaHacer": "Rxin naban",
+        "Predecir": "Naq'ijaj",
+        "ProyectoExistente": "Wuj k'olchik",
+        "ProyectoKutuj": "Q'axbaltzij",
+        "ValorND": "Majon ajni' xatzibaj",
+        "Variables": "Nkaxtaj rjlal ",
+        "Verificar": "Tz'ta chik jmej"
       }
     },
     "اردو": {
-      "Estado": 0.045454545454545456,
+      "Estado": 0.043478260869565216,
       "IzqaDerech": "Normal",
       "Trads": {
         "AvisoReinic": "",
@@ -222,12 +228,13 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
     },
     "हिंदी": {
-      "Estado": 0.45454545454545453,
+      "Estado": 0.43478260869565216,
       "IzqaDerech": true,
       "Trads": {
         "AvisoReinic": "भाषा बदलने के लिये कुतूह को पुनर्प्रारंभ करना है।",
@@ -250,6 +257,7 @@
         "Predecir": "भविष्यनाणी करना",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "परिवर्ती राशि",
         "Verificar": "जांच करना"
       }
@@ -278,6 +286,7 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
@@ -306,6 +315,7 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
@@ -334,6 +344,7 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }
@@ -362,6 +373,7 @@
         "Predecir": "",
         "ProyectoExistente": "",
         "ProyectoKutuj": "",
+        "ValorND": "",
         "Variables": "",
         "Verificar": ""
       }

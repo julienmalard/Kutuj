@@ -2,45 +2,46 @@ from Modelo import Modelo
 from BD import BaseCentral, VariableBD
 from Variables import Variable
 
-
-BD = BaseCentral(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Huehuetenango 1970-2011.csv',
+# La base de datos central
+BD = BaseCentral(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Huehuetenango 1970-2011_corto.csv',
                  cód_nd=-99.9)
-BD.estab_col_fecha('fecha')
-# BD.estab_col_hora('Hora')
+BD.estab_col_fecha('fecha')  # Especificar la columna de fechas
+# BD.estab_col_hora('Hora')  # No hay columna de datos de hora en esta base de datos
 
+# Un variable de datos de base
 varBD = VariableBD(nombre='Lluvia diaria', base=BD, columna='lluvia media', interpol='ninguno',
                    transformación='sumar')
 
+# Un variable para predecir (lluvia total entre el día 100 y el día 200 del año)
 varY = Variable(receta={'Nombre': 'Lluvia crítica', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                         'FiltroTmpInic': 100, 'RefTmpInic': 'abs', 'FiltroTmpFin': 200, 'RefTmpFin': 'abs'},
                 fuente=varBD)
 
+# Un variable observado (lluvia cumulativa a fecha)
 varX1 = Variable(receta={'Nombre': 'Lluvia a fecha', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': 0, 'RefTmpFin': 'rel'},
                  fuente=varBD)
 
-print(varX1.datos)
-
+# Otro variable de predicción (lluvia cumulativa hasta los últimos 10 días)
 varX2 = Variable(receta={'Nombre': 'Lluvia -10', 'MétodoCalc': 'val_tot', 'FiltroVal': 'ninguno',
                          'FiltroTmpInic': 1, 'RefTmpInic': 'abs', 'FiltroTmpFin': -10, 'RefTmpFin': 'rel'},
                  fuente=varBD)
 
+# Crear el modelo
 Modelo = Modelo()
 Modelo.varsX = {'Lluvia a fecha': varX1, 'Lluvia -10': varX2}
 Modelo.varY = varY
 
-Modelo.actualizar_datos(recalc=True)
+Modelo.actualizar_datos()
 
-print(Modelo.pesos_años.shape)
-print(Modelo.pesos_años)
-
-
+# Calibrar el modelo
 Modelo.calibrar()
 
+# Guardar la calibración
 Modelo.guardar_calib(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib_Huehue.txt')
 
-"""
+# Cargar la calibración guardada (en el futuro Modelo.calibrar() ya no es necesario)
 Modelo.cargar_calib('C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
 
+# Predecir los datos
 Modelo.predecir(n_día=10)
-"""
