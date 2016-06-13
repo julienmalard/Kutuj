@@ -176,19 +176,19 @@
       }
     },
     "Tz'utujil": {
-      "Estado": 1.0,
+      "Estado": 0.9565217391304348,
       "IzqaDerech": "Normal",
       "Trads": {
-        "AvisoReinic": "Tmeloja' Kutuj rxin nak'ax tzij",
-        "BasedeDatos": "Rk'olibal wuj rkin ",
-        "CargarBaseDatos": "Tzjaa' ",
+        "AvisoReinic": "Tmeloja'chik ja Kutuj rxin nak'ax tzij",
+        "BasedeDatos": "Rk'olibal je' wujal rxin yatsmaja. ",
+        "CargarBaseDatos": "Wujal rxin yatsmaja. ",
         "CargarProyecto": "Tktu' samaj k'olchik",
-        "Cargardatos": "Tzjaa'",
-        "ColumnaFecha": "Cholq'ij",
-        "ColumnaHora": "Ramaaj",
+        "Cargardatos": "Wujal rxin yatsmaja.",
+        "ColumnaFecha": "Rchlaj cholq'ij",
+        "ColumnaHora": "Rchlaj ramaaj",
         "Empezar": "Namaj rij",
-        "EnTrabajo": "Ntajin nsmaja",
-        "ErrorCargarFecha": "Nxacuinta xasik'ij wuj rchin  cholq'ij. ¿Tz'taa' ri rkamal njelal wuj? ",
+        "EnTrabajo": "Ntajina nsmaja",
+        "ErrorCargarFecha": "Nxacuinta xasik'ij wuj rchin  cholq'ij. ¿Tz'taa' wujal rxin samaj? ",
         "ErrorCargarHora": "Nxacuinta xasik'ij wuj rchin ramaaj. ¿Tz'taa' ri rkamal njelal wuj?",
         "FormatoComas": "Wuj rxin q'atbal tzij",
         "FormatoTexto": "Wuj tz'iban",
@@ -201,7 +201,7 @@
         "ProyectoKutuj": "Q'axbaltzij",
         "ValorND": "Majon ajni' xatzibaj",
         "Variables": "Nkaxtaj rjlal ",
-        "Verificar": "Tz'ta chik jmej"
+        "Verificar": "Tz'ta chik jmej, junjikchik."
       }
     },
     "اردو": {
