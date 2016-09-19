@@ -250,7 +250,7 @@ class Modelo(object):
 
         # Devolver la suma de las densidades de cada año. Más densidad indica un mejor modelo, pero con SciPy
         # solamente podemos minimizar una función. Así que tenemos que devolver el negativo de la densidad.
-        return -np.sum(densidades)
+        return -np.average(densidades)
 
     def guardar_calib(símismo, archivo):
         """
@@ -512,7 +512,7 @@ def calc_densidad(pesos_años, y_ant, y_observ):
     """
 
     # Calculamos la distancia relativa entre el valor del año actual y los valores en años anteriores.
-    dist_y = (y_ant - y_observ) / (y_ant.max() - y_ant.min())
+    dist_y = (y_ant - y_observ) / (max(y_observ, y_ant.max()) - (min(y_observ, y_ant.min())))
 
     # Calcular un índice de dónde cae la observación en la densidad de las predicciones. 1 indica que la
     # predicción predijo 100% de probabilidad donde observamos la observación; 0 indica que la predicción
