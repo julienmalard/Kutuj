@@ -3,13 +3,18 @@ import numpy as np
 import datetime as ft
 
 
-class BaseCentral(object):
+class BasedeDatos(object):
+    """
+    Este objeto representa una base de datos, tal como leída de un archivo en formato .csv. Contiene las funciones para
+    establecer
+    """
+
     def __init__(símismo, archivo, sistema='csv', cód_nd=''):
         símismo.sistema = sistema.lower()
         símismo.archivo = archivo
         símismo.cód_nd = cód_nd
 
-        símismo.nombres_cols = leer_columnas(sistema, archivo)
+        símismo.nombres_cols = símismo.leer_columnas(sistema, archivo)
 
         símismo.receta = {'sistema': 'csv',
                           'id_cols': {'fecha': '', 'tiempo': '', 'vars': {}},
@@ -19,9 +24,9 @@ class BaseCentral(object):
 
         símismo.fecha_inic_datos = None
         símismo.día_inic_año = 1
-        símismo.fechas = []
-        símismo.tiempos = []
-        símismo.datos = {}
+        símismo.fechas = np.array([])
+        símismo.tiempos = np.array([])
+        símismo.vars = {}
 
         símismo.vars = {}
 
@@ -38,13 +43,13 @@ class BaseCentral(object):
             col = símismo.receta['id_cols']['fecha']
 
         try:
-            lista_fechas = cargar_columna(columna=col, sistema=símismo.sistema, archivo=símismo.archivo)
+            lista_fechas = símismo.cargar_columna(columna=col, sistema=símismo.sistema, archivo=símismo.archivo)
         except ValueError:
             raise ValueError('Columna de datos de fechas errada o no especificada.')
 
         # Guardar la fecha inicial del base de datos, tanto como un vector de la posición de cada dís en comparación
         # a esta.
-        símismo.fecha_inic_datos, símismo.fechas = leer_fechas(lista_fechas)
+        símismo.fecha_inic_datos, símismo.fechas = símismo.leer_fechas(lista_fechas)
 
         # Acordarse de cuál era la columna de fechas
         símismo.receta['id_cols']['fecha'] = col
@@ -56,12 +61,12 @@ class BaseCentral(object):
             col = símismo.receta['id_cols']['tiempo']
 
         try:
-            lista_horas = cargar_columna(col, símismo.sistema, símismo.archivo)
+            lista_horas = símismo.cargar_columna(col, símismo.sistema, símismo.archivo)
         except ValueError:
             raise ValueError('Columna de datos de fechas errada o no especificada.')
 
         # Guardar un vector del tiempo del día, en segundos, para cada observación en el base de datos
-        símismo.tiempos = leer_tiempo(lista_horas)
+        símismo.tiempos = símismo.leer_tiempo(lista_horas)
 
         # Acordarse de cuál era la columna de horas
         símismo.receta['id_cols']['tiempo'] = col
@@ -81,6 +86,9 @@ class BaseCentral(object):
             raise ValueError('n_día tiene que ser un número entero entre 1 y 365, inclusivo.')
 
         símismo.día_inic_año = n_día
+
+    """
+    Parece inecesario este. Intentemos borrarlo.
 
     def cargar_var(símismo, nombre, col_datos=None, mét_combin_tiempo=None, mét_interpol=None):
 
@@ -112,15 +120,16 @@ class BaseCentral(object):
             except KeyError:
                 col_datos = nombre
 
-        símismo.datos[nombre] = VariableBD(nombre=nombre, base=símismo, columna=col_datos,
-                                           transformación=mét_combin_tiempo, interpol=mét_interpol
-                                           )
+        símismo.vars[nombre] = VariableBD(nombre=nombre, base=símismo, columna=col_datos,
+                                          transformación=mét_combin_tiempo, interpol=mét_interpol
+                                          )
 
     def olvidar_var(símismo, nombre):
-        símismo.datos.pop(nombre)
+        símismo.vars.pop(nombre)
         símismo.receta['mét_combin_tiempo'].pop(nombre)
         símismo.receta['mét_interpol'].pop(nombre)
         símismo.receta['id_cols']['vars'].pop(nombre)
+    """
 
     def guardar(símismo, archivo):
         pass
@@ -128,17 +137,214 @@ class BaseCentral(object):
     def cargar(símismo, archivo=None):
         pass
 
+    @staticmethod
+    def leer_columnas(sistema, archivo):
+        """
+        Esta función lee los nombres de las columnas de una base de datos.
+
+        :param sistema:
+        :type sistema: str
+
+        :param archivo:
+        :type archivo: str
+
+        :return: La lista de los nombres de las columnas
+        :rtype: list
+        """
+
+        if sistema == 'csv':
+
+            try:
+                with open(archivo, 'r') as d:
+                    l = csv.reader(d)
+
+                    # Tomar la primera fila, guardarla como nombres de columnas
+                    columnas = next(l)
+
+            except FileNotFoundError:
+                raise FileNotFoundError('¡Error abriendo el archivo de datos!')
+
+        else:
+            raise NotImplementedError('Falta código para comunicar con el formato de datos: '
+                                      '{0}'.format(sistema))
+
+        return columnas
+
+    @staticmethod
+    def cargar_columna(columna, sistema, archivo):
+        """
+        Esta función carga una columna de la base de datos.
+
+        :param columna:
+        :type columna: str
+        :param sistema:
+        :type sistema: str
+        :param archivo:
+        :type archivo: str
+        :return:
+        :rtype: list
+
+        """
+
+        if sistema == 'csv':  # Para documentos de tipo .csv
+
+            try:
+                with open(archivo, 'r') as d:
+                    l = csv.reader(d)  # Leer el csv
+
+                    # Buscar el nombre de la columna en la base de datos
+                    n_col = next(l).index(columna)
+
+                    # Sacar el valor de esta columna en cada fila
+                    datos = [f[n_col] for f in l]
+
+                    # Convertir los datos a formato de matriz numpy numérica, con np.nan para datos que faltan
+                    # datos = np.array(datos)
+                    # datos[datos == ''] = np.nan
+                    # datos = datos.astype(np.float)
+
+            except ValueError:
+                raise ValueError('El nombre de columna no existe en la base de datos.')
+
+            except FileNotFoundError:
+                raise FileNotFoundError('No se pudo abrir la base de datos.')
+
+        else:
+            raise NotImplementedError('Falta código para comunicar con el formato de datos'
+                                      '{0}'.format(sistema))
+        return datos
+
+    @staticmethod
+    def leer_fechas(lista_cruda):
+        """
+        Esta función toma una lista de datos de fecha en formato de texto y detecta 1) la primera fecha de la lista,
+          y 2) la posición relativa de cada fecha a esta.
+
+        :param lista_cruda: Una lista con las fechas en formato de texto
+        :type lista_cruda: list
+
+        :return: Un tuple de la primera fecha y del vector numpy de la posición de cada fecha relativa a la primera.
+        :rtype: (ft.date, np.ndarray)
+
+        """
+
+        # Una lista de lso formatos de fecha posibles. Esta función intentará de leer los datos de fechas con cada
+        # formato en esta lista y, si encuentra un que funciona, parará allí.
+        separadores = ['-', '/', ' ', '.']
+
+        f = ['%d{0}%m{0}%y', '%m{0}%d{0}%y', '%d{0}%m{0}%Y', '%m{0}%d{0}%Y',
+             '%d{0}%b{0}%y', '%m{0}%b{0}%y', '%d{0}%b{0}%Y', '%b{0}%d{0}%Y',
+             '%d{0}%B{0}%y', '%m{0}%B{0}%y', '%d{0}%B{0}%Y', '%m{0}%B{0}%Y',
+             '%y{0}%m{0}%d', '%y{0}%d{0}%m', '%Y{0}%m{0}%d', '%Y{0}%d{0}%m',
+             '%y{0}%b{0}%d', '%y{0}%d{0}%b', '%Y{0}%b{0}%d', '%Y{0}%d{0}%b',
+             '%y{0}%B{0}%d', '%y{0}%d{0}%B', '%Y{0}%B{0}%d', '%Y{0}%d{0}%B']
+
+        formatos_posibles = [x.format(s) for s in separadores for x in f]
+
+        # Primero, si los datos de fechas están en formato simplemente numérico...
+        if all([x.isdigit() for x in lista_cruda]):
+
+            # Entonces, no conocemos la fecha inicial
+            fecha_inic_datos = None
+
+            # Pero podemos regresar un vector numpy con los números de cada fecha
+            vector_núm_fechas = np.array(lista_cruda, dtype=float)
+
+        else:
+
+            # Sino, intentar de leer el formato de fecha
+            fechas = None
+
+            # Intentar con cada formato en la lista de formatos posibles
+            for formato in formatos_posibles:
+
+                for x in lista_cruda:
+                    ft.datetime.strptime(x, '%d/%m/%Y')
+
+                try:
+                    # Intentar de convertir todas las fechas a objetos ft.datetime
+                    fechas = [ft.datetime.strptime(x, formato).date() for x in lista_cruda]
+
+                    # Si funcionó, parar aquí
+                    break
+
+                except ValueError:
+                    # Si no funcionó, intentar el próximo formato
+                    continue
+
+            # Si todavía no lo hemos logrado, tenemos un problema.
+            if fechas is None:
+                raise ValueError('No puedo leer los datos de fechas. ¿Mejor le eches un vistazo a tu base de datos?')
+
+            else:
+                # Pero si está bien, ya tenemos que encontrar la primera fecha y calcular la posición relativa de las
+                # otras con referencia en esta.
+
+                # La primera fecha de la base de datos. Este paso se queda un poco lento, así que para largas bases de
+                # datos podría ser útil suponer que la primera fila también contiene la primera fecha.
+                fecha_inic_datos = min(fechas)
+
+                # fecha_inic_datos = fechas[0]  # Ejemplo de código menos seguro pero mucho más rápido
+
+                # La posición relativa de todas las fechas a esta
+                vector_núm_fechas = np.array([(x - fecha_inic_datos).days for x in fechas])
+
+        return fecha_inic_datos, vector_núm_fechas
+
+    @staticmethod
+    def leer_tiempo(tiempos_crudos):
+        """
+        Esta función toma una lista de datos de tiempo (en formato texto) y los convierte en objetos de tiempo de
+          Python.
+
+        :param tiempos_crudos:
+        :type tiempos_crudos: list
+
+        :return:
+        :rtype: np.ndarray
+        """
+
+        lista_tiempos = [x.split(':') for x in tiempos_crudos if x != '\n' and x != '']
+        if len(lista_tiempos[0]) == 3:
+            tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 + int(x[2]) for x in lista_tiempos]
+        elif len(lista_tiempos[0]) == 2:
+            tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 for x in lista_tiempos]
+        else:
+            raise ValueError('No se pudieron leer los datos de hora de la base de datos.')
+
+        return np.array(tiempos_finales)
+
 
 class VariableBD(object):
+    """
+    Esta clase sirve para representar variables de datos de base de datos. Son datos "semi-crudos", por lo cual
+      quiero decir que son datos que se han convertido de datos horarios a datos diarios (si necesario),
+      pero que no han pasado a través de otro tipo de procesamiento.
+
+    """
+
     def __init__(símismo, nombre, base, columna, interpol, transformación):
 
-        assert type(base) is BaseCentral
+        """
+
+        :param nombre:
+        :type nombre: str
+        :param base:
+        :type base: BasedeDatos
+        :param columna:
+        :type columna: str
+        :param interpol:
+        :type interpol: str
+        :param transformación:
+        :type transformación: str
+
+        """
 
         # El nombre del variable
         símismo.nombre = nombre
 
         # La base de datos central
-        símismo.base = base
+        símismo.bd = base
 
         símismo.columna = columna
 
@@ -152,6 +358,7 @@ class VariableBD(object):
         #     [datos año 2...],
         #     ...
         #   ]
+        # Donde cada elemento de la lista es una matriz NumPy.
         símismo.datos = []
 
         # La fecha inicial de los datos crudos
@@ -162,25 +369,25 @@ class VariableBD(object):
 
     def calc_datos(símismo, cód_nd=''):
         """
-        Esta función calcula los datos del variable
+        Esta función calcula los datos del variable.
 
         """
 
         # Para simplificar el código
-        base = símismo.base
+        bd = símismo.bd
         columna = símismo.columna
 
         # Leer datos y convertir a números
-        datos_crudos = cargar_columna(columna=columna, sistema=base.sistema,
-                                      archivo=base.archivo)
+        datos_crudos = bd.cargar_columna(columna=columna, sistema=bd.sistema,
+                                         archivo=bd.archivo)
         datos_crudos = np.array(datos_crudos)
         datos_crudos[datos_crudos == str(cód_nd)] = 'NaN'
         datos_crudos = datos_crudos.astype(float)
 
-        if len(base.tiempos) == 0:
+        if len(bd.tiempos) == 0:
             # Si no se especificó una columna con datos de tiempo...
 
-            if len(base.fechas) != len(set(base.fechas)):
+            if len(bd.fechas) != len(set(bd.fechas)):
                 # Si hay fechas repetidas en los datos...
 
                 # Entonces hay que especificar la hora a cual se tomó cada día en la misma fecha.
@@ -193,17 +400,35 @@ class VariableBD(object):
         else:
             # Si tenemos datos de tiempo, los convertimos a datos diarios
             datos = símismo.gen_datos_diarios(datos_crudos=datos_crudos,
-                                              lista_fechas=base.fechas, lista_tiempos=base.tiempos,
+                                              lista_fechas=bd.fechas, lista_tiempos=bd.tiempos,
                                               transformación=símismo.transformación, interpol=símismo.interpol)
 
         # Ahora que tenemos un vector unidimensional de TODOS los datos diarios, tenemos que dividirlo en una lista
         # de datos anuales.
 
-        símismo.datos = símismo.gen_datos_anuales(datos=datos, día_inic_año=base.día_inic_año,
+        símismo.datos = símismo.gen_datos_anuales(datos=datos, día_inic_año=bd.día_inic_año,
                                                   fecha_inic_datos=símismo.fecha_inic_datos)
 
     @staticmethod
     def gen_datos_diarios(datos_crudos, lista_fechas, lista_tiempos, transformación, interpol):
+        """
+        Esta función genera datos diarios a base de datos crudos (por hora).
+
+        :param datos_crudos:
+        :type datos_crudos: np.ndarray
+        :param lista_fechas:
+        :type lista_fechas: np.ndarray
+        :param lista_tiempos:
+        :type lista_tiempos: np.ndarray
+        :param transformación:
+        :type transformación: str
+        :param interpol:
+        :type interpol: str
+
+        :return:
+        :rtype: np.ndarray
+        """
+
         # Una lista temporaria para guardar los valores de los datos horarios de 1 día
         vals_var_día = []
 
@@ -273,7 +498,7 @@ class VariableBD(object):
                 matr_vals_var_día = np.array(vals_var_día)
                 matr_pesos = np.array(pesos)
 
-                # Arreglar los pesos
+                # Arreglamos los pesos
                 if interpol == 'ninguno':
                     # Si no estamos interpolando, dar el mismo peso (1) a cada dato temporal
                     matr_pesos = np.array([1] * len(matr_vals_var_día))
@@ -313,6 +538,22 @@ class VariableBD(object):
 
     @staticmethod
     def gen_datos_anuales(datos, día_inic_año, fecha_inic_datos):
+        """
+        Esta función toma datos diarios y los convierte en una lista de matrices numpy, con una matriz para cada año.
+
+        :param datos:
+        :type datos: np.ndarray
+
+        :param día_inic_año:
+        :type día_inic_año: int
+
+        :param fecha_inic_datos:
+        :type fecha_inic_datos: ft.date
+
+        :return:
+        :rtype: list
+
+        """
 
         # Para guardar los resultados
         datos_por_año = []
@@ -384,154 +625,3 @@ class VariableBD(object):
             fecha_inic_año_act = fecha_inic_año_próx
 
         return datos_por_año
-
-
-def leer_columnas(sistema, archivo):
-    """
-    Esta función lee los nombres de las columnas de una base de datos.
-
-    :param sistema:
-    :param archivo:
-
-    :return: La lista de los nombres de las columnas
-    :rtype: list
-    """
-
-    if sistema == 'csv':
-
-        try:
-            with open(archivo, 'r') as d:
-                l = csv.reader(d)
-
-                # Tomar la primera fila, guardarla como nombres de columnas
-                columnas = next(l)
-
-        except FileNotFoundError:
-            raise FileNotFoundError('¡Error abriendo el archivo de datos!')
-
-    else:
-        raise NotImplementedError('Falta código para comunicar con el formato de datos: '
-                                  '{0}'.format(sistema))
-
-    return columnas
-
-
-def cargar_columna(columna, sistema, archivo):
-
-    if sistema == 'csv':  # Para documentos de tipo .csv
-
-        try:
-            with open(archivo, 'r') as d:
-                l = csv.reader(d)  # Leer el csv
-
-                # Buscar el nombre de la columna en la base de datos
-                n_col = next(l).index(columna)
-
-                # Sacar el valor de esta columna en cada fila
-                datos = [f[n_col] for f in l]
-
-                # Convertir los datos a formato de matriz numpy numérica, con np.nan para datos que faltan
-                # datos = np.array(datos)
-                # datos[datos == ''] = np.nan
-                # datos = datos.astype(np.float)
-
-        except ValueError:
-            raise ValueError('El nombre de columna no existe en la base de datos.')
-
-        except FileNotFoundError:
-            raise FileNotFoundError('No se pudo abrir la base de datos.')
-
-    else:
-        raise NotImplementedError('Falta código para comunicar con el formato de datos'
-                                  '{0}'.format(sistema))
-    return datos
-
-
-def leer_fechas(lista_cruda):
-    """
-    Esta función toma una lista de datos de fecha en formato de texto y detecta 1) la primera fecha de la lista,
-      y 2) la posición relativa de cada fecha a esta.
-
-    :param lista_cruda: Una lista con las fechas en formato de texto
-    :type lista_cruda: list
-
-    :return: Un tuple de la primera fecha y del vector numpy de la posición de cada fecha relativa a la primera.
-    :rtype: (ft.date, np.ndarray())
-
-    """
-
-    # Una lista de lso formatos de fecha posibles. Esta función intentará de leer los datos de fechas con cada
-    # formato en esta lista y, si encuentra un que funciona, parará allí.
-    separadores = ['-', '/', ' ', '.']
-
-    f = ['%d{0}%m{0}%y', '%m{0}%d{0}%y', '%d{0}%m{0}%Y', '%m{0}%d{0}%Y',
-         '%d{0}%b{0}%y', '%m{0}%b{0}%y', '%d{0}%b{0}%Y', '%b{0}%d{0}%Y',
-         '%d{0}%B{0}%y', '%m{0}%B{0}%y', '%d{0}%B{0}%Y', '%m{0}%B{0}%Y',
-         '%y{0}%m{0}%d', '%y{0}%d{0}%m', '%Y{0}%m{0}%d', '%Y{0}%d{0}%m',
-         '%y{0}%b{0}%d', '%y{0}%d{0}%b', '%Y{0}%b{0}%d', '%Y{0}%d{0}%b',
-         '%y{0}%B{0}%d', '%y{0}%d{0}%B', '%Y{0}%B{0}%d', '%Y{0}%d{0}%B']
-
-    formatos_posibles = [x.format(s) for s in separadores for x in f]
-
-    # Primero, si los datos de fechas están en formato simplemente numérico...
-    if all([x.isdigit() for x in lista_cruda]):
-
-        # Entonces, no conocemos la fecha inicial
-        fecha_inic_datos = None
-
-        # Pero podemos regresar un vector numpy con los números de cada fecha
-        vector_núm_fechas = np.array(lista_cruda, dtype=float)
-
-    else:
-
-        # Sino, intentar de leer el formato de fecha
-        fechas = None
-
-        # Intentar con cada formato en la lista de formatos posibles
-        for formato in formatos_posibles:
-
-            for x in lista_cruda:
-                ft.datetime.strptime(x, '%d/%m/%Y')
-
-            try:
-                # Intentar de convertir todas las fechas a objetos ft.datetime
-                fechas = [ft.datetime.strptime(x, formato).date() for x in lista_cruda]
-
-                # Si funcionó, parar aquí
-                break
-
-            except ValueError:
-                # Si no funcionó, intentar el próximo formato
-                continue
-
-        # Si todavía no lo hemos logrado, tenemos un problema.
-        if fechas is None:
-            raise ValueError('No puedo leer los datos de fechas. ¿Mejor le eches un vistazo a tu base de datos?')
-
-        else:
-            # Pero si está bien, ya tenemos que encontrar la primera fecha y calcular la posición relativa de las
-            # otras con referencia en esta.
-
-            # La primera fecha de la base de datos. Este paso se queda un poco lento, así que para largas bases de
-            # datos podría ser útil suponer que la primera fila también contiene la primera fecha.
-            fecha_inic_datos = min(fechas)
-
-            # fecha_inic_datos = fechas[0]  # Ejemplo de código menos seguro pero mucho más rápido
-
-            # La posición relativa de todas las fechas a esta
-            vector_núm_fechas = np.array([(x - fecha_inic_datos).days for x in fechas])
-
-    return fecha_inic_datos, vector_núm_fechas
-
-
-def leer_tiempo(tiempos_crudos):
-
-    lista_tiempos = [x.split(':') for x in tiempos_crudos if x != '\n' and x != '']
-    if len(lista_tiempos[0]) == 3:
-        tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 + int(x[2]) for x in lista_tiempos]
-    elif len(lista_tiempos[0]) == 2:
-        tiempos_finales = [((int(x[0]) * 60) + int(x[1])) * 60 for x in lista_tiempos]
-    else:
-        raise ValueError('No se pudieron leer los datos de hora de la base de datos.')
-
-    return np.array(tiempos_finales)

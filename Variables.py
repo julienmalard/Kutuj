@@ -4,6 +4,12 @@ from BD import VariableBD
 
 
 class Variable(object):
+    """
+    Esta clase representa variables de datos procesados, tales como variables de lluvia cumulativa, de temperatura
+      máxima mensual, de días-grados, etc.
+
+    """
+
     def __init__(símismo, receta=None, fuente=None):
         """
 
@@ -26,10 +32,9 @@ class Variable(object):
 
         :param receta:
         :param fuente:
+        :type fuente: VariableBD
 
         """
-
-        assert type(fuente) is VariableBD
 
         # Poner los atributos del Variable a fecha
         símismo.receta = receta
@@ -99,20 +104,24 @@ class Variable(object):
             for n_día, día in enumerate(año):
 
                 # Filtrar por la fecha
-
                 if ref_tmp_inic == 'abs':
                     lím_infer = filtro_tmp_inic
                 elif ref_tmp_inic == 'rel':
                     lím_infer = n_día + filtro_tmp_inic
                 else:
-                    raise KeyError
+                    raise ValueError
 
                 if ref_tmp_fin == 'abs':
                     lím_super = filtro_tmp_fin + 1
                 elif ref_tmp_fin == 'rel':
                     lím_super = n_día + filtro_tmp_fin + 1
                 else:
-                    raise KeyError
+                    raise ValueError
+
+                if lím_super < lím_infer:
+                    temp = lím_infer
+                    lím_infer = lím_super
+                    lím_super = temp
 
                 cabeza = []
                 cola = []
@@ -133,13 +142,12 @@ class Variable(object):
                 plazo = np.array(np.concatenate((cabeza, año[lím_infer:lím_super+1], cola)), dtype=float)
 
                 # Filtrar por el valor
-
                 if filtro_val_exact is not None:
                     np.place(plazo, plazo != filtro_val_exact, [float('NaN')])
                 if filtro_val_inf is not None:
-                    np.place(plazo, plazo <= filtro_val_inf, [float('NaN')])
+                    np.place(plazo, plazo < filtro_val_inf, [float('NaN')])
                 if filtro_val_sup is not None:
-                    np.place(plazo, plazo >= filtro_val_sup, [float('NaN')])
+                    np.place(plazo, plazo > filtro_val_sup, [float('NaN')])
 
                 # Calcular el variable
                 if mét_calc == 'val_tot':

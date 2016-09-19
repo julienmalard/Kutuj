@@ -1,14 +1,15 @@
 import os
 
 from Modelo import Modelo
-from BD import BaseCentral, VariableBD
+from BD import BasedeDatos, VariableBD
 from Variables import Variable
 
 # La base de datos central
 directorio = os.path.split(__file__)[0]
-BD = BaseCentral(archivo=os.path.join(directorio, 'Datos_ejemplos/Huehuetenango 1970-1980.csv'),
+BD = BasedeDatos(archivo=os.path.join(directorio, 'Datos_ejemplos/Huehuetenango 1970-1980.csv'),
                  cód_nd=-99.9)
 BD.estab_col_fecha('fecha')  # Especificar la columna de fechas
+
 # BD.estab_col_hora('Hora')  # No hay columna de datos de hora en esta base de datos
 
 # Un variable de datos de base

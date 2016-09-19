@@ -1,5 +1,5 @@
 import os.path
-import warnings as aviso
+from warnings import warn as avisar
 import copy as copia
 import math as mat
 import numpy as np
@@ -7,23 +7,26 @@ import scipy.stats as estad
 import scipy.optimize as optimizar
 import matplotlib.pyplot as dib
 
-from BD import BaseCentral
+from BD import BasedeDatos
 from Variables import Variable
 
 
 class ControladorModelo(object):
     def __init__(símismo, archivo_base_central):
         tipo_archivo = os.path.splitext(os.path.split(archivo_base_central)[1])[1][1:]
-        símismo.base_central = BaseCentral(archivo_base_central, tipo_archivo)
+        símismo.base_central = BasedeDatos(archivo_base_central, tipo_archivo)
         símismo.base_derivados = None
 
         símismo.Modelo = Modelo()
 
 
 class Modelo(object):
+    """
+    Un modelo de predicción de datos climáticos.
+    """
+
     def __init__(símismo, varsx=None, vary=None):
         """
-        Un modelo de predicción de datos climáticos.
 
         :param varsx: Variables con cuales vamos a predecir lo que queremos predecir.
         :type varsx: dict
@@ -41,8 +44,9 @@ class Modelo(object):
             símismo.varsX = {}
 
         # Dos listas para guardar referencias a los datos de los variables.
-        # datosY es simplemente una lista de matrices numpy con datos del variable.
+        # datosY es simplemente una lista de matrices numpy con datos del variable, cada una con eje 0 = día del año.
         # datosX es una lista de matrices numpy, cada una con eje 0 = variable X y eje 1 = día del año.
+        # Cada elemento en la lista representa un año distinto.
         símismo.datosX = []
         símismo.datosY = []
 
@@ -82,13 +86,14 @@ class Modelo(object):
         símismo.datosY = símismo.varY.datos
         símismo.datosX = [np.array(x) for x in datosx]
 
-        # Si existen datos X e Y y queremos recalcular los pesos de los años, hacerlo ahora.
+        # Si existen datos X e Y, tnato como pesos para los variables, y queremos recalcular los pesos de los años,
+        # hacerlo ahora.
         if recalc:
             if len(símismo.datosX) and len(símismo.datosY) and len(símismo.pesos_vars):
                 símismo.recalcular_pesos_años()
             else:
-                aviso.warn('No se pudo recalcular los pesos anuales por falta de variable dependiente o independiente,'
-                           'o falta de calibración del modelo.')
+                avisar('No se pudo recalcular los pesos anuales por falta de variable dependiente o independiente,'
+                       'o falta de calibración del modelo.')
 
     def recalcular_pesos_años(símismo):
         """
