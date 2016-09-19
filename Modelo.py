@@ -127,16 +127,17 @@ class Modelo(object):
             símismo.recalcular_pesos_años()
 
         # Si no se especificó el día hasta cual tomar los datos del año actual, usar todos los datos disponibles
+        # en el año más recién.
         if n_día is None:
             n_día = len(símismo.varY.datos[-1])
 
         # Los datos de Y conocidos son los datos para todos los años, menos el actual
-        y_conoc = np.array([y[-1] for y in símismo.datosY[:-1]])
+        y_conoc = np.array([y[n_día] for y in símismo.datosY[:-1]])
 
         # Tomamos los pesos de todos los años anteriores (eje 1), en el día hasta cual tenemos datos (eje 0).
-        pesos_pred = símismo.pesos_años[n_día, :]
-        pesos_pred = pesos_pred[:-1]
+        pesos_pred = símismo.pesos_años[n_día, :-1]
 
+        # Si hay que dibujar, hacerlo ahora.
         if gráfico:
             dib.hist(x=y_conoc, weights=pesos_pred, facecolor='green', alpha=0.5)
             dib.title('Distribución de probabilidad de predicción')
@@ -144,8 +145,8 @@ class Modelo(object):
             dib.xlabel('Valor')
             dib.show()
 
-        print(y_conoc)
-        print(pesos_pred)
+        print('y_conoc', y_conoc)
+        print('pesos_pred', pesos_pred)
 
         return pesos_pred, y_conoc
 
@@ -311,16 +312,16 @@ class Modelo(object):
         n_años = len(símismo.datosX)
         n_vars = símismo.datosX[0].shape[0]
 
-        simil_años = np.ndarray(shape=(n_vars, 365, n_años, n_años))
+        simil_años = np.empty(shape=(n_vars, 365, n_años, n_años))
 
         for n in range(n_años):
             print('calculando similitud para año %i' % n)
 
-            simil = list(símismo.calc_simil_año(n_x_actual=n, x_anteriores=símismo.datosX, tipo=tipo))
+            simil = símismo.calc_simil_año(n_x_actual=n, x_anteriores=símismo.datosX, tipo=tipo)
 
             simil_años[:, :, n, :] = simil
 
-        return np.array(simil_años)
+        return simil_años
 
     @staticmethod
     def calc_simil_año(x_anteriores, tipo, x_actual=None, n_x_actual=None, día_único=False):
@@ -340,12 +341,23 @@ class Modelo(object):
         :return: el peso de cada año, determinado por el grado de semejanza con el año actual.
           Eje 0 = variable, eje 1 = día del año, eje 2 = año 2.
         :rtype: np.ndarray
-            """
+        """
 
         def calc_simil(x_1, x_2):
+            """
+
+            :param x_1:
+            :type x_1: np.ndarray
+
+            :param x_2:
+            :type x_2: np.ndarray
+
+            :return:
+            :rtype:
+            """
 
             n_vars_x = x_1.shape[0]
-            s = np.ndarray(n_vars_x)
+            s = np.empty(n_vars_x)
 
             for n_var in range(n_vars_x):
                 var_x1 = x_1[n_var, :]
@@ -382,20 +394,21 @@ class Modelo(object):
                     if rango == 0:
                         p = 1
                     else:
-                        p = 1 - np.mean(dif_pos) / rango
+                        p = np.subtract(1, np.mean(dif_pos) / rango).round(10)
 
                 else:
                     raise ValueError
 
                 s[n_var] = p
 
-            return s + 1
+            return s
 
         if x_actual is None:
             x_actual = x_anteriores[n_x_actual]
 
         n_vars = x_actual.shape[0]
 
+        # Crear una matriz vacía para guardar los resultados
         simil_años = np.ndarray(shape=(n_vars, 365, len(x_anteriores)))
         simil_años[:] = np.nan
 
@@ -404,7 +417,7 @@ class Modelo(object):
 
         for n_año, x_ant in enumerate(x_anteriores):
 
-            # Si únicamente estamos comparando hasta el último día de datos disponibles...
+            # Si solamente estamos comparando hasta el último día de datos disponibles...
             if día_único:
 
                 # Calcular la semejanza entre los dos años para cada variable
