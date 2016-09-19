@@ -1,11 +1,12 @@
-import os.path
-from warnings import warn as avisar
 import copy as copia
 import math as mat
-import numpy as np
-import scipy.stats as estad
-import scipy.optimize as optimizar
+import os.path
+from warnings import warn as avisar
+
 import matplotlib.pyplot as dib
+import numpy as np
+import scipy.optimize as optimizar
+import scipy.stats as estad
 
 from BD import BasedeDatos
 from Variables import Variable
@@ -56,7 +57,7 @@ class Modelo(object):
         # El peso de cada año en la predicción de un año en particular.
         # Eje 0 = año, eje 1 = día del año
         símismo.pesos_años = np.array([])
-        símismo.simil_años = np.array([])
+        símismo.semej_años = np.array([])
 
     def actualizar_datos(símismo, recalc=False):
         """
@@ -95,14 +96,18 @@ class Modelo(object):
                 avisar('No se pudo recalcular los pesos anuales por falta de variable dependiente o independiente,'
                        'o falta de calibración del modelo.')
 
-    def recalcular_pesos_años(símismo):
+    def recalcular_pesos_años(símismo, n_día=None):
         """
         Esta función recalcula los pesos de los años en comparación al año actual. Es una función de conveniencia,
           de pronto hacia no la necesitamos.
+
+        :param n_día:
+        :type n_día: int
+
         """
 
         # Calculamos los pesos de los años anteriores (conocidos) por su semejanza al año actual
-        símismo.pesos_años = símismo.calc_pesos_años()
+        símismo.pesos_años = símismo.calc_pesos_años(n_día=n_día)
 
     def predecir(símismo, n_día=None, gráfico=True):
         """
@@ -123,14 +128,14 @@ class Modelo(object):
 
         """
 
-        # Si ya no se calcularon los pesos para el año actual, calcularlos ahora.
-        if not len(símismo.pesos_años):
-            símismo.recalcular_pesos_años()
-
         # Si no se especificó el día hasta cual tomar los datos del año actual, usar todos los datos disponibles
         # en el año más recién.
         if n_día is None:
             n_día = len(símismo.varY.datos[-1])
+
+        # Si ya no se calcularon los pesos para el año actual, calcularlos ahora.
+        if not len(símismo.pesos_años):
+            símismo.recalcular_pesos_años(n_día=n_día)
 
         # Los datos de Y conocidos son los datos para todos los años, menos el actual
         y_conoc = np.array([y[n_día] for y in símismo.datosY[:-1]])
@@ -139,8 +144,12 @@ class Modelo(object):
         pesos_pred = símismo.pesos_años[n_día, :-1]
 
         # Si hay que dibujar, hacerlo ahora.
+        pesos_norm = np.empty_like(y_conoc)
+        pesos_norm[:] = 1/len(y_conoc)
+
         if gráfico:
             dib.hist(x=y_conoc, weights=pesos_pred, facecolor='green', alpha=0.5)
+            dib.hist(x=y_conoc, weights=pesos_norm, facecolor='green', alpha=0.2)
             dib.title('Distribución de probabilidad de predicción')
             dib.ylabel('Probabilidad')
             dib.xlabel('Valor')
@@ -162,13 +171,13 @@ class Modelo(object):
 
         # Una matriz con las semejanzas entre los años.
         # Eje 0 = variable, eje 1 = día del año, eje 2 = año 1, eje 3 = año 2
-        símismo.simil_años = símismo.calc_semej_años()
+        símismo.semej_años = símismo.calc_semej_años()
 
         # Calibrar los pesos individualmente para cada día del año entre 1 y 365...
         for i in range(1, 365):
 
             # Los parámetros necesarios para la optimización (calibración)
-            paráms = (símismo.datosX, símismo.datosY, i, símismo.simil_años)
+            paráms = (símismo.datosX, símismo.datosY, i, símismo.semej_años)
 
             # Los valores iniciales para los pesos de los variables (1)
             inic = np.ones(n_vars)
@@ -235,7 +244,7 @@ class Modelo(object):
             # Una matriz para guardar los pesos de cada año, únicamente para el último día de interés
             matr_pesos_años = símismo.calc_pesos_años(pesos_vars=pesos_vars, n_día=n_día,
                                                       semej_años=semej_años[:, :, n, :], n_año=n)
-            matr_pesos_años = np.delete(matr_pesos_años, n)
+            matr_pesos_años = np.delete(matr_pesos_años, n, axis=1)
 
             densidades[n] = calc_densidad(matr_pesos_años, y_conoc, y_obs)
 
@@ -292,6 +301,12 @@ class Modelo(object):
         """
         Esta martiz calcula los pesos de los años en comparación al año actual, basado en los pesos de los variables.
 
+        :param n_año:
+        :type n_año:
+
+        :param n_día:
+        :type n_día:
+
         :param pesos_vars: Los pesos de los variables
         :type pesos_vars: np.ndarray
 
@@ -313,29 +328,26 @@ class Modelo(object):
 
         # Si no se especificó la semejanza entre los años, calcularla ahora.
         if semej_años is None:
-            símismo.simil_años = símismo.calc_semej_años()
-            semej_años = símismo.simil_años[:, :, n_año, :]  # Eje 0 = variable, eje 1 = día del año, eje 2 = año 2
+            símismo.semej_años = símismo.calc_semej_años()
+            semej_años = símismo.semej_años[:, :, n_año, :]  # Eje 0 = variable, eje 1 = día del año, eje 2 = año 2
 
         # Calcular el peso del año por subir la semejanza entre los años por cada variable al exponencial del peso de
         # dicho variable. Eje 0 = variable, eje 1 = año
         if pesos_vars.ndim == 1:
             if n_día is None:
-                raise ValueError()
+                raise ValueError
             else:
-                semej_años = semej_años[:, n_día, :]
+                semej_años = semej_años[:, n_día:n_día+1, :]
 
         peso_año_por_var = np.power(semej_años, pesos_vars[..., np.newaxis])
 
-        # Tomar el producto del peso de cada variable, según el día del año y el año de comparación
-        peso_año = np.prod(peso_año_por_var, axis=0)  # Eje 0 = año 2
+        # Tomar el promedio del peso de cada variable, según el día del año y el año de comparación
+        peso_año = np.average(peso_año_por_var, axis=0)  # Eje 0 = día, eje 1 = año 2
 
         # Normalizar los pesos a 1.
-        if np.sum(peso_año) == 0:  # Evitar dividir por 0 en la normalización
-            peso_año[:] = 1
-        pesos_años_norm = np.divide(peso_año, np.sum(peso_año))
-
-        #  Eje 0 = año, eje 1 = día
-        pesos_años_norm[np.isnan(pesos_años_norm)] = 1
+        suma = np.sum(peso_año, axis=1)  # Eje 0 = día del año
+        suma[suma == 0] = 1  # Evitar dividir por 0 en la normalización
+        pesos_años_norm = np.divide(peso_año, np.subtract(suma[..., np.newaxis], 1))  # Eje 0 = día, eje 1 = año 2
 
         return pesos_años_norm
 
@@ -344,11 +356,17 @@ class Modelo(object):
         """
         Esta función determina el grado de semejanza entre los variables x de distintos años, según el
 
+        :param x_anteriores: Lista de datos x (matrices numpy) de años anteriores
+        :type x_anteriores: list
+
+        :param tipo:
+        :type tipo:
+
         :param x_actual: Matriz numpy de datos del año de interés
         :type x_actual: np.ndarray
 
-        :param x_anteriores: Lista de datos x (matrices numpy) de años anteriores
-        :type x_anteriores: list
+        :param n_x_actual:
+        :type n_x_actual:
 
         :param día_único: Una opción para determinar si únicamente estamos comparando los años hasta el último día
           de datos disponibles, o si queremos comparalos hasta cada día para cual hay datos disponibles.
@@ -415,6 +433,9 @@ def calc_simil(x_1, x_2, tipo):
 
     :param x_2:
     :type x_2: np.ndarray
+
+    :param tipo:
+    :type tipo:
 
     :return:
     :rtype:

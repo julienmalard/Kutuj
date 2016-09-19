@@ -39,13 +39,13 @@ Modelo.varY = varY
 
 Modelo.actualizar_datos()
 
-"""
+
 # Calibrar el modelo
 Modelo.calibrar()
 
 # Guardar la calibración
 Modelo.guardar_calib(archivo=os.path.join(directorio, 'Datos_ejemplos/Ejemplo_calib_Huehue.txt'))
-"""
+
 
 # Cargar la calibración guardada (en el futuro Modelo.calibrar() ya no es necesario)
 Modelo.cargar_calib(os.path.join(directorio, 'Datos_ejemplos/Ejemplo_calib_Huehue.txt'))
