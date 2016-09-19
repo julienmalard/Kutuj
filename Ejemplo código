@@ -36,16 +36,20 @@ Modelo = Modelo()
 Modelo.varsX = {'Lluvia a fecha': varX1, 'Lluvia -10': varX2}
 Modelo.varY = varY
 
+
 Modelo.actualizar_datos()
 
+"""
 # Calibrar el modelo
 Modelo.calibrar()
 
 # Guardar la calibración
-Modelo.guardar_calib(archivo='C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib_Huehue.txt')
+Modelo.guardar_calib(archivo=os.path.join(directorio, 'Datos_ejemplos/Ejemplo_calib_Huehue.txt'))
+"""
 
 # Cargar la calibración guardada (en el futuro Modelo.calibrar() ya no es necesario)
-Modelo.cargar_calib('C:/Users/iarna/PycharmProjects/Kutuj/Datos_ejemplos/Ejemplo_calib.txt')
+Modelo.cargar_calib(os.path.join(directorio, 'Datos_ejemplos/Ejemplo_calib_Huehue.txt'))
 
 # Predecir los datos
-Modelo.predecir(n_día=10)
+pred = Modelo.predecir(n_día=10)
+print(pred)
